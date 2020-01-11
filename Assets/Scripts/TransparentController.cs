@@ -28,7 +28,7 @@ namespace StudioMeowToon {
                 var _render = GetComponent<MeshRenderer>();
                 var _materialList = _render.materials;
                 foreach (var _material in _materialList) {
-                    Util.SetRenderingMode(_material, RenderingMode.Fade);
+                    Utils.SetRenderingMode(_material, RenderingMode.Fade);
                     var _color = _material.color;
                     _color.a = 0.6f; // 透明化実行
                     _material.color = _color;
@@ -42,7 +42,7 @@ namespace StudioMeowToon {
                 var _render = GetComponent<MeshRenderer>();
                 var _materialList = _render.materials;
                 foreach (var _material in _materialList) {
-                    Util.SetRenderingMode(_material, RenderingMode.Fade);
+                    Utils.SetRenderingMode(_material, RenderingMode.Fade);
                     var _color = _material.color;
                     _color.a = 1f; // 透明化解除
                     _material.color = _color;

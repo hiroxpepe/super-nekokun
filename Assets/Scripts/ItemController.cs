@@ -87,7 +87,7 @@ namespace StudioMeowToon {
                     } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag == "Player") {
                         // 親が Player 継続なら
                         if (transform.localPosition.y < 0.35f) { // 親の持ち上げられた位置に移動する
-                            transform.localPosition = Util.AddLocalPositionY(transform, 1.5f * Time.deltaTime);
+                            transform.localPosition = Utils.AddLocalPositionY(transform, 1.5f * Time.deltaTime);
                         }
                     } else if (!isGrounded && (transform.parent == null || transform.parent.gameObject.tag != "Player")) {
                         // 親が Player でなくなれば落下する
@@ -100,11 +100,11 @@ namespace StudioMeowToon {
                             if (_distance < 0.1) { // ある程度距離が近くなら
                                 isGrounded = true; // 接地とする
                                 var _top = getHitTop(_hit.transform.gameObject); // その後、接地したとするオブジェクトのTOPを調べて
-                                transform.localPosition = Util.ReplaceLocalPositionY(transform, _top); // その位置に置く
+                                transform.localPosition = Utils.ReplaceLocalPositionY(transform, _top); // その位置に置く
                             }
                         }
                         if (!isGrounded) { // まだ接地してなければ落下する
-                            transform.localPosition = Util.SubtractLocalPositionY(transform, 4.0f * Time.deltaTime); // 4.0f は調整値
+                            transform.localPosition = Utils.SubtractLocalPositionY(transform, 4.0f * Time.deltaTime); // 4.0f は調整値
                         }
                     }
                 });

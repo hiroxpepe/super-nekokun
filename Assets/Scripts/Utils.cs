@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace StudioMeowToon {
     /// <summary>
     /// 汎用ユーティリティークラス
     /// </summary>
-    public class Util /*: MonoBehaviour*/ { // 何もしなくても別のスクリプトから呼び出せるっぽい…
+    public class Utils { // 何もしなくても別のスクリプトから呼び出せる
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // パブリックメソッド(パスカルケース: 動詞)
@@ -123,23 +121,4 @@ namespace StudioMeowToon {
     }
 
     #endregion
-
-    #region Extension
-
-    public static class Extension {
-        public static void Method(this GameObject self) {
-            var n = self.name;
-        }
-
-        public static bool LikePlayer(this GameObject self) {
-            return self.tag.Contains("Player");
-        }
-
-        public static bool IsPlayer(this GameObject self) {
-            return self.tag.Equals("Player");
-        }
-    }
-
-    #endregion
-
 }

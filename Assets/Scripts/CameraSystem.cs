@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
+﻿using UnityEngine;
 
 namespace StudioMeowToon {
     /// <summary>
     /// カメラ関連の処理
     /// </summary>
-    public class CameraSystem : MonoBehaviour {
+    public class CameraSystem : GamepadMaper {
 
         // TODO: カメラの視野を調節する機能：ステップ式で良い
 
@@ -33,25 +29,6 @@ namespace StudioMeowToon {
 
         private bool isForwardPosition = false; // カメラシステムが前進ポジションかどうか
 
-        //////////////////////////////////////////////////////
-        // ゲームパッド ボタン
-
-        private ButtonControl aButton;
-
-        private ButtonControl bButton;
-
-        private ButtonControl xButton;
-
-        private ButtonControl yButton;
-
-        private ButtonControl dpadUp;
-
-        private ButtonControl dpadDown;
-
-        private ButtonControl dpadLeft;
-
-        private ButtonControl dpadRight;
-
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // パブリックメソッド
 
@@ -68,36 +45,15 @@ namespace StudioMeowToon {
         // 更新メソッド
 
         // Start is called before the first frame update
-        void Start() {
+        new void Start() {
+            base.Start();
+
             defaultLocalPosition = transform.localPosition; // デフォルトのカメラポジション保存
         }
 
         // Update is called once per frame
-        void Update() {
-            // OS判定とゲームパッドのキー参照
-            dpadUp = Gamepad.current.dpad.up;
-            dpadDown = Gamepad.current.dpad.down;
-            dpadLeft = Gamepad.current.dpad.left;
-            dpadRight = Gamepad.current.dpad.right;
-            if (Application.platform == RuntimePlatform.Android) {
-                // Android
-                aButton = Gamepad.current.aButton;
-                bButton = Gamepad.current.bButton;
-                xButton = Gamepad.current.xButton;
-                yButton = Gamepad.current.yButton;
-            } else if (Application.platform == RuntimePlatform.WindowsPlayer) {
-                // Windows
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            } else {
-                // Unityで開発中は取れない？
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            }
+        new void Update() {
+            base.Update();
 
             // 視点操作のリセット
             if (xButton.wasReleasedThisFrame) {
