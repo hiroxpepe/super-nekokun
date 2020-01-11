@@ -1,0 +1,25 @@
+fileFormatVersion: 2
+guid: 7cfbf169a09fbc245a7c56b36ca0b115
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - itemClip: {fileID: 8300000, guid: 15f921953967b9643a9e6bd955fc70a1, type: 3}
+  - jumpClip: {fileID: 8300000, guid: 2d426c4ae3690484d82de637c67e2afc, type: 3}
+  - climbClip: {fileID: 8300000, guid: ce235d74cdbfeb0469727043e96fef30, type: 3}
+  - walkClip: {fileID: 8300000, guid: d269e6321ab2819408d6fde763d2a722, type: 3}
+  - runClip: {fileID: 8300000, guid: 8112e8abbb9da0b4183fc0b58c195b12, type: 3}
+  - groundedClip: {fileID: 8300000, guid: 34be7d73009f21640bf13ad387dc6f0e, type: 3}
+  - hitClip: {fileID: 8300000, guid: 00db913aa9f9d5f408624290cd61baaa, type: 3}
+  - shootClip: {instanceID: 0}
+  - explosionClip: {instanceID: 0}
+  - damageClip: {instanceID: 0}
+  - knockedupClip: {instanceID: 0}
+  - waterInClip: {instanceID: 0}
+  - waterSinkClip: {instanceID: 0}
+  - waterForwardClip: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
