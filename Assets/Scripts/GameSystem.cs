@@ -55,6 +55,8 @@ namespace StudioMeowToon {
 
         private Material lockonOriginalMaterial; // ロックオン対象の元のマテリアル
 
+        private GameObject virtualController; // バーチャルコントロール
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // FPS計測
 
@@ -164,9 +166,6 @@ namespace StudioMeowToon {
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
-            // 垂直同期を無効 ⇒ [設定]でやる
-            //QualitySettings.vSyncCount = 0;
-
             // フレームレートを設定
             Application.targetFrameRate = 30; // 60fps と 30fps のみ仕上げる
         }
@@ -189,50 +188,13 @@ namespace StudioMeowToon {
             message.text = ""; // メッセージ初期化、非表示
             home.transform.gameObject.SetActive(false);
 
+            virtualController = GameObject.Find("VirtualController"); // バーチャルコントローラー参照取得
+
             // Update is called once per frame.
             this.UpdateAsObservable()
                 .Subscribe(_ => {
-                    //// OS判定とゲームパッドのキー参照
-                    //dpadUp = Gamepad.current.dpad.up;
-                    //dpadDown = Gamepad.current.dpad.down;
-                    //dpadLeft = Gamepad.current.dpad.left;
-                    //dpadRight = Gamepad.current.dpad.right;
-                    //startButton = Gamepad.current.startButton;
-                    //selectButton = Gamepad.current.selectButton;
-                    //if (Application.platform == RuntimePlatform.Android) {
-                    //    // Android
-                    //    aButton = Gamepad.current.aButton;
-                    //    bButton = Gamepad.current.bButton;
-                    //    xButton = Gamepad.current.xButton;
-                    //    yButton = Gamepad.current.yButton;
-                    //} else if (Application.platform == RuntimePlatform.WindowsPlayer) {
-                    //    // Windows
-                    //    aButton = Gamepad.current.bButton;
-                    //    bButton = Gamepad.current.aButton;
-                    //    xButton = Gamepad.current.yButton;
-                    //    yButton = Gamepad.current.xButton;
-                    //} else {
-                    //    // Unityで開発中は取れない？
-                    //    aButton = Gamepad.current.bButton;
-                    //    bButton = Gamepad.current.aButton;
-                    //    xButton = Gamepad.current.yButton;
-                    //    yButton = Gamepad.current.xButton;
-                    //}
-
-                    //if (SceneManager.GetActiveScene().name == "Start") { // スタート画面の場合
-                    //    if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
-                    //        SceneManager.LoadScene("Level1");
-                    //    }
-                    //    return;
-                    //} else if (SceneManager.GetActiveScene().name == "Level1") { // Level1の場合のAボタン遷移
-                    //    if (selectButton.wasPressedThisFrame) {
-                    //        SceneManager.LoadScene("Start");
-                    //    }
-                    //}
-
                     checkGameOver(); // GAMEオーバー確認
                     checkLevelClear(); // レベルクリア確認
-
                     updateGameInfo();
                     updatePlayerStatus();
                 });
@@ -246,32 +208,7 @@ namespace StudioMeowToon {
 
         // Update is called once per frame.
         void Update() {
-            // OS判定とゲームパッドのキー参照
-            dpadUp = Gamepad.current.dpad.up;
-            dpadDown = Gamepad.current.dpad.down;
-            dpadLeft = Gamepad.current.dpad.left;
-            dpadRight = Gamepad.current.dpad.right;
-            startButton = Gamepad.current.startButton;
-            selectButton = Gamepad.current.selectButton;
-            if (Application.platform == RuntimePlatform.Android) {
-                // Android
-                aButton = Gamepad.current.aButton;
-                bButton = Gamepad.current.bButton;
-                xButton = Gamepad.current.xButton;
-                yButton = Gamepad.current.yButton;
-            } else if (Application.platform == RuntimePlatform.WindowsPlayer) {
-                // Windows
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            } else {
-                // Unityで開発中は取れない？
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            }
+            getGamepadInput(); // キー入力
 
             if (SceneManager.GetActiveScene().name == "Start") { // スタート画面の場合
                 if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
@@ -361,6 +298,43 @@ namespace StudioMeowToon {
         private void initFpsForFixedUpdate() { // fixed FPS初期化
             fpsForFixedUpdateFrameCount = 0;
             fpsForFixedUpdatePreviousTime = 0.0f;
+        }
+
+        private void getGamepadInput() {
+            // 物理ゲームパッド接続判定
+            var controllerNames = Input.GetJoystickNames();
+            if (controllerNames[0] == "") {
+                virtualController.gameObject.SetActive(true);
+            } else {
+                virtualController.gameObject.SetActive(false);
+            }
+
+            // OS判定とゲームパッドのキー参照
+            dpadUp = Gamepad.current.dpad.up;
+            dpadDown = Gamepad.current.dpad.down;
+            dpadLeft = Gamepad.current.dpad.left;
+            dpadRight = Gamepad.current.dpad.right;
+            startButton = Gamepad.current.startButton;
+            selectButton = Gamepad.current.selectButton;
+            if (Application.platform == RuntimePlatform.Android) {
+                // Android
+                aButton = Gamepad.current.aButton;
+                bButton = Gamepad.current.bButton;
+                xButton = Gamepad.current.xButton;
+                yButton = Gamepad.current.yButton;
+            } else if (Application.platform == RuntimePlatform.WindowsPlayer) {
+                // Windows
+                aButton = Gamepad.current.bButton;
+                bButton = Gamepad.current.aButton;
+                xButton = Gamepad.current.yButton;
+                yButton = Gamepad.current.xButton;
+            } else {
+                // Unityで開発中は取れない？
+                aButton = Gamepad.current.bButton;
+                bButton = Gamepad.current.aButton;
+                xButton = Gamepad.current.yButton;
+                yButton = Gamepad.current.xButton;
+            }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
