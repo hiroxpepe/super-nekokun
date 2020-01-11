@@ -1,17 +1,13 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-//using UniRx;
-//using UniRx.Triggers;
 
 namespace StudioMeowToon {
     /// <summary>
     /// プレイヤーの処理
     /// </summary>
-    public class PlayerController : MonoBehaviour {
+    public class PlayerController : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // 設定・参照
@@ -70,29 +66,6 @@ namespace StudioMeowToon {
         private float previousSpeed; // 1フレ前の速度ベクトル
 
         private Vector3[] previousPosition = new Vector3[30]; // 30フレ分前のポジション保存用
-
-        //////////////////////////////////////////////////////
-        // ゲームパッド ボタン
-
-        private ButtonControl aButton;
-
-        private ButtonControl bButton;
-
-        private ButtonControl xButton;
-
-        private ButtonControl yButton;
-
-        private ButtonControl dpadUp;
-
-        private ButtonControl dpadDown;
-
-        private ButtonControl dpadLeft;
-
-        private ButtonControl dpadRight;
-
-        private ButtonControl l1Button;
-
-        private ButtonControl r1Button;
 
         ////////// TODO: 実験的
         private System.Diagnostics.Stopwatch sw;
@@ -158,53 +131,18 @@ namespace StudioMeowToon {
         }
 
         // Start is called before the first frame update.
-        void Start() {
+        new void Start() {
+            base.Start();
+
             speed = 0;
             // TODO: 実験的
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
-            //// Update is called once per frame.
-            //this.UpdateAsObservable()
-            //    .Subscribe(_ => {
-            //    });
-            //// FixedUpdate is called just before each physics update.
-            //this.FixedUpdateAsObservable()
-            //    .Subscribe(_ => {
-            //    });
-            //// LateUpdate is called after all Update functions have been called.
-            //this.LateUpdateAsObservable()
-            //    .Subscribe(_ => {
-            //    });
         }
 
         // Update is called once per frame.
-        void Update() {
-            // OS判定とゲームパッドのキー参照
-            dpadUp = Gamepad.current.dpad.up;
-            dpadDown = Gamepad.current.dpad.down;
-            dpadLeft = Gamepad.current.dpad.left;
-            dpadRight = Gamepad.current.dpad.right;
-            l1Button = Gamepad.current.leftShoulder;
-            r1Button = Gamepad.current.rightShoulder;
-            if (Application.platform == RuntimePlatform.Android) {
-                // Android
-                aButton = Gamepad.current.aButton;
-                bButton = Gamepad.current.bButton;
-                xButton = Gamepad.current.xButton;
-                yButton = Gamepad.current.yButton;
-            } else if (Application.platform == RuntimePlatform.WindowsPlayer) {
-                // Windows
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            } else {
-                // Unityで開発中は取れない？
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            }
+        new void Update() {
+            base.Update();
 
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // ステージをクリアした・GAMEオーバーした場合抜ける
@@ -590,17 +528,17 @@ namespace StudioMeowToon {
             if (doFixedUpdate.run) { // 走る
                 _rb.useGravity = true; // 重力再有効化 
                 if (speed < 3.25f) { // TODO: 16f/*8f*/ ⇒ フレームレートに依存する 60fps,8f, 30fps:16f, 20fps:24f, 15fps:32f
-                    _rb.AddFor​​ce(Util.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    _rb.AddFor​​ce(Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
                 }
             } else if (doFixedUpdate.walk) { // 歩く
                 _rb.useGravity = true; // 重力再有効化 
                 if (speed < 1.1f) {
-                    _rb.AddFor​​ce(Util.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    _rb.AddFor​​ce(Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
                 }
             } else if (doFixedUpdate.backward) { // 下がる
                 _rb.useGravity = true; // 重力再有効化 
                 if (speed < 0.75f) {
-                    _rb.AddFor​​ce(-Util.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 後ろに移動させる
+                    _rb.AddFor​​ce(-Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 後ろに移動させる
                 }
             } else if (doFixedUpdate.idol) {
                 _rb.useGravity = true; // 重力有効化
