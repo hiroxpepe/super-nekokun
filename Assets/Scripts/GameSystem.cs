@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UniRx;
@@ -10,7 +8,7 @@ namespace StudioMeowToon {
     /// <summary>
     /// ゲームシステムの処理
     /// </summary>
-    public class GameSystem : MonoBehaviour {
+    public class GameSystem : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
@@ -55,8 +53,6 @@ namespace StudioMeowToon {
 
         private Material lockonOriginalMaterial; // ロックオン対象の元のマテリアル
 
-        private GameObject virtualController; // バーチャルコントロール
-
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // FPS計測
 
@@ -73,29 +69,6 @@ namespace StudioMeowToon {
         float fpsForFixedUpdatePreviousTime; // FixedUpdate() FPS前フレーム秒
 
         float fpsForFixedUpdate = 0f; // FixedUpdate() FPS
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // ゲームパッド ボタン
-
-        private ButtonControl aButton;
-
-        private ButtonControl bButton;
-
-        private ButtonControl xButton;
-
-        private ButtonControl yButton;
-
-        private ButtonControl dpadUp;
-
-        private ButtonControl dpadDown;
-
-        private ButtonControl dpadLeft;
-
-        private ButtonControl dpadRight;
-
-        private ButtonControl startButton;
-
-        private ButtonControl selectButton;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -171,7 +144,9 @@ namespace StudioMeowToon {
         }
 
         // Start is called before the first frame update.
-        void Start() {
+        new void Start() {
+            base.Start();
+
             initFpsForUpdate(); // FPS初期化
             initFpsForFixedUpdate(); // fixed FPS初期化
 
@@ -187,8 +162,6 @@ namespace StudioMeowToon {
 
             message.text = ""; // メッセージ初期化、非表示
             home.transform.gameObject.SetActive(false);
-
-            virtualController = GameObject.Find("VirtualController"); // バーチャルコントローラー参照取得
 
             // Update is called once per frame.
             this.UpdateAsObservable()
@@ -207,31 +180,20 @@ namespace StudioMeowToon {
         }
 
         // Update is called once per frame.
-        void Update() {
-            getGamepadInput(); // キー入力
+        new void Update() {
+            base.Update();
 
             if (SceneManager.GetActiveScene().name == "Start") { // スタート画面の場合
                 if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
-                    SceneManager.LoadScene("Level1");
+                    SceneManager.LoadScene("Level1"); // TODO: メソッド
                 }
                 return;
             } else if (SceneManager.GetActiveScene().name == "Level1") { // Level1の場合のAボタン遷移
                 if (selectButton.wasPressedThisFrame) {
-                    SceneManager.LoadScene("Start");
+                    SceneManager.LoadScene("Start"); // TODO: メソッド
                 }
             }
-
-            //checkGameOver(); // GAMEオーバー確認
-            //checkLevelClear(); // レベルクリア確認
-
-            //updateGameInfo();
-            //updatePlayerStatus();
         }
-
-        //// FixedUpdate is called just before each physics update.
-        //void FixedUpdate() {
-        //    updateFpsForFixedUpdate();
-        //}
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プライベートメソッド(キャメルケース: 動詞)
@@ -298,43 +260,6 @@ namespace StudioMeowToon {
         private void initFpsForFixedUpdate() { // fixed FPS初期化
             fpsForFixedUpdateFrameCount = 0;
             fpsForFixedUpdatePreviousTime = 0.0f;
-        }
-
-        private void getGamepadInput() {
-            // 物理ゲームパッド接続判定
-            var controllerNames = Input.GetJoystickNames();
-            if (controllerNames[0] == "") {
-                virtualController.gameObject.SetActive(true);
-            } else {
-                virtualController.gameObject.SetActive(false);
-            }
-
-            // OS判定とゲームパッドのキー参照
-            dpadUp = Gamepad.current.dpad.up;
-            dpadDown = Gamepad.current.dpad.down;
-            dpadLeft = Gamepad.current.dpad.left;
-            dpadRight = Gamepad.current.dpad.right;
-            startButton = Gamepad.current.startButton;
-            selectButton = Gamepad.current.selectButton;
-            if (Application.platform == RuntimePlatform.Android) {
-                // Android
-                aButton = Gamepad.current.aButton;
-                bButton = Gamepad.current.bButton;
-                xButton = Gamepad.current.xButton;
-                yButton = Gamepad.current.yButton;
-            } else if (Application.platform == RuntimePlatform.WindowsPlayer) {
-                // Windows
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            } else {
-                // Unityで開発中は取れない？
-                aButton = Gamepad.current.bButton;
-                bButton = Gamepad.current.aButton;
-                xButton = Gamepad.current.yButton;
-                yButton = Gamepad.current.xButton;
-            }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
