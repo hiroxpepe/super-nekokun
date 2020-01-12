@@ -11,21 +11,7 @@ namespace StudioMeowToon {
         // パブリックメソッド(パスカルケース: 動詞)
 
         /// <summary>
-        /// localPosition Y座標に値を足す。
-        /// </summary>
-        public static Vector3 AddLocalPositionY(Transform t, float value) {
-            return new Vector3(t.localPosition.x, t.localPosition.y + value, t.localPosition.z);
-        }
-
-        /// <summary>
-        /// localPosition Y座標から値を引く。
-        /// </summary>
-        public static Vector3 SubtractLocalPositionY(Transform t, float value) {
-            return new Vector3(t.localPosition.x, t.localPosition.y - value, t.localPosition.z);
-        }
-
-        /// <summary>
-        /// localPosition Y座標だけ入れ替える。
+        /// localPosition Y座標だけ入れ替える。TODO: 拡張メソッドで localPosition.ReplaceY(5f); とか実装？
         /// </summary>
         public static Vector3 ReplaceLocalPositionY(Transform t, float value) {
             return new Vector3(t.localPosition.x, value, t.localPosition.z);
