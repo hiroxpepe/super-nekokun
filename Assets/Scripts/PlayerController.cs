@@ -54,6 +54,8 @@ namespace StudioMeowToon {
 
         private float waterLevel; // 水面の高さ TODO:プレイヤーのフィールドでOK?
 
+        private GameObject playerNeck; // プレイヤーの水面判定用
+
         private GameObject intoWaterFilter; // 水中でのカメラエフェクト用
 
         private GameObject bodyIntoWater; // 水中での体
@@ -127,6 +129,9 @@ namespace StudioMeowToon {
 
                 // 水中での体取得
                 bodyIntoWater = GameObject.Find("Nekokun/Body");
+
+                // 水面判定用
+                playerNeck = GameObject.Find("Bell");
             }
         }
 
@@ -621,10 +626,6 @@ namespace StudioMeowToon {
         // LateUpdate is called after all Update functions have been called.
         void LateUpdate() {
             if (doUpdate.climbing) { // 捕まり反転ジャンプの準備
-                // Input.GetAxis("Vertical")    1:上
-                // Input.GetAxis("Vertical")   -1:下
-                // Input.GetAxis("Horizontal") -1:左
-                // Input.GetAxis("Horizontal")  1:右
                 if (dpadLeft.isPressed) {
                     AxisToggle.Left = AxisToggle.Left == true ? false : true;
                 } else if (dpadRight.isPressed) {
@@ -717,12 +718,6 @@ namespace StudioMeowToon {
                     soundSystem.PlayWaterInClip();
                 }
             }
-        }
-
-        void OnTriggerStay(Collider other) {
-        }
-
-        void OnTriggerExit(Collider other) {
         }
 
         void OnGUI() {
@@ -1195,8 +1190,7 @@ namespace StudioMeowToon {
         }
 
         private bool checkIntoWater() { // 水中にいるかチェック TODO: 空間が水中でなはい時は？
-            var _level = transform.Find("Bell").gameObject;
-            if (_level.transform.position.y + 0.25f < waterLevel) { // 0.25f は体を水面に沈める為の調整値
+            if (playerNeck.transform.position.y + 0.25f < waterLevel) { // 0.25f は体を水面に沈める為の調整値
                 //transform.GetComponent<CapsuleCollider>().enabled = false; // コライダー切り替え
                 //if (_level.transform.position.y < waterLevel) { bodyIntoWater.GetComponent<CapsuleCollider>().enabled = true; }
                 doFixedUpdate.intoWater = true;

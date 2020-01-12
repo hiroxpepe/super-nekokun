@@ -33,7 +33,7 @@ namespace StudioMeowToon {
         // パブリックメソッド
 
         public void LookPlayer() { // TODO: 再検討
-            transform.localPosition = new Vector3(0, 0.75f, 0.8f);
+            transform.localPosition = new Vector3(0f, 0.75f, 0.8f);
             transform.localRotation = new Quaternion(0, -180, 0, 0);
         }
 
@@ -74,30 +74,18 @@ namespace StudioMeowToon {
                 float _ADJUST = 80.0f; // 移動係数
                 if (isForwardPosition) {
                     if (transform.localPosition.z < -0.5) { // カメラシステムをプレイヤーの頭のすぐ後ろまで移動する
-                        transform.localPosition = new Vector3(
-                            transform.localPosition.x,
-                            transform.localPosition.y,
-                            transform.localPosition.z + 0.075f * Time.deltaTime * _ADJUST
-                        );
+                        transform.localPosition += new Vector3(0f, 0f, 0.075f * Time.deltaTime * _ADJUST);
                     }
-                    transform.localRotation = new Quaternion(0, 0, 0, 0);
+                    transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
                     checkSix();
                 } else if (!isForwardPosition) {
                     if (transform.localPosition.z > defaultLocalPosition.z) {
-                        transform.localPosition = new Vector3(
-                            transform.localPosition.x,
-                            transform.localPosition.y,
-                            transform.localPosition.z - 0.035f * Time.deltaTime * _ADJUST
-                        );
+                        transform.localPosition -= new Vector3(0f, 0f, 0.035f * Time.deltaTime * _ADJUST);
                     }
                     if (transform.localPosition.y > defaultLocalPosition.y) {
-                        transform.localPosition = new Vector3(
-                            transform.localPosition.x,
-                            transform.localPosition.y - 0.035f * Time.deltaTime * _ADJUST,
-                            transform.localPosition.z
-                        );
+                        transform.localPosition -= new Vector3(0f, 0.035f * Time.deltaTime * _ADJUST, 0f);
                     }
-                    transform.localRotation = new Quaternion(0, 0, 0, 0);
+                    transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
                 }
             }
         }
@@ -144,9 +132,9 @@ namespace StudioMeowToon {
             // 回転 X:15, Y:0   , Z:0    ※MainCameraに設定
             // 拡縮 X: 1, Y:1   , Z:1
             transform.localPosition = defaultLocalPosition; // カメラシステム位置リセット
-            transform.localRotation = new Quaternion(0, 0, 0, 0);
-            horizontalAxis.transform.localRotation = new Quaternion(0, 0, 0, 0); // カメラ水平回転リセット
-            verticalAxis.transform.localRotation = new Quaternion(0, 0, 0, 0); // カメラ垂直回転リセット
+            transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+            horizontalAxis.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f); // カメラ水平回転リセット
+            verticalAxis.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f); // カメラ垂直回転リセット
             mainCamera.transform.localEulerAngles = new Vector3(15f, 0f, 0f); // カメラ本体は少し下向き
         }
 
@@ -163,11 +151,7 @@ namespace StudioMeowToon {
                 horizontalAxis.transform.Rotate(0f, 1.0f * Time.deltaTime * _ADJUST, 0f);
             }
             if (transform.localPosition.z < 0.1f) { // カメラシステムをキャラの目の位置に移動する
-                transform.localPosition = new Vector3(
-                    transform.localPosition.x,
-                    transform.localPosition.y,
-                    transform.localPosition.z + 0.075f * Time.deltaTime * _ADJUST
-                );
+                transform.localPosition += new Vector3(0f, 0f, 0.075f * Time.deltaTime * _ADJUST);
             }
         }
     }
