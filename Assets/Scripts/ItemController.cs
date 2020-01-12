@@ -87,7 +87,7 @@ namespace StudioMeowToon {
                     } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag == "Player") {
                         // 親が Player 継続なら
                         if (transform.localPosition.y < 0.35f) { // 親の持ち上げられた位置に移動する
-                            transform.localPosition = Utils.AddLocalPositionY(transform, 1.5f * Time.deltaTime);
+                            transform.localPosition += new Vector3(0f, 1.5f * Time.deltaTime, 0f);
                         }
                     } else if (!isGrounded && (transform.parent == null || transform.parent.gameObject.tag != "Player")) {
                         // 親が Player でなくなれば落下する
@@ -104,48 +104,11 @@ namespace StudioMeowToon {
                             }
                         }
                         if (!isGrounded) { // まだ接地してなければ落下する
-                            transform.localPosition = Utils.SubtractLocalPositionY(transform, 4.0f * Time.deltaTime); // 4.0f は調整値
+                            transform.localPosition -= new Vector3(0f, 4.0f * Time.deltaTime, 0f); // 4.0f は調整値
                         }
                     }
                 });
         }
-
-        //// Update is called once per frame.
-        //void Update() {
-        //}
-
-//        // FixedUpdate is called just before each physics update.
-//        void FixedUpdate() {
-//            if (isFloat) { // 浮遊フラグONはリターン
-//                return;
-//            }
-//            if (isGrounded && transform.parent != null && transform.parent.gameObject.tag == "Player") {
-//                // 親が Player になった時
-//                isGrounded = false; // 接地フラグOFF
-//            } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag == "Player") {
-//                // 親が Player 継続なら
-//                if (transform.localPosition.y < 0.35f) { // 親の持ち上げられた位置に移動する
-//                    transform.localPosition = Util.AddLocalPositionY(transform, 1.5f * Time.deltaTime);
-//                }
-//            } else if (!isGrounded && (transform.parent == null || transform.parent.gameObject.tag != "Player")) {
-//                // 親が Player でなくなれば落下する
-//                var _ray = new Ray(transform.position, new Vector3(0, -1f, 0)); // 下方サーチするレイ作成
-//                if (Physics.Raycast(_ray, out RaycastHit _hit, 20f)) { // 下方にレイを投げて反応があった場合
-//#if DEBUG
-//                    Debug.DrawRay(_ray.origin, _ray.direction, Color.yellow, 3, false);
-//#endif 
-//                    var _distance = (float) Math.Round(_hit.distance, 3, MidpointRounding.AwayFromZero);
-//                    if (_distance < 0.1) { // ある程度距離が近くなら
-//                        isGrounded = true; // 接地とする
-//                        var _top = getHitTop(_hit.transform.gameObject); // その後、接地したとするオブジェクトのTOPを調べて
-//                        transform.localPosition = Util.ReplaceLocalPositionY(transform, _top); // その位置に置く
-//                    }
-//                }
-//                if (!isGrounded) { // まだ接地してなければ落下する
-//                    transform.localPosition = Util.SubtractLocalPositionY(transform, 4.0f * Time.deltaTime); // 4.0f は調整値
-//                }
-//            }
-//        }
 
         // TODO: アイテムはブロックの子にする。移動するブロックの上でアイテムもいどうする。ブロックが破壊されたらアイテムは落下する
         // TODO: ブロックの上には一つしかアイテムが置けない

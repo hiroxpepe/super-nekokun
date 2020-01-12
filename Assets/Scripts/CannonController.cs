@@ -50,7 +50,7 @@ namespace StudioMeowToon {
 
                         // 弾の位置
                         var _pos = transform.position + transform.forward * 1.7f; // 前進させないと弾のコライダーが自分に当たる
-                        _bullet.transform.position = new Vector3(_pos.x, _pos.y + 0.5f, _pos.z);
+                        _bullet.transform.position = new Vector3(_pos.x, _pos.y + 0.5f, _pos.z); // 0.5f は Y軸を中心に合わせる為
 
                         // 弾の回転
                         _bullet.transform.rotation = transform.rotation;

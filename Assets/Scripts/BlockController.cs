@@ -51,11 +51,9 @@ namespace StudioMeowToon {
 
         private GameObject item; // アイテムオブジェクト
 
+        private bool isItemOnThis = false; // アイテムオブジェクトが上にのっているかフラグ
 
-
-        private bool isItemOn = false; // アイテムオブジェクトが上にのっているかフラグ
-
-        private bool isPlayerOn = false; // プレイヤーオブジェクトが上にのっているかフラグ
+        private bool isPlayerOnThis = false; // プレイヤーオブジェクトが上にのっているかフラグ
 
         private bool isPushed; // 押されるフラグ
 
@@ -157,16 +155,12 @@ namespace StudioMeowToon {
             // TODO:開始点-終了点が0.5おかしい
             toReach = new Vector3(origin.x + movementToX, origin.y + movementToY, origin.z + movementToZ);
 
-            // 参照取得
-            player = GameObject.FindGameObjectWithTag("Player");
-
             // Update is called once per frame.
             this.UpdateAsObservable()
                 .Subscribe(_ => {
-                    //base.Update(); // 基底クラスのメソッド実行
-
+                    // 押される
                     if (canPush) { // 押されることが出来るブロックのみ
-                        //player = GameObject.FindGameObjectWithTag("Player");
+                        player = GameObject.FindGameObjectWithTag("Player"); // MEMO:ここで設定しないと NullRef になる。なぜ？
                         if (isPushed && (pushedDistance < 1.0f)) { // 1ブロック分押すまで
                             bePushed(); // ブロックを押される
                             return;
@@ -175,16 +169,17 @@ namespace StudioMeowToon {
                             isPushed = false; // 押されるフラグOFF
                             pushedDistance = 0; // 押される距離リセット
                             player.transform.parent = null; // 押してるプレイヤーの子オブジェクト化を解除
-                                                            // TODO: 押せない時のアニメ？
+                            // TODO: 押せない時のアニメ？
                         }
                     }
 
+                    // 自動移動
                     if (!gameObject.name.Contains("_Piece")) { // 破片ではない場合
-                        if (movementToX != 0 || movementToY != 0 || movementToZ != 0) {
+                        if (movementToX != 0 || movementToY != 0 || movementToZ != 0) { // TODO: canAutoMove 実装?
                             // TODO: ブロックの上にアイテムを二つ置いて、また持ったらバグる
                             if (item == null || item.GetComponent<ItemController>().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
                                 item = null;
-                                isItemOn = false;
+                                isItemOnThis = false;
                             }
                             moveAuto(); // 自動的に移動する
                         }
@@ -207,53 +202,6 @@ namespace StudioMeowToon {
                 });
         }
 
-        // Update is called once per frame.
-        //new void Update() {
-            //base.Update(); // 基底クラスのメソッド実行
-
-            //if (canPush) { // 押されることが出来るブロックのみ
-            //    player = GameObject.FindGameObjectWithTag("Player");
-            //    if (isPushed && (pushedDistance < 1.0f)) { // 1ブロック分押すまで
-            //        bePushed(); // ブロックを押される
-            //        return;
-            //    } else if (isPushed && (pushedDistance >= 1.0f)) { // 1ブロック分押したら
-            //        align(); // 位置微調整
-            //        isPushed = false; // 押されるフラグOFF
-            //        pushedDistance = 0; // 押される距離リセット
-            //        player.transform.parent = null; // 押してるプレイヤーの子オブジェクト化を解除
-            //        // TODO: 押せない時のアニメ？
-            //    }
-            //}
-
-            //if (!gameObject.name.Contains("_Piece")) { // 破片ではない場合
-            //    if (movementToX != 0 || movementToY != 0 || movementToZ != 0) {
-            //        // TODO: ブロックの上にアイテムを二つ置いて、また持ったらバグる
-            //        if (item == null || item.GetComponent<ItemController>().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
-            //            item = null;
-            //            isItemOn = false;
-            //        }
-            //        moveAuto(); // 自動的に移動する
-            //    }
-            //}
-        //}
-
-        // FixedUpdate is called just before each physics update.
-        //new void FixedUpdate() {
-        //    base.FixedUpdate(); // 基底クラスのメソッド実行
-
-        //    if (doFixedUpdate.explode) { // 破片を飛散させる
-        //        GetComponent<BoxCollider>().enabled = false; // コライダー判定OFF※子に引き継がれる
-        //        explodePiece(explodeParam.number, explodeParam.scale, explodeParam.force);
-        //        GetComponent<BoxCollider>().enabled = true; // コライダー判定ON
-        //        doFixedUpdate.explode = false;
-        //        if (destroyable) {
-        //            Destroy(gameObject); // 自分を削除
-        //        }
-        //        life--; // HPを削る
-        //    }
-
-        //}
-
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // イベントハンドラ
 
@@ -264,15 +212,15 @@ namespace StudioMeowToon {
                 if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
                     Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
                     player = collision.gameObject;
-                    isPlayerOn = true;
+                    isPlayerOnThis = true;
                 }
             }
-            if (collision.gameObject.name.Contains("Item")) {
+            if (collision.gameObject.name.Contains("Item")) { // TODO: LikeItem()
                 // アイテムが上に乗った
                 if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
                     Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
                     item = collision.gameObject;
-                    isItemOn = true;
+                    isItemOnThis = true;
                 }
             }
         }
@@ -283,7 +231,7 @@ namespace StudioMeowToon {
                 if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
                     Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
                     player = collision.gameObject;
-                    isPlayerOn = true;
+                    isPlayerOnThis = true;
                 }
             }
             if (collision.gameObject.name.Contains("Item")) {
@@ -291,7 +239,7 @@ namespace StudioMeowToon {
                 if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
                     Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
                     item = collision.gameObject;
-                    isItemOn = true;
+                    isItemOnThis = true;
                 }
             }
         }
@@ -300,12 +248,12 @@ namespace StudioMeowToon {
             if (collision.gameObject.tag.Contains("Player")) {
                 // プレイヤーが上から離れた
                 player = null;
-                isPlayerOn = false;
+                isPlayerOnThis = false;
             }
             if (collision.gameObject.name.Contains("Item")) { // TODO: ここが子オブジェクトになるんので動作してない 親がプやいやになったら外す
                 // アイテムが上から離れた
                 item = null;
-                isItemOn = false;
+                isItemOnThis = false;
             }
         }
 
@@ -374,24 +322,12 @@ namespace StudioMeowToon {
             // X軸正方向
             if (positiveX) {
                 if (Math.Round(transform.localPosition.x) < Math.Round(toReach.x)) {
-                    transform.localPosition = new Vector3(
-                        transform.localPosition.x + movementSpeed * Time.deltaTime,
-                        transform.localPosition.y,
-                        transform.localPosition.z
-                    );
-                    if (isPlayerOn) {
-                        player.transform.localPosition = new Vector3(
-                            player.transform.localPosition.x + movementSpeed * Time.deltaTime,
-                            player.transform.localPosition.y,
-                            player.transform.localPosition.z
-                        );
+                    transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
+                    if (isPlayerOnThis) {
+                        player.transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
-                    if (isItemOn) {
-                        item.transform.localPosition = new Vector3(
-                            item.transform.localPosition.x + movementSpeed * Time.deltaTime,
-                            item.transform.localPosition.y,
-                            item.transform.localPosition.z
-                        );
+                    if (isItemOnThis) {
+                        item.transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
                 } else if (Math.Round(transform.localPosition.x) == Math.Round(toReach.x)) {
                     positiveX = false;
@@ -399,24 +335,12 @@ namespace StudioMeowToon {
             // X軸負方向
             } else if (!positiveX) {
                 if (Math.Round(transform.localPosition.x) > Math.Round(origin.x)) {
-                    transform.localPosition = new Vector3(
-                        transform.localPosition.x - movementSpeed * Time.deltaTime,
-                        transform.localPosition.y,
-                        transform.localPosition.z
-                    );
-                    if (isPlayerOn) {
-                        player.transform.localPosition = new Vector3(
-                            player.transform.localPosition.x - movementSpeed * Time.deltaTime,
-                            player.transform.localPosition.y,
-                            player.transform.localPosition.z
-                        );
+                    transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
+                    if (isPlayerOnThis) {
+                        player.transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
-                    if (isItemOn) {
-                        item.transform.localPosition = new Vector3(
-                            item.transform.localPosition.x - movementSpeed * Time.deltaTime,
-                            item.transform.localPosition.y,
-                            item.transform.localPosition.z
-                        );
+                    if (isItemOnThis) {
+                        item.transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
                 } else if (Math.Round(transform.localPosition.x) == Math.Round(origin.x)) {
                     positiveX = true;
@@ -425,24 +349,12 @@ namespace StudioMeowToon {
             // Y軸正方向
             if (positiveY) {
                 if (Math.Round(transform.localPosition.y) < Math.Round(toReach.y)) {
-                    transform.localPosition = new Vector3(
-                        transform.localPosition.x,
-                        transform.localPosition.y + movementSpeed * Time.deltaTime,
-                        transform.localPosition.z
-                    );
-                    if (isPlayerOn) {
-                        player.transform.localPosition = new Vector3(
-                            player.transform.localPosition.x,
-                            player.transform.localPosition.y + movementSpeed * Time.deltaTime,
-                            player.transform.localPosition.z
-                        );
+                    transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
+                    if (isPlayerOnThis) {
+                        player.transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
-                    if (isItemOn) {
-                        item.transform.localPosition = new Vector3(
-                            item.transform.localPosition.x,
-                            item.transform.localPosition.y + movementSpeed * Time.deltaTime,
-                            item.transform.localPosition.z
-                        );
+                    if (isItemOnThis) {
+                        item.transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
                 } else if (Math.Round(transform.localPosition.y) == Math.Round(toReach.y)) {
                     positiveY = false;
@@ -450,24 +362,12 @@ namespace StudioMeowToon {
             // Y軸負方向
             } else if (!positiveY) {
                 if (Math.Round(transform.localPosition.y) > Math.Round(origin.y)) {
-                    transform.localPosition = new Vector3(
-                        transform.localPosition.x,
-                        transform.localPosition.y - movementSpeed * Time.deltaTime,
-                        transform.localPosition.z
-                    );
-                    if (isPlayerOn) {
-                        player.transform.localPosition = new Vector3(
-                            player.transform.localPosition.x,
-                            player.transform.localPosition.y - movementSpeed * Time.deltaTime,
-                            player.transform.localPosition.z
-                        );
+                    transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
+                    if (isPlayerOnThis) {
+                        player.transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
-                    if (isItemOn) {
-                        item.transform.localPosition = new Vector3(
-                            item.transform.localPosition.x,
-                            item.transform.localPosition.y - movementSpeed * Time.deltaTime,
-                            item.transform.localPosition.z
-                        );
+                    if (isItemOnThis) {
+                        item.transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
                 } else if (Math.Round(transform.localPosition.y) == Math.Round(origin.y)) {
                     positiveY = true;
@@ -476,24 +376,12 @@ namespace StudioMeowToon {
             // Z軸正方向
             if (positiveZ) {
                 if (Math.Round(transform.localPosition.z) < Math.Round(toReach.z)) {
-                    transform.localPosition = new Vector3(
-                        transform.localPosition.x,
-                        transform.localPosition.y,
-                        transform.localPosition.z + movementSpeed * Time.deltaTime
-                    );
-                    if (isPlayerOn) {
-                        player.transform.localPosition = new Vector3(
-                            player.transform.localPosition.x,
-                            player.transform.localPosition.y,
-                            player.transform.localPosition.z + movementSpeed * Time.deltaTime
-                        );
+                    transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
+                    if (isPlayerOnThis) {
+                        player.transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
-                    if (isItemOn) {
-                        item.transform.localPosition = new Vector3(
-                            item.transform.localPosition.x,
-                            item.transform.localPosition.y,
-                            item.transform.localPosition.z + movementSpeed * Time.deltaTime
-                        );
+                    if (isItemOnThis) {
+                        item.transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
                 } else if (Math.Round(transform.localPosition.z) == Math.Round(toReach.z)) {
                     positiveZ = false;
@@ -501,24 +389,12 @@ namespace StudioMeowToon {
             // Z軸負方向
             } else if (!positiveZ) {
                 if (Math.Round(transform.localPosition.z) > Math.Round(origin.z)) {
-                    transform.localPosition = new Vector3(
-                        transform.localPosition.x,
-                        transform.localPosition.y,
-                        transform.localPosition.z - movementSpeed * Time.deltaTime
-                    );
-                    if (isPlayerOn) {
-                        player.transform.localPosition = new Vector3(
-                            player.transform.localPosition.x,
-                            player.transform.localPosition.y,
-                            player.transform.localPosition.z - movementSpeed * Time.deltaTime
-                        );
+                    transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
+                    if (isPlayerOnThis) {
+                        player.transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
-                    if (isItemOn) {
-                        item.transform.localPosition = new Vector3(
-                            item.transform.localPosition.x,
-                            item.transform.localPosition.y,
-                            item.transform.localPosition.z - movementSpeed * Time.deltaTime
-                        );
+                    if (isItemOnThis) {
+                        item.transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
                 } else if (Math.Round(transform.localPosition.z) == Math.Round(origin.z)) {
                     positiveZ = true;
@@ -647,7 +523,7 @@ namespace StudioMeowToon {
                     return new Vector3(pushed.position.x, pushed.position.y, pushed.position.z + _OFFSET);
                 }
             }
-            return new Vector3(0, 0, 0); // TODO: 修正
+            return new Vector3(0f, 0f, 0f); // TODO: 修正
         }
 
         #region PushedDirection
