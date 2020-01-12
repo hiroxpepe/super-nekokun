@@ -206,6 +206,7 @@ namespace StudioMeowToon {
                 // 持つ(Rボタン)押した
                 if (r1Button.wasPressedThisFrame) {
                     if (checkToHoldItem()) { // アイテムが持てるかチェック
+                        faceToFace(); // 面に正対する // TOD0: 精度が悪い？
                     }
                 }
 
@@ -671,6 +672,10 @@ namespace StudioMeowToon {
                         }
                     }
                 }
+                // ブロックを持つ実装 TODO: 修正
+                if (_name.Contains("Item")) { // TODO: Holdable 追加？
+                    holded = collision.gameObject; // 持てるアイテムの参照を保持する
+                }
             }
             // 地上・壁に接地したら
             else if ((_name.Contains("Ground") || _name.Contains("Wall")) && !checkIntoWater()) { // 水中ではない場合
@@ -685,7 +690,7 @@ namespace StudioMeowToon {
                 flatToFace(); // 面に合わせる TODO:※試験的
             }
             // 持てるアイテムと接触したら
-            else if (_name.Contains("Item")) {
+            else if (_name.Contains("Item")) { // TODO: Holdable 追加？
                 holded = collision.gameObject; // 持てるアイテムの参照を保持する
             }
             // 被弾したら
@@ -701,6 +706,10 @@ namespace StudioMeowToon {
                 // 横に当たった場合
                 if (isHitSide(collision.gameObject)) {
                 }
+            }
+            // ブロックを持つ実装 TODO: 修正: ここは効いていない
+            if (_name.Contains("Item")) { // TODO: Holdable 追加？
+                holded = collision.gameObject; // 持てるアイテムの参照を保持する
             }
         }
 
@@ -1172,13 +1181,18 @@ namespace StudioMeowToon {
 #if DEBUG
                     Debug.DrawRay(_ray.origin, _ray.direction * 0.35f, Color.magenta, 4, false); //レイを可視化
 #endif
-                    if (_hit.transform.name.Contains("Item")) { // 持てるのはアイテムのみ
-                                                                // TODO: 子のオブジェクト判定は？
+                    if (_hit.transform.name.Contains("Item")) { // 持てるのはアイテムのみ TODO: 子のオブジェクト判定は？
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                         if (_distance < 0.3f) { // 距離が近くなら
-                            var _itemController = holded.GetComponent<ItemController>();
-                            leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
-                            rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
+                            if (holded.tag.Equals("Item")) {
+                                var _itemController = holded.GetComponent<ItemController>();
+                                leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
+                                rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
+                            } else if (holded.tag.Equals("Block")) {
+                                var _blockController = holded.GetComponent<BlockController>();
+                                leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
+                                rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
+                            }
                             holded.transform.parent = transform; // 自分の子オブジェクトにする
                             doUpdate.holding = true; // 持つフラグON
                             return true;

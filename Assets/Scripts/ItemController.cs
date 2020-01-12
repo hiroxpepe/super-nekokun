@@ -35,7 +35,7 @@ namespace StudioMeowToon {
             get {
                 if (transform.parent == null) {
                     return false;
-                } else if (transform.parent.gameObject.tag == "Player") {
+                } else if (transform.parent.gameObject.tag.Equals("Player")) {
                     return true;
                 } else {
                     return false;

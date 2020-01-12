@@ -34,6 +34,9 @@ namespace StudioMeowToon {
         [SerializeField]
         private int life = 1; // HP(耐久度)
 
+        [SerializeField]
+        private bool canHold = false; // 持たれることが出来るかフラグ
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
@@ -65,6 +68,13 @@ namespace StudioMeowToon {
 
         private DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用 フラグ
 
+        // 持たれる機能実装
+        private bool isGrounded; // 接地フラグ
+
+        private Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
+
+        private Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
 
@@ -82,6 +92,21 @@ namespace StudioMeowToon {
         /// 次の一撃で破壊されるかどうか。
         /// </summary>
         public bool destroyable { get => life == 1 ? true : false; }
+
+        /// <summary>
+        /// プレイヤーに持たれているかどうか。
+        /// </summary>
+        public bool holdedByPlayer {
+            get {
+                if (transform.parent == null) {
+                    return false;
+                } else if (transform.parent.gameObject.tag.Equals("Player")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // ロックオンシステム
@@ -136,6 +161,15 @@ namespace StudioMeowToon {
             gameObject.GetComponent<CommonController>().shockedBy = player.transform; // Player に下から衝撃を受ける
         }
 
+        // 持たれる実装用
+        public Transform GetLeftHandTransform() { // キャラにIKで持たれる用
+            return leftHandTransform;
+        }
+
+        public Transform GetRightHandTransform() { // キャラにIKで持たれる用
+            return rightHandTransform;
+        }
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // 更新メソッド
 
@@ -154,6 +188,20 @@ namespace StudioMeowToon {
             // TODO: 自分のx,y,z の縮尺率を掛ける
             // TODO:開始点-終了点が0.5おかしい
             toReach = new Vector3(origin.x + movementToX, origin.y + movementToY, origin.z + movementToZ);
+
+            // 持たれる実装用
+            if (canHold) {
+                isGrounded = false;
+                // 持たれる時の手の位置オブジェクト初期化
+                var _leftHandGameObject = new GameObject("LeftHand");
+                var _rightHandGameObject = new GameObject("RightHand");
+                leftHandTransform = _leftHandGameObject.transform;
+                rightHandTransform = _rightHandGameObject.transform;
+                leftHandTransform.parent = transform;
+                rightHandTransform.parent = transform;
+                leftHandTransform.localPosition = Vector3.zero;
+                rightHandTransform.localPosition = Vector3.zero;
+            }
 
             // Update is called once per frame.
             this.UpdateAsObservable()
@@ -187,7 +235,7 @@ namespace StudioMeowToon {
                 });
 
             // FixedUpdate is called just before each physics update.
-            this.FixedUpdateAsObservable()
+            (this).FixedUpdateAsObservable()
                 .Subscribe(_ => {
                     if (doFixedUpdate.explode) { // 破片を飛散させる
                         GetComponent<BoxCollider>().enabled = false; // コライダー判定OFF※子に引き継がれる
@@ -199,6 +247,35 @@ namespace StudioMeowToon {
                         }
                         life--; // HPを削る
                     }
+
+                    // 持たれる実装用
+                    if (!canHold) { return; }
+                    if (isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
+                        // 親が Player になった時
+                        isGrounded = false; // 接地フラグOFF
+                    } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
+                        // 親が Player 継続なら
+                        beHolded(); // 持ち上げられる
+                    } else if (!isGrounded && (transform.parent == null || !transform.parent.gameObject.tag.Equals("Player"))) {
+                        // 親が Player でなくなれば落下する
+                        var _ray = new Ray(transform.position, new Vector3(0, -1f, 0)); // 下方サーチするレイ作成
+                        if (Physics.Raycast(_ray, out RaycastHit _hit, 20f)) { // 下方にレイを投げて反応があった場合
+#if DEBUG
+                            Debug.DrawRay(_ray.origin, _ray.direction, Color.yellow, 3, false);
+#endif
+                            var _distance = (float) Math.Round(_hit.distance, 3, MidpointRounding.AwayFromZero);
+                            if (_distance < 0.2f/*0.1*/) { // ある程度距離が近くなら
+                                isGrounded = true; // 接地とする
+                                var _top = getHitTop(_hit.transform.gameObject); // その後、接地したとするオブジェクトのTOPを調べて
+                                transform.localPosition = Utils.ReplaceLocalPositionY(transform, _top); // その位置に置く
+                                align2(); // 位置調整
+                            }
+                        }
+                        if (!isGrounded) { // まだ接地してなければ落下する
+                            transform.localPosition -= new Vector3(0f, 5.0f * Time.deltaTime, 0f); // 5.0f は調整値
+                        }
+                    }
+
                 });
         }
 
@@ -288,7 +365,10 @@ namespace StudioMeowToon {
             }
         }
 
-        private int getRandomForce(int force) { // 飛散する破片に加える力のランダム要素
+        /// <summary>
+        /// 飛散する破片に加える力のランダム数値取得。
+        /// </summary>
+        private int getRandomForce(int force) {
             var _random = new System.Random();
             return _random.Next((int) force / 2, (int) force * 2); // force の2分の1から2倍の範囲で
         }
@@ -305,9 +385,20 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// ブロックの位置をグリッドに合わせ微調整する。
+        /// </summary>
+        private void align2() {
+            transform.position = new Vector3(
+                (float) Math.Round(transform.position.x * 2, 0, MidpointRounding.AwayFromZero) / 2, // 0.5単位にする為、2倍して2で割る
+                (float) Math.Round(transform.position.y * 2, 0, MidpointRounding.AwayFromZero) / 2,
+                (float) Math.Round(transform.position.z * 2, 0, MidpointRounding.AwayFromZero) / 2
+            );
+            transform.localRotation = new Quaternion(0, 0f, 0f, 0f);
+        }
+
+        /// <summary>
         /// 自身のY位置を取得する。
         /// </summary>
-        /// <returns></returns>
         private float getTop() {
             float _height = GetComponent<Renderer>().bounds.size.y; // オブジェクトの高さ取得 
             float _y = transform.position.y; // オブジェクトのy座標取得(※0基点)
@@ -524,6 +615,53 @@ namespace StudioMeowToon {
                 }
             }
             return new Vector3(0f, 0f, 0f); // TODO: 修正
+        }
+
+        // 衝突したオブジェクトの側面に当たったか判定する
+        private float getHitTop(GameObject hit) {
+            float _height = hit.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
+            float _y = hit.transform.position.y; // 対象オブジェクトのy座標取得(※0基点)
+            float _top = _height + _y; // 対象オブジェクトのTOP取得
+            return _top;
+        }
+
+        /// <summary>
+        /// プレイヤーに持ち上げられる。
+        /// </summary>
+        private void beHolded() {
+            if (transform.localPosition.y < 0.6f) { // 親に持ち上げられた位置に移動する: 0.6fは調整値
+                var _direction = getPushedDirection(transform.parent.forward);
+                if (_direction == PushedDirection.PositiveZ) { // Z軸正方向
+                    transform.position = new Vector3(
+                        transform.parent.transform.position.x,
+                        transform.position.y + 1.5f * Time.deltaTime, // 調整値
+                        transform.parent.transform.position.z + 0.8f // 調整値
+                    );
+                    transform.rotation = Quaternion.Euler(-15f, 0f, 0f); // 15度傾ける
+                } else if (_direction == PushedDirection.NegativeZ) { // Z軸負方向
+                    transform.position = new Vector3(
+                        transform.parent.transform.position.x,
+                        transform.position.y + 1.5f * Time.deltaTime,
+                        transform.parent.transform.position.z - 0.8f
+                    );
+                    transform.rotation = Quaternion.Euler(15f, 0f, 0f);
+                } else if (_direction == PushedDirection.PositiveX) { // X軸正方向
+                    transform.position = new Vector3(
+                        transform.parent.transform.position.x + 0.8f,
+                        transform.position.y + 1.5f * Time.deltaTime,
+                        transform.parent.transform.position.z
+                    );
+                    transform.rotation = Quaternion.Euler(0f, 0f, 15f);
+                } else if (_direction == PushedDirection.NegativeX) { // X軸負方向
+
+                    transform.position = new Vector3(
+                        transform.parent.transform.position.x - 0.8f,
+                        transform.position.y + 1.5f * Time.deltaTime,
+                        transform.parent.transform.position.z
+                    );
+                    transform.rotation = Quaternion.Euler(0f, 0f, -15f);
+                }
+            }
         }
 
         #region PushedDirection
