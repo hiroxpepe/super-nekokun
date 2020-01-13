@@ -235,7 +235,7 @@ namespace StudioMeowToon {
                 });
 
             // FixedUpdate is called just before each physics update.
-            (this).FixedUpdateAsObservable()
+            this.FixedUpdateAsObservable()
                 .Subscribe(_ => {
                     if (doFixedUpdate.explode) { // 破片を飛散させる
                         GetComponent<BoxCollider>().enabled = false; // コライダー判定OFF※子に引き継がれる
@@ -249,33 +249,41 @@ namespace StudioMeowToon {
                     }
 
                     // 持たれる実装用
-                    if (!canHold) { return; }
-                    if (isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
-                        // 親が Player になった時
-                        isGrounded = false; // 接地フラグOFF
-                    } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
-                        // 親が Player 継続なら
-                        beHolded(); // 持ち上げられる
-                    } else if (!isGrounded && (transform.parent == null || !transform.parent.gameObject.tag.Equals("Player"))) {
-                        // 親が Player でなくなれば落下する
-                        var _ray = new Ray(transform.position, new Vector3(0, -1f, 0)); // 下方サーチするレイ作成
-                        if (Physics.Raycast(_ray, out RaycastHit _hit, 20f)) { // 下方にレイを投げて反応があった場合
+                    if (!canHold) {
+                        return;
+                    } else {
+                        if (isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
+                            // 親が Player になった時
+                            isGrounded = false; // 接地フラグOFF
+                        } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
+                            // 親が Player 継続なら
+                            if (!transform.parent.GetComponent<PlayerController>().Faceing) { // プレイヤーの移動・回転を待つ
+                                if (transform.parent.transform.position.y > transform.position.y + 0.2f) { // 0.2fは調整値
+                                    beHolded(8.0f); // 上から持ち上げられる
+                                } else {
+                                    beHolded(); // 横から持ち上げられる
+                                }
+                            }
+                        } else if (!isGrounded && (transform.parent == null || !transform.parent.gameObject.tag.Equals("Player"))) {
+                            // 親が Player でなくなれば落下する
+                            var _ray = new Ray(transform.position, new Vector3(0, -1f, 0)); // 下方サーチするレイ作成
+                            if (Physics.Raycast(_ray, out RaycastHit _hit, 20f)) { // 下方にレイを投げて反応があった場合
 #if DEBUG
-                            Debug.DrawRay(_ray.origin, _ray.direction, Color.yellow, 3, false);
+                                Debug.DrawRay(_ray.origin, _ray.direction, Color.yellow, 3, false);
 #endif
-                            var _distance = (float) Math.Round(_hit.distance, 3, MidpointRounding.AwayFromZero);
-                            if (_distance < 0.2f/*0.1*/) { // ある程度距離が近くなら
-                                isGrounded = true; // 接地とする
-                                var _top = getHitTop(_hit.transform.gameObject); // その後、接地したとするオブジェクトのTOPを調べて
-                                transform.localPosition = Utils.ReplaceLocalPositionY(transform, _top); // その位置に置く
-                                align2(); // 位置調整
+                                var _distance = (float) Math.Round(_hit.distance, 3, MidpointRounding.AwayFromZero);
+                                if (_distance < 0.2f) { // ある程度距離が近くなら
+                                    isGrounded = true; // 接地とする
+                                    var _top = getHitTop(_hit.transform.gameObject); // その後、接地したとするオブジェクトのTOPを調べて
+                                    transform.localPosition = Utils.ReplaceLocalPositionY(transform, _top); // その位置に置く
+                                    align2(); // 位置調整
+                                }
+                            }
+                            if (!isGrounded) { // まだ接地してなければ落下する
+                                transform.localPosition -= new Vector3(0f, 5.0f * Time.deltaTime, 0f); // 5.0f は調整値
                             }
                         }
-                        if (!isGrounded) { // まだ接地してなければ落下する
-                            transform.localPosition -= new Vector3(0f, 5.0f * Time.deltaTime, 0f); // 5.0f は調整値
-                        }
                     }
-
                 });
         }
 
@@ -558,6 +566,24 @@ namespace StudioMeowToon {
             if (_fX == -1 && _fZ == 0) { // X軸負方向
                 return PushedDirection.NegativeX;
             }
+            // ここに来たら二軸の差を判定する TODO: ロジック再確認
+            float _abX = Math.Abs(forwardVector.x);
+            float _abZ = Math.Abs(forwardVector.z);
+            if (_abX > _abZ) {
+                if (_fX == 1) { // X軸正方向
+                    return PushedDirection.PositiveX;
+                }
+                if (_fX == -1) { // X軸負方向
+                    return PushedDirection.NegativeX;
+                }
+            } else if (_abX < _abZ) {
+                if (_fZ == 1) { // Z軸正方向
+                    return PushedDirection.PositiveZ;
+                }
+                if (_fZ == -1) { // Z軸負方向
+                    return PushedDirection.NegativeZ;
+                }
+            }
             return PushedDirection.None; // 判定不明
         }
 
@@ -628,35 +654,34 @@ namespace StudioMeowToon {
         /// <summary>
         /// プレイヤーに持ち上げられる。
         /// </summary>
-        private void beHolded() {
+        private void beHolded(float speed = 2.0f) {
             if (transform.localPosition.y < 0.6f) { // 親に持ち上げられた位置に移動する: 0.6fは調整値
                 var _direction = getPushedDirection(transform.parent.forward);
                 if (_direction == PushedDirection.PositiveZ) { // Z軸正方向
                     transform.position = new Vector3(
                         transform.parent.transform.position.x,
-                        transform.position.y + 1.5f * Time.deltaTime, // 調整値
+                        transform.position.y + speed * Time.deltaTime, // 調整値
                         transform.parent.transform.position.z + 0.8f // 調整値
                     );
                     transform.rotation = Quaternion.Euler(-15f, 0f, 0f); // 15度傾ける
                 } else if (_direction == PushedDirection.NegativeZ) { // Z軸負方向
                     transform.position = new Vector3(
                         transform.parent.transform.position.x,
-                        transform.position.y + 1.5f * Time.deltaTime,
+                        transform.position.y + speed * Time.deltaTime,
                         transform.parent.transform.position.z - 0.8f
                     );
                     transform.rotation = Quaternion.Euler(15f, 0f, 0f);
                 } else if (_direction == PushedDirection.PositiveX) { // X軸正方向
                     transform.position = new Vector3(
                         transform.parent.transform.position.x + 0.8f,
-                        transform.position.y + 1.5f * Time.deltaTime,
+                        transform.position.y + speed * Time.deltaTime,
                         transform.parent.transform.position.z
                     );
                     transform.rotation = Quaternion.Euler(0f, 0f, 15f);
                 } else if (_direction == PushedDirection.NegativeX) { // X軸負方向
-
                     transform.position = new Vector3(
                         transform.parent.transform.position.x - 0.8f,
-                        transform.position.y + 1.5f * Time.deltaTime,
+                        transform.position.y + speed * Time.deltaTime,
                         transform.parent.transform.position.z
                     );
                     transform.rotation = Quaternion.Euler(0f, 0f, -15f);
