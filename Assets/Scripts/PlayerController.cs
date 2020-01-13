@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UniRx;
+using UniRx.Triggers;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -77,6 +79,8 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
 
+        public bool Faceing { get => doUpdate.faceing; } // オブジェクトに正対中かどうか
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // パブリックメソッド
 
@@ -128,7 +132,7 @@ namespace StudioMeowToon {
                 intoWaterFilter = GameObject.Find("Canvas");
 
                 // 水中での体取得
-                bodyIntoWater = GameObject.Find("Nekokun/Body");
+                bodyIntoWater = GameObject.Find("Player/Body");
 
                 // 水面判定用
                 playerNeck = GameObject.Find("Bell");
@@ -139,7 +143,8 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
-            speed = 0;
+            speed = 0; // 速度初期化
+
             // TODO: 実験的
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
@@ -164,6 +169,15 @@ namespace StudioMeowToon {
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 gameSystem.playerLife = life; // HP設定
                 gameSystem.bombAngle = bombAngle.Value; // 弾角度
+            }
+
+            ///////////////////////////////////////////////////////////////////////////////////////
+            // オブジェクトに正対中キャラ操作無効
+            if (doUpdate.faceing) {
+                if (holded != null) {
+                    faceToObject(holded);
+                }
+                return;
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////
@@ -199,14 +213,25 @@ namespace StudioMeowToon {
                 intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
             }
 
+            // 持つ(Rボタン)を離した
+            if (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) {
+                if (holded != null) {
+                    holded.transform.parent = null; // 子オブジェクト解除
+                    doUpdate.holding = false; // 持つフラグOFF
+                    holded = null; // 持つオブジェクト参照解除
+                }
+            }
+
             ///////////////////////////////////////////////////////////////////////////////////////
             // 接地フラグONの場合
             if (doUpdate.grounded && !doUpdate.climbing) {
 
                 // 持つ(Rボタン)押した
                 if (r1Button.wasPressedThisFrame) {
-                    if (checkToHoldItem()) { // アイテムが持てるかチェック
-                        faceToFace(); // 面に正対する // TOD0: 精度が悪い？
+                    if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
+                        startFaceing(); // オブジェクトに正対する開始
+                        faceToObject(holded); // オブジェクトに正対する
+                        goto STEP0; // 弾発射を飛ばす
                     }
                 }
 
@@ -224,13 +249,14 @@ namespace StudioMeowToon {
                     simpleAnime.CrossFade("Walk", 0.5f); // 投げるから歩くアニメ
                     goto STEP1;
                 } else if (r1Button.wasPressedThisFrame) { // Rボタンを押した時
-                    if (!doUpdate.holding) { // Item を持っていなかったら
+                    if (!doUpdate.holding || !doUpdate.faceing) { // Item を持っていなかったら、またはオブジェクトに正対中でなければ
                         simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
                         doUpdate.throwing = true;
                     }
                     goto STEP1;
                 }
 
+STEP0:
                 if (aButton.isPressed) { // Aボタン押しっぱなし
                     if (dpadLeft.isPressed) { // 左
                         if (!doUpdate.throwing) {
@@ -315,14 +341,11 @@ namespace StudioMeowToon {
 
                 // 上を押しながら、押す(Aボタン)
                 if (aButton.wasPressedThisFrame && dpadUp.isPressed) {
-                    checkToPushBlock();
+                    if (checkToPushBlock()) {
+                        //startFaceing(); // オブジェクトに正対する開始
+                        faceToObject(pushed); // オブジェクトに正対する
+                    }
                 }
-
-                //// 持つ(Rボタン)押した
-                //if (Input.GetButtonDown("R1")) {
-                //    if (checkToHoldItem()) { // アイテムが持てるかチェック
-                //    }
-                //}
             }
             ///////////////////////////////////////////////////////////////////////////////////////
             // ジャンプ中 ※水中もここに来る
@@ -341,20 +364,20 @@ namespace StudioMeowToon {
                 }
                 if (Math.Round(previousSpeed, 4) == Math.Round(speed, 4) && !doUpdate.lookBackJumping && (doUpdate.secondsAfterJumped > 0.1f && doUpdate.secondsAfterJumped < 0.4f)) { // 完全に空中停止した場合※捕まり反転ジャンプ時以外
 #if DEBUG
-                    Debug.Log("400 完全に空中停止した場合 speed:" + speed);
+                    Debug.Log("344 完全に空中停止した場合 speed:" + speed);
 #endif 
                     transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
                     doUpdate.grounded = true; // 接地
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
                 }
-                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 1.0f) { // TODO: checkIntoWater 重くない？
-#if DEBUG
-                    Debug.Log("408 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
-#endif 
-                    transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
-                    doUpdate.grounded = true; // 接地
-                    doFixedUpdate.unintended = true; // 意図しない状況フラグON
-                }
+//                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 1.0f) { // TODO: checkIntoWater 重くない？
+//#if DEBUG
+//                    Debug.Log("352 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
+//#endif 
+//                    transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
+//                    doUpdate.grounded = true; // 接地
+//                    doFixedUpdate.unintended = true; // 意図しない状況フラグON
+//                }
             }
 
         STEP1:
@@ -397,14 +420,14 @@ namespace StudioMeowToon {
                 doFixedUpdate.cancelClimb = true;
             }
 
-            // 持つ(Rボタン)を離した
-            if (r1Button.wasReleasedThisFrame) {
-                if (holded != null) {
-                    holded.transform.parent = null; // 子オブジェクト解除
-                    doUpdate.holding = false; // 持つフラグOFF
-                    holded = null; // 持つオブジェクト参照解除
-                }
-            }
+            //// 持つ(Rボタン)を離した
+            //if (r1Button.wasReleasedThisFrame) {
+            //    if (holded != null) {
+            //        holded.transform.parent = null; // 子オブジェクト解除
+            //        doUpdate.holding = false; // 持つフラグOFF
+            //        holded = null; // 持つオブジェクト参照解除
+            //    }
+            //}
 
             // ロック(Lボタン)を押して続けている // TODO: 敵ロック
             if (l1Button.isPressed) {
@@ -458,6 +481,7 @@ namespace StudioMeowToon {
                 doStairDown();
             }
 
+            if (holded != null) Debug.Log("483 holded.name:" + holded.name);
         }
 
         // FixedUpdate is called just before each physics update.
@@ -596,18 +620,6 @@ namespace StudioMeowToon {
                 _rb.velocity = Vector3.zero;
             }
 
-            ////// 水中での挙動
-            //if (doFixedUpdate.intoWater) { // 水の中に入ったら
-            //    _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
-            //    _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
-            //    _rb.useGravity = false;
-            //    _rb.AddForce(new Vector3(0, 3.8f, 0), ForceMode.Acceleration); // 3.8f は調整値
-            //} else if (!doFixedUpdate.intoWater) { // 元に戻す
-            //    _rb.drag = 0f;
-            //    _rb.angularDrag = 0f;
-            //    _rb.useGravity = true;
-            //}
-
             // 意図していない状況
             if (doFixedUpdate.unintended) {
                 _rb.useGravity = true; // 重力有効化
@@ -632,7 +644,7 @@ namespace StudioMeowToon {
                 } else if (dpadRight.isPressed) {
                     AxisToggle.Right = AxisToggle.Right == true ? false : true;
                 }
-                if (l1Button.isPressed/*Input.GetButton("L1")*/) { // Lボタン押しっぱなし TODO: ボタンの変更
+                if (l1Button.isPressed) { // Lボタン押しっぱなし TODO: ボタンの変更
                     readyForBackJump();
                 }
             }
@@ -673,8 +685,9 @@ namespace StudioMeowToon {
                     }
                 }
                 // ブロックを持つ実装 TODO: 修正
-                if (_name.Contains("Item")) { // TODO: Holdable 追加？
+                if (_name.Contains("Item") && !doUpdate.holding) { // TODO: Holdable 追加？
                     holded = collision.gameObject; // 持てるアイテムの参照を保持する
+                    Debug.Log("686 block holded: on");
                 }
             }
             // 地上・壁に接地したら
@@ -690,7 +703,7 @@ namespace StudioMeowToon {
                 flatToFace(); // 面に合わせる TODO:※試験的
             }
             // 持てるアイテムと接触したら
-            else if (_name.Contains("Item")) { // TODO: Holdable 追加？
+            else if (_name.Contains("Item") && !doUpdate.holding) { // TODO: Holdable 追加？
                 holded = collision.gameObject; // 持てるアイテムの参照を保持する
             }
             // 被弾したら
@@ -707,9 +720,20 @@ namespace StudioMeowToon {
                 if (isHitSide(collision.gameObject)) {
                 }
             }
-            // ブロックを持つ実装 TODO: 修正: ここは効いていない
-            if (_name.Contains("Item")) { // TODO: Holdable 追加？
-                holded = collision.gameObject; // 持てるアイテムの参照を保持する
+        }
+
+        private void OnCollisionExit(Collision collision) {
+            // ブロックから離れたら
+            var _name = collision.gameObject.name;
+            if (_name.Contains("Block")) {
+                // ブロックを持つ実装 TODO: 修正
+                if (_name.Contains("Item")) { // TODO: Holdable 追加？
+                    // 持つ(Rボタン)を離した
+                    if (!doUpdate.holding) {
+                        holded = null; // 持てるブロックの参照を解除する
+                        Debug.Log("728 block holded: off");
+                    }
+                }
             }
         }
 
@@ -734,13 +758,16 @@ namespace StudioMeowToon {
                 // デバッグ表示
                 var _y = String.Format("{0:F3}", Math.Round(transform.position.y, 3, MidpointRounding.AwayFromZero));
                 var _s = String.Format("{0:F3}", Math.Round(speed, 3, MidpointRounding.AwayFromZero));
+                var _aj = String.Format("{0:F3}", Math.Round(doUpdate.secondsAfterJumped, 3, MidpointRounding.AwayFromZero));
                 var _rb = transform.GetComponent<Rigidbody>(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
-                gameSystem.TRACE("T: " + _y + "m S: " + _s + "m/s " +
-                    "\r\n grounded: " + doUpdate.grounded +
-                    "\r\n climbing: " + doUpdate.climbing +
-                    "\r\n stairup: " + doUpdate.stairUping +
-                    "\r\n gravity: " + _rb.useGravity +
-                    "\r\n afterJumped: " + doUpdate.secondsAfterJumped,
+                gameSystem.TRACE("Hight: " + _y + "m \r\nSpeed: " + _s + "m/s" +
+                    "\r\nGrounded: " + doUpdate.grounded +
+                    "\r\nClimbing: " + doUpdate.climbing +
+                    "\r\nHolding: " + doUpdate.holding +
+                    "\r\nStairUp: " + doUpdate.stairUping +
+                    "\r\nStairDown: " + doUpdate.stairDowning +
+                    "\r\nGravity: " + _rb.useGravity +
+                    "\r\nJumped: " + _aj + "sec",
                     speed, 3.0f
                 );
             }
@@ -874,6 +901,88 @@ namespace StudioMeowToon {
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, 270, 0), _SPEED * Time.deltaTime); // 徐々に回転
             }
         }
+
+        /// <summary>
+        /// 面への正対が許容範囲かチェックする。
+        /// </summary>
+        private bool checkToFace() {
+            var _fX = (float) Math.Round(transform.forward.x);
+            var _fZ = (float) Math.Round(transform.forward.z);
+            if (_fX == 0 && _fZ == 1) { // Z軸正方向
+                return true;
+            } else if (_fX == 0 && _fZ == -1) { // Z軸負方向
+                return true;
+            } else if (_fX == 1 && _fZ == 0) { // X軸正方向
+                return true;
+            } else if (_fX == -1 && _fZ == 0) { // X軸負方向
+                return true;
+            }
+            return false; // 判定不可
+        }
+
+        /// <summary>
+        /// オブジェクトに正対する。
+        /// </summary>
+        private void faceToObject(GameObject target, float speed = 2.0f) {
+            var _fx = (float) Math.Round(transform.forward.x);
+            var _fz = (float) Math.Round(transform.forward.z);
+            if (_fx == 0 && _fz == 1) { // Z軸正方向
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0f, 0f, 0f), speed * Time.deltaTime);
+                if (transform.rotation.eulerAngles.y >= 0f) {
+                    transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+                    float _tx = (float) Math.Round(transform.position.x * 2, 0, MidpointRounding.AwayFromZero) / 2;
+                    transform.position = Vector3.MoveTowards(transform.position, new Vector3(_tx, transform.position.y, transform.position.z), speed * Time.deltaTime);
+                    if (Math.Round(transform.position.x, 2) == Math.Round(_tx, 2)) {
+                        doUpdate.faceing = false;
+                    }
+                }
+            } else if (_fx == 0 && _fz == -1) { // Z軸負方向
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0f, 180f, 0f), speed * Time.deltaTime);
+                if (transform.rotation.eulerAngles.y >= 179f) {
+                    transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+                    float _tx = (float) Math.Round(transform.position.x * 2, 0, MidpointRounding.AwayFromZero) / 2;
+                    transform.position = Vector3.MoveTowards(transform.position, new Vector3(_tx, transform.position.y, transform.position.z), speed * Time.deltaTime);
+                    if (Math.Round(transform.position.x, 2) == Math.Round(_tx, 2)) {
+                        doUpdate.faceing = false;
+                    }
+                }
+            } else if (_fx == 1 && _fz == 0) { // X軸正方向
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0f, 90f, 0f), speed * Time.deltaTime);
+                if (transform.rotation.eulerAngles.y >= 89f) {
+                    transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+                    float _tz = (float) Math.Round(transform.position.z * 2, 0, MidpointRounding.AwayFromZero) / 2;
+                    transform.position = Vector3.MoveTowards(transform.position, new Vector3(transform.position.x, transform.position.y, _tz), speed * Time.deltaTime);
+                    if (Math.Round(transform.position.z, 2) == Math.Round(_tz, 2)) {
+                        doUpdate.faceing = false;
+                    }
+                }
+            } else if (_fx == -1 && _fz == 0) { // X軸負方向
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0f, 270f, 0f), speed * Time.deltaTime);
+                if (transform.rotation.eulerAngles.y >= 269f) {
+                    transform.rotation = Quaternion.Euler(0f, 270f, 0f);
+                    float _tz = (float) Math.Round(transform.position.z * 2, 0, MidpointRounding.AwayFromZero) / 2;
+                    transform.position = Vector3.MoveTowards(transform.position, new Vector3(transform.position.x, transform.position.y, _tz), speed * Time.deltaTime);
+                    if (Math.Round(transform.position.z, 2) == Math.Round(_tz, 2)) {
+                        doUpdate.faceing = false;
+                    }
+                }
+            }
+            Debug.Log("969 faceToObject doUpdate.faceing: " + doUpdate.faceing + "_fx: " + _fx + " _fz: " + _fz);
+        }
+
+        /// <summary>
+        /// オブジェクトに正対するフラグの開始。
+        /// </summary>
+        private void startFaceing() {
+            doUpdate.faceing = true;
+        }
+
+        ///// <summary>
+        ///// オブジェクトに正対するフラグの解除。
+        ///// </summary>
+        //private void doneFaceing() {
+        //    doUpdate.faceing = false;
+        //}
 
         private void lockOnTarget() { // ロックオン対象の方向に回転
             var target = gameSystem.SerchNearTargetByTag(gameObject, "Block");
@@ -1143,7 +1252,7 @@ namespace StudioMeowToon {
             faceToFace(5f); // 面に正対する
         }
 
-        private void checkToPushBlock() {
+        private bool checkToPushBlock() {
             var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
@@ -1163,11 +1272,19 @@ namespace StudioMeowToon {
                                 doUpdate.pushing = true; // 押すフラグON
                                 pushed = _hit.transform.gameObject; // 押されるオブジェクトの参照保存
                                 transform.parent = pushed.transform; // プレイヤーを押されるオブジェクトの子にする
+                                return true;
                             }
+                            //Observable.EveryUpdate().Select(_ => !doUpdate.faceing && !doUpdate.pushing).Subscribe(_ => {
+                            //    doUpdate.pushing = true; // 押すフラグON
+                            //    pushed = _hit.transform.gameObject; // 押されるオブジェクトの参照保存
+                            //    transform.parent = pushed.transform; // プレイヤーを押されるオブジェクトの子にする
+                            //});
+                            //return true; TODO: まだこれでは動かない
                         }
                     }
                 }
             }
+            return false;
         }
 
         private bool checkToHoldItem() {
@@ -1177,29 +1294,50 @@ namespace StudioMeowToon {
                     new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.3f, _rayBox.transform.position.z),
                     transform.forward
                 );
-                if (Physics.Raycast(_ray, out RaycastHit _hit, 0.35f)) { // 前方にレイを投げて反応があった場合
+                if (Physics.Raycast(_ray, out RaycastHit _hit, 0.35f) || checkDownAsHoldableBlock()) { // 前方にレイを投げて反応があった場合
 #if DEBUG
                     Debug.DrawRay(_ray.origin, _ray.direction * 0.35f, Color.magenta, 4, false); //レイを可視化
 #endif
-                    if (_hit.transform.name.Contains("Item")) { // 持てるのはアイテムのみ TODO: 子のオブジェクト判定は？
+                    if (checkDownAsHoldableBlock() || _hit.transform.name.Contains("Item")) { // 持てるのはアイテムのみ TODO: 子のオブジェクト判定は？
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
-                        if (_distance < 0.3f) { // 距離が近くなら
-                            if (holded.tag.Equals("Item")) {
-                                var _itemController = holded.GetComponent<ItemController>();
-                                leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
-                                rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
-                            } else if (holded.tag.Equals("Block")) {
-                                var _blockController = holded.GetComponent<BlockController>();
-                                leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
-                                rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
-                            }
-                            holded.transform.parent = transform; // 自分の子オブジェクトにする
-                            doUpdate.holding = true; // 持つフラグON
+                        if (_distance < 0.3f || checkDownAsHoldableBlock()) { // 距離が近くなら
+                            //if (holded.tag.Equals("Item")) {
+                            //    var _itemController = holded.GetComponent<ItemController>(); // TODO: holdable で共通化？
+                            //    leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
+                            //    rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
+                            //} else if (holded.tag.Equals("Block")) {
+                            //    var _blockController = holded.GetComponent<BlockController>();
+                            //    leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
+                            //    rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
+                            //}
+                            //holded.transform.parent = transform; // 自分の子オブジェクトにする
+                            //doUpdate.holding = true; // 持つフラグON
+                            Observable.EveryUpdate().Select(_ => !doUpdate.faceing && holded != null).Subscribe(_ => {
+                                if (holded.tag.Equals("Item")) {
+                                    var _itemController = holded.GetComponent<ItemController>(); // TODO: holdable で共通化？
+                                    leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
+                                    rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
+                                } else if (holded.tag.Equals("Block")) {
+                                    var _blockController = holded.GetComponent<BlockController>();
+                                    leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
+                                    rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
+                                }
+                                holded.transform.parent = transform; // 自分の子オブジェクトにする
+                                doUpdate.holding = true; // 持つフラグON
+                            });
                             return true;
                         }
                     }
                 }
             }
+            return false;
+        }
+
+        private bool checkDownAsHoldableBlock() { // 足元の下が持てるブロックかどうか
+            if (holded != null) {
+                //Debug.Log("1208 checkDownAsHoldableBlock: true");
+                return true;
+            } // TODO: 修正
             return false;
         }
 
@@ -1248,6 +1386,28 @@ namespace StudioMeowToon {
             return false; // そうではない
         }
 
+        ///// <summary>
+        ///// 押す・持つ方向を列挙体で返す。
+        ///// </summary>
+        //private DoneDirection getDoneDirection(Vector3 forwardVector) {
+        //    var _fX = (float) Math.Round(forwardVector.x);
+        //    var _fY = (float) Math.Round(forwardVector.y);
+        //    var _fZ = (float) Math.Round(forwardVector.z);
+        //    if (_fX == 0 && _fZ == 1) { // Z軸正方向
+        //        return DoneDirection.PositiveZ;
+        //    }
+        //    if (_fX == 0 && _fZ == -1) { // Z軸負方向
+        //        return DoneDirection.NegativeZ;
+        //    }
+        //    if (_fX == 1 && _fZ == 0) { // X軸正方向
+        //        return DoneDirection.PositiveX;
+        //    }
+        //    if (_fX == -1 && _fZ == 0) { // X軸負方向
+        //        return DoneDirection.NegativeX;
+        //    }
+        //    return DoneDirection.None; // 判定不明
+        //}
+
         #region DoUpdate
 
         /// <summary>
@@ -1262,6 +1422,7 @@ namespace StudioMeowToon {
             private bool _climbing; // 上り降りフラグ
             private bool _pushing; // 押すフラグ
             private bool _holding; // 持つフラグ
+            private bool _faceing; // 正対するフラグ
             private bool _stairUping; // 階段上りフラグ
             private bool _stairDowning; // 階段下りフラグ
             private bool _lookBackJumping; // 捕まり反転ジャンプフラグ
@@ -1281,6 +1442,7 @@ namespace StudioMeowToon {
             public bool grounded { get => _grounded; set => _grounded = value; }
             public bool climbing { get => _climbing; set => _climbing = value; }
             public bool pushing { get => _pushing; set => _pushing = value; }
+            public bool faceing { get => _faceing; set => _faceing = value; }
             public bool holding { get => _holding; set => _holding = value; }
             public bool stairUping { get => _stairUping; set => _stairUping = value; }
             public bool stairDowning { get => _stairDowning; set => _stairDowning = value; }
@@ -1311,6 +1473,7 @@ namespace StudioMeowToon {
                 _climbing = false;
                 _pushing = false;
                 _holding = false;
+                _faceing = false;
                 _stairUping = false;
                 _stairDowning = false;
                 _lookBackJumping = false;
@@ -1389,7 +1552,6 @@ namespace StudioMeowToon {
             private bool _getItem;
             private bool _stairUp;
             private bool _stairDown;
-            //private bool _onWater; // TODO: ⇒ 使ってない？
             private bool _unintended; // 意図していない状況
             private bool _intoWater;
 
@@ -1409,7 +1571,6 @@ namespace StudioMeowToon {
             public bool getItem { get => _getItem; set => _getItem = value; }
             public bool stairUp { get => _stairUp; set => _stairUp = value; }
             public bool stairDown { get => _stairDown; set => _stairDown = value; }
-            //public bool onWater { get => _onWater; set => _onWater = value; }
             public bool unintended { get => _unintended; set => _unintended = value; }
             public bool intoWater { get => _intoWater; set => _intoWater = value; }
 
@@ -1448,7 +1609,6 @@ namespace StudioMeowToon {
                 _getItem = false;
                 _stairUp = false;
                 _stairDown = false;
-                //_onWater = false;
                 _unintended = false;
                 // _intoWater は初期化しない
             }
@@ -1502,7 +1662,7 @@ namespace StudioMeowToon {
 
         #region AxisToggle
 
-        class AxisToggle {
+        private class AxisToggle {
             public static bool Up = false;
             public static bool Down = false;
             public static bool Left = false;
@@ -1510,6 +1670,21 @@ namespace StudioMeowToon {
         }
 
         #endregion
+
+        //#region PushedDirection
+
+        ///// <summary>
+        ///// 押された方向を表す列挙体。
+        ///// </summary>
+        //private enum DoneDirection { // TODO: 必要？
+        //    PositiveZ,
+        //    NegativeZ,
+        //    PositiveX,
+        //    NegativeX,
+        //    None
+        //};
+
+        //#endregion
     }
 
 }
