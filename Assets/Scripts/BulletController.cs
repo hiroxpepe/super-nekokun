@@ -49,23 +49,6 @@ namespace StudioMeowToon {
                 });
         }
 
-        //// Update is called once per frame.
-        //void Update() {
-        //}
-
-        //// FixedUpdate is called just before each physics update.
-        //protected void FixedUpdate() {
-        //    if (hits) { // 何かに接触したら
-        //        secondSinceHit += Time.deltaTime; // 秒を加算して
-        //        if (secondSinceHit > 0.5f) { // 0.5秒後に自分を消去する
-        //            Destroy(gameObject);
-        //        }
-        //    }
-        //    if (transform.position.y < -100f) { // -100m以下なら流れ弾なので消去
-        //        Destroy(gameObject);
-        //    }
-        //}
-
         ///////////////////////////////////////////////////////////////////////////
         // イベントハンドラ
 

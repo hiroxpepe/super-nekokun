@@ -229,7 +229,7 @@ namespace StudioMeowToon {
 
         private void updateGameInfo() { // GAME の情報を表示
             updateFpForUpdate(); // FPS更新
-            information.text = "Item (" + itemRemainCount + "/" + itemTotalCount + ")\r\nFPS1 " + fpsForUpdate + "\r\nFPS2 " + fpsForFixedUpdate; // 残りアイテム数表示
+            information.text = "Item (" + itemRemainCount + "/" + itemTotalCount + ")\r\nfps1 " + fpsForUpdate + "\r\nfps2 " + fpsForFixedUpdate; // 残りアイテム数表示
         }
 
         private void updateFpForUpdate() { // FPS更新

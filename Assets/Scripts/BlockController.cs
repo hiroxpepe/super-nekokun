@@ -68,7 +68,7 @@ namespace StudioMeowToon {
 
         private DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用 フラグ
 
-        // 持たれる機能実装
+        // 持たれる機能実装 TODO: _Item を付けなくても持てるように
         private bool isGrounded; // 接地フラグ
 
         private Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
@@ -157,8 +157,11 @@ namespace StudioMeowToon {
             }
         }
 
+        /// <summary>
+        /// Player に下から衝撃を受ける。
+        /// </summary>
         public void KnockedUp() {
-            gameObject.GetComponent<CommonController>().shockedBy = player.transform; // Player に下から衝撃を受ける
+            gameObject.GetComponent<CommonController>().shockedBy = player.transform;
         }
 
         // 持たれる実装用
@@ -191,7 +194,7 @@ namespace StudioMeowToon {
 
             // 持たれる実装用
             if (canHold) {
-                isGrounded = false;
+                isGrounded = true; // false; MEMO: 初期設定の位置そのまま？
                 // 持たれる時の手の位置オブジェクト初期化
                 var _leftHandGameObject = new GameObject("LeftHand");
                 var _rightHandGameObject = new GameObject("RightHand");
