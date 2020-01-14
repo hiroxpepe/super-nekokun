@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UniRx;
-using UniRx.Triggers;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -258,6 +257,13 @@ namespace StudioMeowToon {
 
 STEP0:
                 if (aButton.isPressed) { // Aボタン押しっぱなし
+                    // MEMO: 追加:しゃがむ時、持ってるモノを離す ///////////////
+                    if (holded != null) {
+                        holded.transform.parent = null; // 子オブジェクト解除
+                        doUpdate.holding = false; // 持つフラグOFF
+                        holded = null; // 持つオブジェクト参照解除
+                    }
+                    ////////////////////////////////////////////////////////////
                     if (dpadLeft.isPressed) { // 左
                         if (!doUpdate.throwing) {
                             simpleAnime.Play("Push");
@@ -370,14 +376,14 @@ STEP0:
                     doUpdate.grounded = true; // 接地
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
                 }
-//                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 1.0f) { // TODO: checkIntoWater 重くない？
-//#if DEBUG
-//                    Debug.Log("352 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
-//#endif 
-//                    transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
-//                    doUpdate.grounded = true; // 接地
-//                    doFixedUpdate.unintended = true; // 意図しない状況フラグON
-//                }
+                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 10.0f) { // TODO: checkIntoWater 重くない？
+#if DEBUG
+                    Debug.Log("352 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
+#endif 
+                    transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
+                    doUpdate.grounded = true; // 接地
+                    doFixedUpdate.unintended = true; // 意図しない状況フラグON
+                }
             }
 
         STEP1:
@@ -481,7 +487,17 @@ STEP0:
                 doStairDown();
             }
 
-            if (holded != null) Debug.Log("483 holded.name:" + holded.name);
+            ///////////////////////////////////////////////////////////////////////////////////////
+            // モバイル用モード
+            if (useVirtualController) {
+                if (yButton.wasReleasedThisFrame) {
+                    doFixedUpdate.virtualControllerMode = true;
+                    Observable.TimerFrame(30)
+                        .Subscribe(_ => {
+                            doFixedUpdate.virtualControllerMode = false;
+                        });
+                }
+            }
         }
 
         // FixedUpdate is called just before each physics update.
@@ -515,7 +531,7 @@ STEP0:
             // ジャンプ
             if (doFixedUpdate.jump) { // TODO: ジャンプボタンを押し続けると飛距離が伸びるように
                 var _ADJUST = 0f;
-                if (speed > 2.9f) {
+                if (doFixedUpdate.virtualControllerMode || speed > 2.9f) { // TODO: 再検討
                     _ADJUST = jumpPower * 1.75f; // 最高速ジャンプ
                 } else if (speed > 1.9f) {
                     _ADJUST = jumpPower * 1.25f; // 走りジャンプ
@@ -557,7 +573,7 @@ STEP0:
             if (_fps == 30) _ADJUST1 = 16f;
             if (doFixedUpdate.run) { // 走る
                 _rb.useGravity = true; // 重力再有効化 
-                if (speed < 3.25f) { // TODO: 16f/*8f*/ ⇒ フレームレートに依存する 60fps,8f, 30fps:16f, 20fps:24f, 15fps:32f
+                if (speed < 3.25f) { // ⇒ フレームレートに依存する 60fps,8f, 30fps:16f, 20fps:24f, 15fps:32f
                     _rb.AddFor​​ce(Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
                 }
             } else if (doFixedUpdate.walk) { // 歩く
@@ -687,7 +703,6 @@ STEP0:
                 // ブロックを持つ実装 TODO: 修正
                 if (_name.Contains("Item") && !doUpdate.holding) { // TODO: Holdable 追加？
                     holded = collision.gameObject; // 持てるアイテムの参照を保持する
-                    Debug.Log("686 block holded: on");
                 }
             }
             // 地上・壁に接地したら
@@ -731,7 +746,6 @@ STEP0:
                     // 持つ(Rボタン)を離した
                     if (!doUpdate.holding) {
                         holded = null; // 持てるブロックの参照を解除する
-                        Debug.Log("728 block holded: off");
                     }
                 }
             }
@@ -1144,7 +1158,6 @@ STEP0:
                         doFixedUpdate.idol = true;
                         simpleAnime.Play("Run"); // 走るアニメ※この方が自然に見える
                         soundSystem.PlayRunClip();
-                        //Debug.Log("A");
                     }
                 }
             } else if (_distance == 0) { // 下にハシゴがなくなった時
@@ -1152,7 +1165,6 @@ STEP0:
                 doUpdate.climbing = false; // 登るフラグOFF
                 transform.position += transform.forward * 0.2f * Time.deltaTime; // 少し前に進む
                 doFixedUpdate.cancelClimb = true;
-                //Debug.Log("B");
             }
         }
 
@@ -1335,7 +1347,6 @@ STEP0:
 
         private bool checkDownAsHoldableBlock() { // 足元の下が持てるブロックかどうか
             if (holded != null) {
-                //Debug.Log("1208 checkDownAsHoldableBlock: true");
                 return true;
             } // TODO: 修正
             return false;
@@ -1554,6 +1565,7 @@ STEP0:
             private bool _stairDown;
             private bool _unintended; // 意図していない状況
             private bool _intoWater;
+            private bool _virtualControllerMode;
 
             public bool idol { get => _idol; set => _idol = value; }
             public bool run { get => _run; set => _run = value; }
@@ -1573,6 +1585,7 @@ STEP0:
             public bool stairDown { get => _stairDown; set => _stairDown = value; }
             public bool unintended { get => _unintended; set => _unintended = value; }
             public bool intoWater { get => _intoWater; set => _intoWater = value; }
+            public bool virtualControllerMode { get => _virtualControllerMode; set => _virtualControllerMode = value; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // コンストラクタ
@@ -1611,6 +1624,7 @@ STEP0:
                 _stairDown = false;
                 _unintended = false;
                 // _intoWater は初期化しない
+                // _virtualControllerMode は初期化しない
             }
         }
 

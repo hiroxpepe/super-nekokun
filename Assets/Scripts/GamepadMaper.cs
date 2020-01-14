@@ -36,6 +36,16 @@ namespace StudioMeowToon {
 
         protected ButtonControl selectButton; // セレクトボタン
 
+        private bool _useVirtualController;
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // プロパティ(キャメルケース: 名詞、形容詞)
+
+        public bool useVirtualController { get => _useVirtualController; } // バーチャルコントローラー使用かどうか
+
+        ///////////////////////////////////////////////////////////////////////////
+        // 更新 メソッド
+
         // Start is called before the first frame update.
         protected void Start() {
             virtualController = GameObject.Find("VirtualController"); // バーチャルコントローラー参照取得
@@ -54,8 +64,12 @@ namespace StudioMeowToon {
             var controllerNames = Input.GetJoystickNames();
             if (controllerNames.Length == 0 || controllerNames[0] == "") {
                 virtualController.SetActive(true);
+                _useVirtualController = true;
+                Debug.Log("_useVirtualController: " + _useVirtualController);
             } else {
                 virtualController.SetActive(false);
+                _useVirtualController = false;
+                Debug.Log("_useVirtualController: " + _useVirtualController);
             }
 
             // OS判定とゲームパッドのキー参照
