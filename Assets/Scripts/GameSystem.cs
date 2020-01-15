@@ -23,9 +23,6 @@ namespace StudioMeowToon {
         private Text debug; // デバッグ表示用テキストUI
 
         [SerializeField]
-        private Button home; // 戻るボタンUI
-
-        [SerializeField]
         private Slider playerLifeUI; // Player HPのUI
 
         [SerializeField]
@@ -52,6 +49,8 @@ namespace StudioMeowToon {
         private GameObject lockonTarget = null; // ロックオン対象
 
         private Material lockonOriginalMaterial; // ロックオン対象の元のマテリアル
+
+        private bool useVibration = true; // スマホ時に振動を使うかどうか
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // FPS計測
@@ -147,6 +146,40 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
+            // ボタンを押したらスマホ振動
+            this.UpdateAsObservable()
+                .Where(_ => virtualController && useVibration &&(aButton.wasPressedThisFrame || bButton.wasPressedThisFrame || xButton.wasPressedThisFrame || yButton.wasPressedThisFrame ||
+                    dpadUp.wasPressedThisFrame || dpadDown.wasPressedThisFrame || dpadLeft.wasPressedThisFrame || dpadRight.wasPressedThisFrame ||
+                    l1Button.wasPressedThisFrame || r1Button.wasPressedThisFrame || selectButton.wasPressedThisFrame || startButton.wasPressedThisFrame))
+                .Subscribe(_ => {
+                    AndroidVibrator.Vibrate(50L);
+                });
+
+            // スタート、Xボタン同時押しでスマホの振動なし
+            this.UpdateAsObservable()
+                .Where(_ => (xButton.isPressed && startButton.wasPressedThisFrame) || (xButton.wasPressedThisFrame && startButton.isPressed))
+                .Subscribe(_ => {
+                    useVibration = false;
+                });
+
+            // Update is called once per frame.
+            this.UpdateAsObservable()
+                .Where(_ => !SceneManager.GetActiveScene().name.Equals("Start"))
+                .Subscribe(_ => {
+                    checkGameOver(); // GAMEオーバー確認
+                    checkLevelClear(); // レベルクリア確認
+                    updateGameInfo();
+                    updatePlayerStatus();
+                });
+
+            // FixedUpdate is called just before each physics update.
+            this.FixedUpdateAsObservable()
+                .Subscribe(_ => {
+                    updateFpsForFixedUpdate();
+                });
+
+            // TODO: スタート画面の場合、おそらく以下でエラーが出てる
+
             initFpsForUpdate(); // FPS初期化
             initFpsForFixedUpdate(); // fixed FPS初期化
 
@@ -161,22 +194,6 @@ namespace StudioMeowToon {
             updateGameInfo();
 
             message.text = ""; // メッセージ初期化、非表示
-            home.transform.gameObject.SetActive(false);
-
-            // Update is called once per frame.
-            this.UpdateAsObservable()
-                .Subscribe(_ => {
-                    checkGameOver(); // GAMEオーバー確認
-                    checkLevelClear(); // レベルクリア確認
-                    updateGameInfo();
-                    updatePlayerStatus();
-                });
-
-            // FixedUpdate is called just before each physics update.
-            this.FixedUpdateAsObservable()
-                .Subscribe(_ => {
-                    updateFpsForFixedUpdate();
-                });
         }
 
         // Update is called once per frame.
@@ -203,7 +220,6 @@ namespace StudioMeowToon {
                 Time.timeScale = 0f;
                 isGameOver = true; // GAMEオーバーフラグON
                 message.text = "Game Over!"; // GAMEオーバーメッセージ表示
-                home.transform.gameObject.SetActive(true);
                 if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
                     SceneManager.LoadScene("Start");
                 }
@@ -215,7 +231,6 @@ namespace StudioMeowToon {
                 Time.timeScale = 0f;
                 isLevelClear = true; // ステージクリアフラグON
                 message.text = "Level Clear!"; // クリアメッセージ表示
-                home.transform.gameObject.SetActive(true);
                 if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
                     SceneManager.LoadScene("Start");
                 }

@@ -10,7 +10,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        protected GameObject virtualController; // バーチャルコントロール
+        protected GameObject virtualController; // バーチャルコントロール // TODO ⇒ static ?
 
         protected ButtonControl aButton; // Aボタン:任天堂配置
 
@@ -65,11 +65,11 @@ namespace StudioMeowToon {
             if (controllerNames.Length == 0 || controllerNames[0] == "") {
                 virtualController.SetActive(true);
                 _useVirtualController = true;
-                Debug.Log("_useVirtualController: " + _useVirtualController);
+                //Debug.Log("_useVirtualController: " + _useVirtualController);
             } else {
                 virtualController.SetActive(false);
                 _useVirtualController = false;
-                Debug.Log("_useVirtualController: " + _useVirtualController);
+                //Debug.Log("_useVirtualController: " + _useVirtualController);
             }
 
             // OS判定とゲームパッドのキー参照
