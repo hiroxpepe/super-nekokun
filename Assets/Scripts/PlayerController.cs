@@ -1324,7 +1324,7 @@ STEP0:
                             //}
                             //holded.transform.parent = transform; // 自分の子オブジェクトにする
                             //doUpdate.holding = true; // 持つフラグON
-                            Observable.EveryUpdate().Select(_ => !doUpdate.faceing && holded != null).Subscribe(_ => {
+                            Observable.EveryUpdate().Select(_ => !doUpdate.faceing && holded != null).Subscribe(_ => { // なぜ Where だとダメ？
                                 if (holded.tag.Equals("Item")) {
                                     var _itemController = holded.GetComponent<ItemController>(); // TODO: holdable で共通化？
                                     leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
@@ -1396,28 +1396,6 @@ STEP0:
             }
             return false; // そうではない
         }
-
-        ///// <summary>
-        ///// 押す・持つ方向を列挙体で返す。
-        ///// </summary>
-        //private DoneDirection getDoneDirection(Vector3 forwardVector) {
-        //    var _fX = (float) Math.Round(forwardVector.x);
-        //    var _fY = (float) Math.Round(forwardVector.y);
-        //    var _fZ = (float) Math.Round(forwardVector.z);
-        //    if (_fX == 0 && _fZ == 1) { // Z軸正方向
-        //        return DoneDirection.PositiveZ;
-        //    }
-        //    if (_fX == 0 && _fZ == -1) { // Z軸負方向
-        //        return DoneDirection.NegativeZ;
-        //    }
-        //    if (_fX == 1 && _fZ == 0) { // X軸正方向
-        //        return DoneDirection.PositiveX;
-        //    }
-        //    if (_fX == -1 && _fZ == 0) { // X軸負方向
-        //        return DoneDirection.NegativeX;
-        //    }
-        //    return DoneDirection.None; // 判定不明
-        //}
 
         #region DoUpdate
 
@@ -1684,21 +1662,6 @@ STEP0:
         }
 
         #endregion
-
-        //#region PushedDirection
-
-        ///// <summary>
-        ///// 押された方向を表す列挙体。
-        ///// </summary>
-        //private enum DoneDirection { // TODO: 必要？
-        //    PositiveZ,
-        //    NegativeZ,
-        //    PositiveX,
-        //    NegativeX,
-        //    None
-        //};
-
-        //#endregion
     }
 
 }
