@@ -153,6 +153,11 @@ namespace StudioMeowToon {
         new void Update() {
             base.Update();
 
+            // ポーズ中動作停止
+            if (Time.timeScale == 0f) {
+                return;
+            }
+
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // ステージをクリアした・GAMEオーバーした場合抜ける
                 if (gameSystem.levelClear || gameSystem.gameOver) {
@@ -383,6 +388,10 @@ STEP0:
                     transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
                     doUpdate.grounded = true; // 接地
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
+                }
+                // モバイル動作時に面に正対する TODO: ジャンプ後しばらくたってから
+                if (useVirtualController && !checkIntoWater()) {
+                    faceToFace(5f);
                 }
             }
 
@@ -770,9 +779,9 @@ STEP0:
         void OnGUI() {
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // デバッグ表示
-                var _y = String.Format("{0:F3}", Math.Round(transform.position.y, 3, MidpointRounding.AwayFromZero));
-                var _s = String.Format("{0:F3}", Math.Round(speed, 3, MidpointRounding.AwayFromZero));
-                var _aj = String.Format("{0:F3}", Math.Round(doUpdate.secondsAfterJumped, 3, MidpointRounding.AwayFromZero));
+                var _y = string.Format("{0:F3}", Math.Round(transform.position.y, 3, MidpointRounding.AwayFromZero));
+                var _s = string.Format("{0:F3}", Math.Round(speed, 3, MidpointRounding.AwayFromZero));
+                var _aj = string.Format("{0:F3}", Math.Round(doUpdate.secondsAfterJumped, 3, MidpointRounding.AwayFromZero));
                 var _rb = transform.GetComponent<Rigidbody>(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
                 gameSystem.TRACE("Hight: " + _y + "m \r\nSpeed: " + _s + "m/s" +
                     "\r\nGrounded: " + doUpdate.grounded +

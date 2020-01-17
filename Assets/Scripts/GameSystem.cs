@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UniRx;
@@ -51,6 +52,8 @@ namespace StudioMeowToon {
         private Material lockonOriginalMaterial; // ロックオン対象の元のマテリアル
 
         private bool useVibration = true; // スマホ時に振動を使うかどうか
+
+        private bool isPausing = false; // ポーズ(一時停止)
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // FPS計測
@@ -159,7 +162,21 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Where(_ => (xButton.isPressed && startButton.wasPressedThisFrame) || (xButton.wasPressedThisFrame && startButton.isPressed))
                 .Subscribe(_ => {
-                    useVibration = false;
+                    useVibration = !useVibration;
+                });
+
+            // ポーズ(一時停止)実行・解除
+            this.UpdateAsObservable()
+                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && startButton.wasPressedThisFrame)
+                .Subscribe(_ => {
+                    if (isPausing) {
+                        Time.timeScale = 1f;
+                        message.text = "";
+                    } else {
+                        Time.timeScale = 0f;
+                        message.text = "Pause";
+                    }
+                    isPausing = !isPausing;
                 });
 
             // Update is called once per frame.
@@ -244,7 +261,9 @@ namespace StudioMeowToon {
 
         private void updateGameInfo() { // GAME の情報を表示
             updateFpForUpdate(); // FPS更新
-            information.text = "Item (" + itemRemainCount + "/" + itemTotalCount + ")\r\nfps1 " + fpsForUpdate + "\r\nfps2 " + fpsForFixedUpdate; // 残りアイテム数表示
+            information.text = "Item (" + itemRemainCount + "/" + itemTotalCount + ")" + 
+                               "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) + 
+                               "\r\nfps2 " + string.Format("{0:F3}", Math.Round(fpsForFixedUpdate, 3, MidpointRounding.AwayFromZero)); // 残りアイテム数表示
         }
 
         private void updateFpForUpdate() { // FPS更新
