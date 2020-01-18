@@ -93,10 +93,11 @@ namespace StudioMeowToon {
         public static AndroidJavaObject vibrator;
 #endif
         public static void Vibrate(long milliseconds) {
-            if (isAndroid())
+            if (isAndroid()) {
                 vibrator.Call("vibrate", milliseconds);
-            else
+            } else {
                 Handheld.Vibrate();
+            }
         }
 
         private static bool isAndroid() {

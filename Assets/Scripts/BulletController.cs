@@ -22,8 +22,10 @@ namespace StudioMeowToon {
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
-            // Player から SoundSystem 取得
-            soundSystem = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().GetSoundSystem();
+            //// Player から SoundSystem 取得
+            //soundSystem = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().GetSoundSystem();
+            // SoundSystem 取得
+            soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
         }
 
         // Start is called before the first frame update.
@@ -57,7 +59,7 @@ namespace StudioMeowToon {
         /// </summary>
         void OnCollisionEnter(Collision collision) {
             if (!hits) { // 初回ヒットのみ破壊の対象
-                         // Block に接触した場合
+                // Block に接触した場合
                 if (collision.transform.name.Contains("Block")) {
                     collision.transform.GetComponent<BlockController>().DestroyWithDebris(transform); // 弾の transform を渡す
                     if (collision.transform.GetComponent<BlockController>().destroyable) { // この一撃で破壊可能かどうか

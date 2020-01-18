@@ -87,6 +87,27 @@ namespace StudioMeowToon {
 
         public void DecrementLife() { life--; } // HPデクリメント
 
+        /// <summary>
+        /// 敵から攻撃を受ける
+        /// </summary>
+        public void DamagedByEnemy(Vector3 forward) {
+            moveByShocked(forward);
+            doUpdate.damaged = true;
+            simpleAnime.Play("ClimbUp"); // FIXME: ダメージアニメ
+            Observable.TimerFrame(15) // FIXME: 60fpsの時は？
+                .Subscribe(_ =>{
+                    doUpdate.damaged = false;
+                });
+        }
+
+        /// <summary>
+        /// 攻撃の衝撃で少し後ろ上に動く。
+        /// </summary>
+        private void moveByShocked(Vector3 forward) {
+            var _ADJUST = 2.5f; // 調整値
+            transform.position += (forward + new Vector3(0f, 0.5f, 0)) / _ADJUST; // 0.5fは上方向調整値
+        }
+
         ///////////////////////////////////////////////////////////////////////////
 
         //　IK左手位置用のTransform
@@ -118,6 +139,7 @@ namespace StudioMeowToon {
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
+
             doUpdate = DoUpdate.GetInstance(); // 状態フラグ構造体
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグ構造体
             bombAngle = BombAngle.GetInstance(); // 弾道角度用構造体
@@ -173,6 +195,12 @@ namespace StudioMeowToon {
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 gameSystem.playerLife = life; // HP設定
                 gameSystem.bombAngle = bombAngle.Value; // 弾角度
+            }
+
+            ///////////////////////////////////////////////////////////////////////////////////////
+            // ダメージ受け期間
+            if (doUpdate.damaged) {
+                return;
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////
@@ -1434,6 +1462,8 @@ STEP0:
             private bool _bombing;
             private bool _bombed;
 
+            private bool _damaged; // ダメージを受けるフラグ
+
             ///////////////////////////////////////////////////////////////////////////////////////////
             // プロパティ(キャメルケース)
 
@@ -1450,6 +1480,7 @@ STEP0:
             public bool bombing { get => _bombing; set => _bombing = value; }
             public bool bombed { get => _bombed; set => _bombed = value; }
             public float secondsAfterJumped { get => _secondsAfterJumped; set => _secondsAfterJumped = value; }
+            public bool damaged { get => _damaged; set => _damaged = value; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // コンストラクタ(パスカルケース)
@@ -1481,6 +1512,7 @@ STEP0:
                 _throwedTime = 0f;
                 _bombing = false;
                 _bombed = false;
+                _damaged = false;
             }
 
             public void IncrementTime(float time) {

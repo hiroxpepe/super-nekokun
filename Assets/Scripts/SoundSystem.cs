@@ -56,9 +56,11 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private string nowPlayingClip; // 今再生中の効果音
+        private string nowPlayingClipSe1; // 今再生中の効果音1
 
-        private AudioSource seAudioSource; // 効果音用オーディオソース
+        private string nowPlayingClipSe2; // 今再生中の効果音2
+
+        private AudioSource se1AudioSource; // 効果音用オーディオソース1
 
         private AudioSource bgmAudioSource; // BGM用オーディオソース
 
@@ -68,59 +70,59 @@ namespace StudioMeowToon {
         // パブリックメソッド
 
         public void PlayItemClip() { // アイテム取得時の効果音を鳴らす
-            if (seAudioSource.isPlaying) {
-                seAudioSource.Stop();
+            if (se1AudioSource.isPlaying) {
+                se1AudioSource.Stop();
             }
-            seAudioSource.PlayOneShot(itemClip, 2.5f);
-            nowPlayingClip = "itemClip";
+            se1AudioSource.PlayOneShot(itemClip, 2.5f);
+            nowPlayingClipSe1 = "itemClip";
         }
 
         public void PlayJumpClip() {
-            if (seAudioSource.isPlaying) {
-                seAudioSource.Stop();
+            if (se1AudioSource.isPlaying) {
+                se1AudioSource.Stop();
             }
-            seAudioSource.PlayOneShot(jumpClip);
-            nowPlayingClip = "jumpClip";
+            se1AudioSource.PlayOneShot(jumpClip);
+            nowPlayingClipSe1 = "jumpClip";
         }
 
         public void PlayGroundedClip() {
-            if (seAudioSource.isPlaying) {
-                seAudioSource.Stop();
+            if (se1AudioSource.isPlaying) {
+                se1AudioSource.Stop();
             }
-            seAudioSource.PlayOneShot(groundedClip, 0.35f);
-            nowPlayingClip = "groundedClip";
+            se1AudioSource.PlayOneShot(groundedClip, 0.35f);
+            nowPlayingClipSe1 = "groundedClip";
         }
 
         public void PlayWalkClip() {
-            if (nowPlayingClip != "walkClip" && nowPlayingClip != "groundedClip" && nowPlayingClip != "itemClip") {
-                seAudioSource.Stop();
+            if (nowPlayingClipSe1 != "walkClip" && nowPlayingClipSe1 != "groundedClip" && nowPlayingClipSe1 != "itemClip") {
+                se1AudioSource.Stop();
             }
-            if (!seAudioSource.isPlaying) {
-                seAudioSource.clip = walkClip;
-                seAudioSource.Play();
-                nowPlayingClip = "walkClip";
+            if (!se1AudioSource.isPlaying) {
+                se1AudioSource.clip = walkClip;
+                se1AudioSource.Play();
+                nowPlayingClipSe1 = "walkClip";
             }
         }
 
         public void PlayRunClip() {
-            if (nowPlayingClip != "runClip" && nowPlayingClip != "groundedClip" && nowPlayingClip != "itemClip") {
-                seAudioSource.Stop();
+            if (nowPlayingClipSe1 != "runClip" && nowPlayingClipSe1 != "groundedClip" && nowPlayingClipSe1 != "itemClip") {
+                se1AudioSource.Stop();
             }
-            if (!seAudioSource.isPlaying) {
-                seAudioSource.clip = runClip;
-                seAudioSource.Play();
-                nowPlayingClip = "runClip";
+            if (!se1AudioSource.isPlaying) {
+                se1AudioSource.clip = runClip;
+                se1AudioSource.Play();
+                nowPlayingClipSe1 = "runClip";
             }
         }
 
         public void PlayClimbClip() {
-            if (nowPlayingClip != "climbClip") {
-                seAudioSource.Stop();
+            if (nowPlayingClipSe1 != "climbClip") {
+                se1AudioSource.Stop();
             }
-            if (!seAudioSource.isPlaying) {
-                seAudioSource.clip = climbClip;
-                seAudioSource.Play();
-                nowPlayingClip = "climbClip";
+            if (!se1AudioSource.isPlaying) {
+                se1AudioSource.clip = climbClip;
+                se1AudioSource.Play();
+                nowPlayingClipSe1 = "climbClip";
             }
         }
 
@@ -133,13 +135,13 @@ namespace StudioMeowToon {
         }
 
         public void PlayWaterForwardClip() {
-            if (nowPlayingClip != "waterForwardClip") {
-                seAudioSource.Stop();
+            if (nowPlayingClipSe1 != "waterForwardClip") {
+                se1AudioSource.Stop();
             }
-            if (!seAudioSource.isPlaying) {
-                seAudioSource.clip = waterForwardClip;
-                seAudioSource.Play();
-                nowPlayingClip = "waterForwardClip";
+            if (!se1AudioSource.isPlaying) {
+                se1AudioSource.clip = waterForwardClip;
+                se1AudioSource.Play();
+                nowPlayingClipSe1 = "waterForwardClip";
             }
         }
 
@@ -159,13 +161,18 @@ namespace StudioMeowToon {
             se2AudioSource.PlayOneShot(damageClip, 3.0f);
         }
 
+        //public void PlayDamageClip() {
+        //    se2AudioSource.PlayOneShot(damageClip, 3.0f);
+        //    nowPlayingClipSe2 = "damageClip";
+        //}
+
         public void PlayKnockedupClip() {
             se2AudioSource.PlayOneShot(knockedupClip, 3.5f);
         }
 
         public void StopClip() {
-            if (nowPlayingClip != "groundedClip" && nowPlayingClip != "itemClip") {
-                seAudioSource.Stop();
+            if (nowPlayingClipSe1 != "groundedClip" && nowPlayingClipSe1 != "itemClip") {
+                se1AudioSource.Stop();
             }
         }
 
@@ -175,7 +182,7 @@ namespace StudioMeowToon {
         // Start is called before the first frame update
         void Start() {
             // TODO: 順番に注意
-            seAudioSource = GetComponents<AudioSource>()[0]; // SEオーディオソース設定
+            se1AudioSource = GetComponents<AudioSource>()[0]; // SEオーディオソース設定
             bgmAudioSource = GetComponents<AudioSource>()[1]; // BGMオーディオソース設定
             se2AudioSource = GetComponents<AudioSource>()[2]; // SEオーディオソース設定
         }
