@@ -43,35 +43,33 @@ namespace StudioMeowToon {
                     }
                 });
 
+            // 接触した対象の削除フラグを立てる、Player のHPを削る。
+            this.OnCollisionEnterAsObservable() // TODO: 他の物にHitしてるのでは？
+                .Subscribe(t => {
+                    if (!hits) { // 初回ヒットのみ破壊の対象
+                        //Debug.Log("Hit to: " + t.gameObject.name);
+                        // Block に接触した場合
+                        if (t.transform.name.Contains("Block")) {
+                            t.transform.GetComponent<BlockController>().DestroyWithDebris(transform); // 弾の transform を渡す
+                            if (t.transform.GetComponent<BlockController>().destroyable) { // この一撃で破壊可能かどうか
+                                soundSystem.PlayExplosionClip(); // 破壊した
+                            } else {
+                                soundSystem.PlayDamageClip(); // ダメージを与えた
+                            }
+                            //Debug.Log("BlockにHit!");
+                            // Player に接触した場合
+                        } else if (t.transform.tag.Contains("Player")) {
+                            t.transform.GetComponent<PlayerController>().DecrementLife();
+                        }
+                        // TODO: ボスの破壊
+                    }
+                    hits = true; // ヒットフラグON
+                });
+
             // LateUpdate is called after all Update functions have been called.
             this.LateUpdateAsObservable()
                 .Subscribe(_ => {
                 });
-        }
-
-        ///////////////////////////////////////////////////////////////////////////
-        // イベントハンドラ
-
-        /// <summary>
-        /// 接触した対象の削除フラグを立てる、Player のHPを削る。
-        /// </summary>
-        void OnCollisionEnter(Collision collision) {
-            if (!hits) { // 初回ヒットのみ破壊の対象
-                // Block に接触した場合
-                if (collision.transform.name.Contains("Block")) {
-                    collision.transform.GetComponent<BlockController>().DestroyWithDebris(transform); // 弾の transform を渡す
-                    if (collision.transform.GetComponent<BlockController>().destroyable) { // この一撃で破壊可能かどうか
-                        soundSystem.PlayExplosionClip(); // 破壊した
-                    } else {
-                        soundSystem.PlayDamageClip(); // ダメージを与えた
-                    }
-                    // Player に接触した場合
-                } else if (collision.transform.tag.Contains("Player")) {
-                    collision.transform.GetComponent<PlayerController>().DecrementLife();
-                }
-                // TODO: ボスの破壊
-            }
-            hits = true; // ヒットフラグON
         }
     }
 
