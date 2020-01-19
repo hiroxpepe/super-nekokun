@@ -134,6 +134,17 @@ namespace StudioMeowToon {
             }
         }
 
+        /// <summary>
+        /// 爆弾の爆発時に持ち手を強制パージ
+        /// </summary>
+        public void PurgeFromBomb() {
+            if (holded.name.Contains("Bomb")) {
+                holded.transform.parent = null; // 子オブジェクト解除
+                doUpdate.holding = false; // 持つフラグOFF
+                holded = null; // 持つオブジェクト参照解除
+            }
+        }
+
         ///////////////////////////////////////////////////////////////////////////
         // 更新 メソッド
 
@@ -737,8 +748,8 @@ STEP0:
                         }
                     }
                 }
-                // ブロックを持つ実装 TODO: 修正
-                if (_name.Contains("Item") && !doUpdate.holding) { // TODO: Holdable 追加？
+                // ブロックを持つ実装 FIXME: 修正
+                if ((_name.Contains("Item") || collision.gameObject.tag.Equals("Holdable")) && !doUpdate.holding) { // TODO: Holdable 追加？
                     holded = collision.gameObject; // 持てるアイテムの参照を保持する
                 }
             }
@@ -755,7 +766,7 @@ STEP0:
                 flatToFace(); // 面に合わせる TODO:※試験的
             }
             // 持てるアイテムと接触したら
-            else if (_name.Contains("Item") && !doUpdate.holding) { // TODO: Holdable 追加？
+            else if ((_name.Contains("Item") || collision.gameObject.tag.Equals("Holdable")) && !doUpdate.holding) { // FIXME: Holdable 追加？
                 holded = collision.gameObject; // 持てるアイテムの参照を保持する
             }
             // 被弾したら
@@ -968,7 +979,7 @@ STEP0:
             } else if (_fX == -1 && _fZ == 0) { // X軸負方向
                 return true;
             }
-            return false; // 判定不可
+            return false; // 判定不可 FIXME: この部分に関連する実装を再検討する
         }
 
         /// <summary>
@@ -1018,7 +1029,7 @@ STEP0:
                     }
                 }
             }
-            Debug.Log("969 faceToObject doUpdate.faceing: " + doUpdate.faceing + "_fx: " + _fx + " _fz: " + _fz);
+            //Debug.Log("969 faceToObject doUpdate.faceing: " + doUpdate.faceing + "_fx: " + _fx + " _fz: " + _fz);
         }
 
         /// <summary>
@@ -1350,17 +1361,7 @@ STEP0:
                     if (checkDownAsHoldableBlock() || _hit.transform.name.Contains("Item")) { // 持てるのはアイテムのみ TODO: 子のオブジェクト判定は？
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                         if (_distance < 0.3f || checkDownAsHoldableBlock()) { // 距離が近くなら
-                            //if (holded.tag.Equals("Item")) {
-                            //    var _itemController = holded.GetComponent<ItemController>(); // TODO: holdable で共通化？
-                            //    leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
-                            //    rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
-                            //} else if (holded.tag.Equals("Block")) {
-                            //    var _blockController = holded.GetComponent<BlockController>();
-                            //    leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
-                            //    rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
-                            //}
-                            //holded.transform.parent = transform; // 自分の子オブジェクトにする
-                            //doUpdate.holding = true; // 持つフラグON
+                            // MEMO:多段継承する必要はない！
                             Observable.EveryUpdate().Select(_ => !doUpdate.faceing && holded != null).Subscribe(_ => { // なぜ Where だとダメ？
                                 if (holded.tag.Equals("Item")) {
                                     var _itemController = holded.GetComponent<ItemController>(); // TODO: holdable で共通化？
@@ -1368,6 +1369,10 @@ STEP0:
                                     rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
                                 } else if (holded.tag.Equals("Block")) {
                                     var _blockController = holded.GetComponent<BlockController>();
+                                    leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
+                                    rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
+                                } else if (holded.tag.Equals("Holdable")) {
+                                    var _blockController = holded.GetComponent<HoldableController>();
                                     leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
                                     rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
                                 }
