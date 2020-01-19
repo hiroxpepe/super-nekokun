@@ -39,7 +39,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Where(_ => transform.parent != null && transform.parent.name.Equals("Player")) // プレイヤーに持たれたら
                 .Subscribe(_ => {
-                    Debug.Log("点火！");
+                    //Debug.Log("点火！");
                     ignition = true; // 自動的に点火される
                 });
 
@@ -55,7 +55,7 @@ namespace StudioMeowToon {
                             if (transform.parent != null && transform.parent.name.Equals("Player")) { // まだプレイヤーに持たれていたら
                                 transform.parent.GetComponent<PlayerController>().PurgeFromBomb(); // 強制パージ
                             }
-                            Debug.Log("爆発！");
+                            //Debug.Log("爆発！");
                             Destroy(gameObject); // 自分を削除して
                             explodePiece(8, 0.75f, 60); // 破片を飛ばす
                         });

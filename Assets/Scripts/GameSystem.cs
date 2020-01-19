@@ -195,6 +195,24 @@ namespace StudioMeowToon {
                     updateFpsForFixedUpdate();
                 });
 
+            // 砲台全破壊
+            var _fieldEnemy = false;
+            this.UpdateAsObservable()
+                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && GameObject.Find("Cannon").transform.childCount == 0)
+                .Subscribe(_ => {
+                    _fieldEnemy = true;
+                });
+
+            // フィールド敵出現
+            this.UpdateAsObservable()
+                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && _fieldEnemy)
+                .Subscribe(_ => {
+                    var fieldEnemy = GameObject.Find("FieldEnemy");
+                    foreach (Transform child in fieldEnemy.transform) {
+                        child.gameObject.SetActive(true);
+                    }
+                });
+
             // TODO: スタート画面の場合、おそらく以下でエラーが出てる
 
             initFpsForUpdate(); // FPS初期化

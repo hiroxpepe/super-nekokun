@@ -107,7 +107,7 @@ namespace StudioMeowToon {
 
             // 障害物に当たった(壁)
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Contains("Limit") || 
+                .Where(t => t.gameObject.name.Contains("EnemyWall") || 
                        t.gameObject.name.Contains("Wall") && doUpdate.searching)
                 .Subscribe(_ => {
                     //Debug.Log("[壁]障害物回避:反転");

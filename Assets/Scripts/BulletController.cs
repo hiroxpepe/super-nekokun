@@ -44,9 +44,10 @@ namespace StudioMeowToon {
                 });
 
             // 接触した対象の削除フラグを立てる、Player のHPを削る。
-            this.OnCollisionEnterAsObservable()
+            this.OnCollisionEnterAsObservable() // TODO: 他の物にHitしてるのでは？
                 .Subscribe(t => {
                     if (!hits) { // 初回ヒットのみ破壊の対象
+                        //Debug.Log("Hit to: " + t.gameObject.name);
                         // Block に接触した場合
                         if (t.transform.name.Contains("Block")) {
                             t.transform.GetComponent<BlockController>().DestroyWithDebris(transform); // 弾の transform を渡す
@@ -55,7 +56,7 @@ namespace StudioMeowToon {
                             } else {
                                 soundSystem.PlayDamageClip(); // ダメージを与えた
                             }
-                            Debug.Log("BlockにHit!");
+                            //Debug.Log("BlockにHit!");
                             // Player に接触した場合
                         } else if (t.transform.tag.Contains("Player")) {
                             t.transform.GetComponent<PlayerController>().DecrementLife();
