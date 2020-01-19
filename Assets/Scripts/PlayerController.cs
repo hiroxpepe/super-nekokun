@@ -94,8 +94,8 @@ namespace StudioMeowToon {
             moveByShocked(forward);
             doUpdate.damaged = true;
             simpleAnime.Play("ClimbUp"); // FIXME: ダメージアニメ
-            Observable.TimerFrame(15) // FIXME: 60fpsの時は？
-                .Subscribe(_ =>{
+            Observable.TimerFrame(9) // FIXME: 60fpsの時は？
+                .Subscribe(_ => {
                     doUpdate.damaged = false;
                 });
         }
