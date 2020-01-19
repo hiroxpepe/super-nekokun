@@ -27,8 +27,6 @@ namespace StudioMeowToon {
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
-            //// Player から SoundSystem 取得
-            //soundSystem = player.GetComponent<PlayerController>().GetSoundSystem();
             // SoundSystem 取得
             soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
         }

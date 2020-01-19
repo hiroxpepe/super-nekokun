@@ -100,24 +100,6 @@ namespace StudioMeowToon {
                 });
         }
 
-        // Update is called once per frame.
-        //protected void Update() {
-            //doAutoDestroy(); // 自動削除
-            //doShock(); // 弾に当たった時の衝撃
-            //if (transform.position.y < -100f) { // -100m以下ならLevelから落ちたので消去
-            //    Destroy(gameObject);
-            //}
-        //}
-
-        // FixedUpdate is called just before each physics update.
-        //protected void FixedUpdate() {
-        //}
-
-        //// LateUpdate is called after all Update functions have been called.
-        //void LateUpdate() {
-        //    cashPreviousPosition(); // 10フレ前分の位置情報保存
-        //}
-
         /// <summary>
         /// 10フレ前分の位置情報保存する。※使用していない
         /// </summary>
