@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 3301035844755745247}
   - component: {fileID: 3301035844755745243}
   - component: {fileID: 2400239665097747347}
+  - component: {fileID: 2610006528908762168}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -134,7 +135,7 @@ SphereCollider:
   m_GameObject: {fileID: 3301035843723987247}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 3
   m_Center: {x: 0, y: 0, z: 0}
@@ -237,6 +238,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   simpleAnime: {fileID: 3301035844755745243}
+--- !u!64 &2610006528908762168
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3301035843723987247}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_Mesh: {fileID: -8748156175479226893, guid: 77a640509177b3342a030601072e8cec, type: 3}
 --- !u!1 &3301035843723987273
 GameObject:
   m_ObjectHideFlags: 0

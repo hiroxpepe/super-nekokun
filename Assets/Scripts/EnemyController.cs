@@ -20,6 +20,8 @@ namespace StudioMeowToon {
 
         private DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
 
+        private GameObject plate; // 移動範囲のプレート
+
         // Awake is called when the script instance is being loaded.
         protected void Awake() {
             doUpdate = DoUpdate.GetInstance(); // 状態フラグ構造体
@@ -27,10 +29,6 @@ namespace StudioMeowToon {
 
             // SoundSystem 取得
             soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
-
-            // FIXME: テスト
-            //doFixedUpdate.walk = true;
-
         }
 
         // Start is called before the first frame update.
@@ -51,39 +49,55 @@ namespace StudioMeowToon {
 
             simpleAnime.Play("Walk"); // 歩くアニメ
 
-            this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_rotate: " + doUpdate.rotate); });
-            this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_searching: " + doUpdate.searching); });
-            this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_chasing: " + doUpdate.chasing); });
-            this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_attacking: " + doUpdate.attacking); });
+            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_rotate: " + doUpdate.rotate); });
+            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_searching: " + doUpdate.searching); });
+            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_chasing: " + doUpdate.chasing); });
+            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_attacking: " + doUpdate.attacking); });
 
-            //bool _idle = true;
+            // 接地プレート取得
+            this.OnCollisionEnterAsObservable()
+                .Where(t => t.gameObject.name.Contains("Plate"))
+                .Subscribe(t => {
+                    plate = t.gameObject;
+                    //Debug.Log("Plate name: " + plate.name);
+                });
+
+            bool _idle = false;
             this.UpdateAsObservable()
                 .Where(_ => doUpdate.searching && !doUpdate.rotate)
                 .Subscribe(_ => {
                     // ランダムで移動位置指定
-                    var _random1 = Mathf.FloorToInt(Random.Range(4f, 6f));
-                    var _random2 = Mathf.FloorToInt(Random.Range(-3f, 3f));
-                    var _random3 = Mathf.FloorToInt(Random.Range(-3f, 3f));
-                    Debug.Log("ランダム");
+                    var _rand1 = Mathf.FloorToInt(Random.Range(3f, 9f));
+                    var _rand2 = Mathf.FloorToInt(Random.Range(-3f, 3f));
+                    var _rand3 = Mathf.FloorToInt(Random.Range(-3f, 3f));
                     doUpdate.rotate = true;
-                    // [_random1]秒後に
-                    Observable.Timer(System.TimeSpan.FromSeconds(_random1)) // FIXME: 60fpsの時は？
+                    // [_rand1]秒後に
+                    Observable.Timer(System.TimeSpan.FromSeconds(_rand1)) // FIXME: 60fpsの時は？
                         .Subscribe(__ => {
-                            simpleAnime.Play("Walk"); // 歩くアニメ
-                            Debug.Log("回転開始");
-                            transform.LookAt(new Vector3(
-                                transform.position.x + _random2,
-                                transform.position.y,
-                                transform.position.z + _random3
-                            ));
-                            Debug.Log("回転終了");
-                            doUpdate.rotate = false;
+                            var _rand4 = Mathf.FloorToInt(Random.Range(1, 6));
+                            if (_rand4 % 2 == 1) { // 偶数
+                                simpleAnime.Play("Walk"); // 歩くアニメ
+                                doFixedUpdate.ApplyWalk();
+                                _idle = false;
+                                transform.LookAt(new Vector3(
+                                    transform.position.x + _rand2,
+                                    transform.position.y,
+                                    transform.position.z + _rand3
+                                ));
+                                doUpdate.rotate = false;
+                                //Debug.Log("方向転換");
+                            } else { // 奇数
+                                simpleAnime.Play("Default"); // デフォルトアニメ
+                                _idle = true;
+                                doUpdate.rotate = false;
+                                //Debug.Log("その位置で待機");
+                            }
                         });
                 });
 
             // 索敵中移動
             this.FixedUpdateAsObservable()
-                .Where(_ => doUpdate.searching)
+                .Where(_ => doUpdate.searching && !_idle)
                 .Subscribe(_ => {
                     var _speed = _rb.velocity.magnitude; // 速度ベクトル取得
                     if (_speed < 1.1f) {
@@ -91,30 +105,27 @@ namespace StudioMeowToon {
                     }
                 });
 
-            // 障害物に当たった
+            // 障害物に当たった(壁)
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Contains("Block") || 
-                       t.gameObject.name.Contains("Limit") || 
+                .Where(t => t.gameObject.name.Contains("Limit") || 
                        t.gameObject.name.Contains("Wall") && doUpdate.searching)
                 .Subscribe(_ => {
-                    Debug.Log("障害物回避:反転");
-                    transform.rotation = Quaternion.Euler(
-                        transform.rotation.x,
-                        transform.rotation.y - 180f,
-                        transform.rotation.z
-                    );
+                    //Debug.Log("[壁]障害物回避:反転");
+                    transform.LookAt(new Vector3( // 接地プレートの中心を向く
+                        plate.transform.position.x,
+                        transform.position.y,
+                        plate.transform.position.z
+                    ));
                 });
 
-            // 障害物に当たり中
-            this.OnCollisionStayAsObservable()
-                .Where(t => t.gameObject.name.Contains("Block") || 
-                       t.gameObject.name.Contains("Limit") || 
-                       t.gameObject.name.Contains("Wall") && doUpdate.searching)
+            // 障害物に当たった(ブロック)
+            this.OnCollisionEnterAsObservable()
+                .Where(t => t.gameObject.name.Contains("Block") && doUpdate.searching)
                 .Subscribe(_ => {
-                    Debug.Log("障害物回避:反転");
+                    //Debug.Log("[ブロック]障害物回避:反転");
                     transform.rotation = Quaternion.Euler(
                         transform.rotation.x,
-                        transform.rotation.y - 15f,
+                        transform.rotation.y + 180f,
                         transform.rotation.z
                     );
                 });
@@ -123,16 +134,18 @@ namespace StudioMeowToon {
             this.OnTriggerEnterAsObservable()
                 .Where(t => t.gameObject.name.Equals("Player") && doUpdate.searching)
                 .Subscribe(_ => {
-                    Debug.Log("プレイヤー発見");
+                    //Debug.Log("プレイヤー発見");
                     doUpdate.ApplyChasing();
+                    doFixedUpdate.ApplyRun();
                 });
 
             // プレイヤーロスト
             this.OnTriggerExitAsObservable()
                 .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.searching)
                 .Subscribe(_ => {
-                    Debug.Log("プレイヤーロスト");
+                    //Debug.Log("プレイヤーロスト");
                     doUpdate.ApplySearching();
+                    doFixedUpdate.ApplyWalk();
                 });
 
             #endregion
@@ -143,7 +156,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Where(_ => doUpdate.chasing)
                 .Subscribe(_ => {
-                    simpleAnime.Play("Walk"); // 歩くアニメ
+                    simpleAnime.Play("Run"); // 走るアニメ
                     transform.LookAt(new Vector3(
                         _player.transform.position.x,
                         transform.position.y,
@@ -156,8 +169,14 @@ namespace StudioMeowToon {
                 .Where(_ => doUpdate.chasing)
                 .Subscribe(_ => {
                     var _speed = _rb.velocity.magnitude; // 速度ベクトル取得
-                    if (_speed < 1.1f) {
-                        _rb.AddFor​​ce(Utils.TransformForward(transform.forward, _speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    if (doFixedUpdate.run) { // 走る
+                        if (_speed < 3.25f) {
+                            _rb.AddFor​​ce(Utils.TransformForward(transform.forward, _speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                        }
+                    } else if (doFixedUpdate.walk) { // 歩く
+                        if (_speed < 1.1f) {
+                            _rb.AddFor​​ce(Utils.TransformForward(transform.forward, _speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                        }
                     }
                 });
 
@@ -182,7 +201,6 @@ namespace StudioMeowToon {
                 .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking)
                 .Subscribe(t => {
                     doUpdate.ApplyAttacking();
-                    //Debug.Log("e Punch!");
                     soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
                     _player.transform.GetComponent<PlayerController>().DecrementLife();
                     _player.transform.GetComponent<PlayerController>().DamagedByEnemy(transform.forward);
@@ -197,18 +215,15 @@ namespace StudioMeowToon {
             this.OnCollisionStayAsObservable()
                 .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking)
                 .Subscribe(t => {
-                    Debug.Log("呼ばれないはず1");
                     doUpdate.ApplyChasing();
                     Observable.TimerFrame(24).Where(_ => !_wait).Subscribe(_ => { // FIXME: 60fpsの時は？
                         _wait = true;
                         doUpdate.ApplyAttacking();
-                        //Debug.Log("s Punch!");
                         _player.transform.GetComponent<PlayerController>().DecrementLife();
                         _player.transform.GetComponent<PlayerController>().DamagedByEnemy(transform.forward);
                         soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
                         Observable.TimerFrame(12) // FIXME: 60fpsの時は？
                             .Subscribe(__ => {
-                                Debug.Log("呼ばれないはず2");
                                 doUpdate.ApplyChasing();
                                 _wait = false;
                             });
@@ -238,29 +253,14 @@ namespace StudioMeowToon {
             // プロパティ(キャメルケース)
 
             public bool grounded { get => _grounded; set => _grounded = value; }
-            public bool searching { get => _searching; }
-            public bool rotate { get => _rotate; set => _rotate = value; }
-            public bool chasing { get => _chasing; }
-            public bool attacking { get => _attacking; }
 
-            public void ApplySearching() {
-                _searching = true;
-                _chasing = false;
-                _attacking = false;
-                _rotate = false;
-            }
-            public void ApplyChasing() {
-                _searching = false;
-                _chasing = true;
-                _attacking = false;
-                _rotate = false;
-            }
-            public void ApplyAttacking() {
-                _searching = false;
-                _chasing = false;
-                _attacking = true;
-                _rotate = false;
-            }
+            public bool searching { get => _searching; }
+
+            public bool rotate { get => _rotate; set => _rotate = value; }
+
+            public bool chasing { get => _chasing; }
+
+            public bool attacking { get => _attacking; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // コンストラクタ(パスカルケース)
@@ -276,6 +276,27 @@ namespace StudioMeowToon {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // パブリックメソッド(パスカルケース)
+
+            public void ApplySearching() {
+                _searching = true;
+                _chasing = false;
+                _attacking = false;
+                _rotate = false;
+            }
+
+            public void ApplyChasing() {
+                _searching = false;
+                _chasing = true;
+                _attacking = false;
+                _rotate = false;
+            }
+
+            public void ApplyAttacking() {
+                _searching = false;
+                _chasing = false;
+                _attacking = true;
+                _rotate = false;
+            }
 
             public void ResetState() {
                 _grounded = false;
@@ -301,15 +322,22 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            private bool _idol;
+            //private bool _idol;
             private bool _run;
             private bool _walk;
             private bool _jump;
 
-            public bool idol { get => _idol; set => _idol = value; }
-            public bool run { get => _run; set => _run = value; }
-            public bool walk { get => _walk; set => _walk = value; }
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            // プロパティ(キャメルケース)
+
+            //public bool idol { get => _idol; set => _idol = value; }
+
+            public bool run { get => _run; }
+
+            public bool walk { get => _walk; }
+
             public bool jump { get => _jump; set => _jump = value; }
+
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // コンストラクタ
@@ -326,11 +354,21 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // パブリックメソッド
 
+            public void ApplyRun() {
+                _run = false;
+                _walk = true;
+            }
+
+            public void ApplyWalk() {
+                _run = true;
+                _walk = false;
+            }
+
             /// <summary>
             /// 全フィールドの初期化
             /// </summary>
             public void ResetMotion() {
-                _idol = false;
+                //_idol = false;
                 _run = false;
                 _walk = false;
                 _jump = false;

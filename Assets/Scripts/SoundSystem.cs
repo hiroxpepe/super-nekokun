@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -160,11 +158,6 @@ namespace StudioMeowToon {
         public void PlayDamageClip() {
             se2AudioSource.PlayOneShot(damageClip, 3.0f);
         }
-
-        //public void PlayDamageClip() {
-        //    se2AudioSource.PlayOneShot(damageClip, 3.0f);
-        //    nowPlayingClipSe2 = "damageClip";
-        //}
 
         public void PlayKnockedupClip() {
             se2AudioSource.PlayOneShot(knockedupClip, 3.5f);
