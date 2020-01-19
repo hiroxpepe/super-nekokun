@@ -414,15 +414,15 @@ STEP0:
                 }
                 if (Math.Round(previousSpeed, 4) == Math.Round(speed, 4) && !doUpdate.lookBackJumping && (doUpdate.secondsAfterJumped > 0.1f && doUpdate.secondsAfterJumped < 0.4f)) { // 完全に空中停止した場合※捕まり反転ジャンプ時以外
 #if DEBUG
-                    Debug.Log("344 完全に空中停止した場合 speed:" + speed);
+                    Debug.Log("417 完全に空中停止した場合 speed:" + speed);
 #endif 
                     transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
                     doUpdate.grounded = true; // 接地
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
                 }
-                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 10.0f) { // TODO: checkIntoWater 重くない？
+                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 5.0f) { // TODO: checkIntoWater 重くない？
 #if DEBUG
-                    Debug.Log("352 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
+                    Debug.Log("425 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
 #endif 
                     transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
                     doUpdate.grounded = true; // 接地
@@ -796,6 +796,8 @@ STEP0:
                         holded = null; // 持てるブロックの参照を解除する
                     }
                 }
+            } else if ((_name.Contains("Item") || collision.gameObject.tag.Equals("Holdable")) && !doUpdate.holding) { // FIXME: Holdable 追加？
+                holded = null; // 持てるブロックの参照を解除する
             }
         }
 

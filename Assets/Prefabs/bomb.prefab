@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8210587521140474945}
   - component: {fileID: 133246100572973810}
   - component: {fileID: 6223646207834931451}
-  m_Layer: 20
+  m_Layer: 24
   m_Name: bomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 5243082461333179387}
   - component: {fileID: 3885496866272059323}
   - component: {fileID: 1875668511837232909}
-  m_Layer: 20
+  m_Layer: 24
   m_Name: fuse1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -167,7 +167,7 @@ GameObject:
   - component: {fileID: 2257591029920290871}
   - component: {fileID: 2386144112791835130}
   - component: {fileID: 2514638015382395125}
-  m_Layer: 20
+  m_Layer: 24
   m_Name: fuse2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -246,7 +246,7 @@ GameObject:
   - component: {fileID: 4171751803037856827}
   - component: {fileID: 8793952023803573183}
   - component: {fileID: 4184645724284113895}
-  m_Layer: 20
+  m_Layer: 24
   m_Name: bomb
   m_TagString: Holdable
   m_Icon: {fileID: 0}
