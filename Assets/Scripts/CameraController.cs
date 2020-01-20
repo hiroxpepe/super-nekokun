@@ -4,7 +4,7 @@ namespace StudioMeowToon {
     /// <summary>
     /// カメラ関連の処理
     /// </summary>
-    public class CameraSystem : GamepadMaper {
+    public class CameraController : GamepadMaper {
 
         // TODO: カメラの視野を調節する機能：ステップ式で良い
 

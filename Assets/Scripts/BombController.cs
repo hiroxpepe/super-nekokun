@@ -13,15 +13,19 @@ namespace StudioMeowToon {
         // 何秒後に爆発するか設定出来る。
         // プレイヤーが持ったら起爆スイッチON
         // 砲台から発射されたら起爆スイッチON(発射の時にはリジッドボディ有効:接地して数秒後にrb無効)
+        // 砲台から発射された爆弾をプレイヤーが拾って攻撃する。
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private int timer = 5;
+        private int timer = 10;
 
         [SerializeField]
         private GameObject prefabForPiece; // 破片生成用のプレハブ
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // フィールド
 
         private bool _ignition; // 点火フラグ
 
@@ -72,7 +76,7 @@ namespace StudioMeowToon {
             var _random = new System.Random(); // 乱数発生元
             var _min = -getRandomForce(force);
             var _max = getRandomForce(force);
-            for (var i = 0; i < number; i++) { // 破片を生成する
+            for (var i = 0; i < number; i++) { // 破片を生成する // TODO: 時間差で破片を生成する？
                 var _piece = Instantiate(prefabForPiece);
                 _piece.name += "_Piece"; // 破片には名前に "_Piece" を付加する
                 _piece.transform.localScale = new Vector3(scale, scale, scale);

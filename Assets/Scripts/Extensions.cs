@@ -4,7 +4,7 @@ namespace StudioMeowToon {
     /// <summary>
     /// 汎用拡張メソッドクラス
     /// </summary>
-    public static class Extension {
+    public static class Extensions {
         public static void Method(this GameObject self) {
             var n = self.name;
         }

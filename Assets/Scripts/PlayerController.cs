@@ -20,7 +20,7 @@ namespace StudioMeowToon {
         private SoundSystem soundSystem; // サウンドシステム
 
         [SerializeField]
-        private CameraSystem cameraSystem; // カメラシステム
+        private CameraController cameraController; // カメラシステム
 
         [SerializeField]
         private float jumpPower = 5.0f;
@@ -490,7 +490,7 @@ STEP0:
 
             // Lボタンを離した(※捕まり反転ジャンプ準備のカメラリセット)
             if (l1Button.wasReleasedThisFrame) {
-                cameraSystem.ResetLookAround(); // カメラ初期化
+                cameraController.ResetLookAround(); // カメラ初期化
             }
 
             // TODO: テスト
@@ -734,7 +734,7 @@ STEP0:
                         doUpdate.stairDowning = false; // 階段下りフラグOFF
                         doFixedUpdate.idol = true;
                         doFixedUpdate.grounded = true;
-                        cameraSystem.ResetLookAround(); // カメラ初期化
+                        cameraController.ResetLookAround(); // カメラ初期化
                         doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
                         flatToFace(); // 面に合わせる TODO:※試験的
                     } else if (isHitSide(collision.gameObject)) {
@@ -761,7 +761,7 @@ STEP0:
                 doUpdate.lookBackJumping = false; // 振り返りジャンプフラグOFF
                 doFixedUpdate.idol = true;
                 doFixedUpdate.grounded = true;
-                cameraSystem.ResetLookAround(); // カメラ初期化
+                cameraController.ResetLookAround(); // カメラ初期化
                 doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
                 flatToFace(); // 面に合わせる TODO:※試験的
             }
@@ -851,7 +851,7 @@ STEP0:
             var _rotation = Quaternion.LookRotation(_relativePos);
             transform.rotation =
               Quaternion.Slerp(transform.rotation, _rotation, Time.deltaTime * _SPEED);
-            //cameraSystem.LookPlayer();
+            //cameraController.LookPlayer();
         }
 
         /// <summary>
@@ -988,6 +988,9 @@ STEP0:
         /// オブジェクトに正対する。
         /// </summary>
         private void faceToObject(GameObject target, float speed = 2.0f) {
+            if (!target.name.Contains("Block")) { // FIXME: ブロック以外は取り合えず無効
+                doUpdate.faceing = false;
+            }
             var _fx = (float) Math.Round(transform.forward.x);
             var _fz = (float) Math.Round(transform.forward.z);
             if (_fx == 0 && _fz == 1) { // Z軸正方向
@@ -1031,7 +1034,7 @@ STEP0:
                     }
                 }
             }
-            //Debug.Log("969 faceToObject doUpdate.faceing: " + doUpdate.faceing + "_fx: " + _fx + " _fz: " + _fz);
+            //Debug.Log("1034 faceToObject doUpdate.faceing: " + doUpdate.faceing + "_fx: " + _fx + " _fz: " + _fz);
         }
 
         /// <summary>
