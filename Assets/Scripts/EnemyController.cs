@@ -4,15 +4,18 @@ using UniRx.Triggers;
 
 namespace StudioMeowToon {
     /// <summary>
-    /// プレイヤーの処理
+    /// エネミーの処理
     /// </summary>
     public class EnemyController : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
         private SimpleAnimation simpleAnime;
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // フィールド
 
         private SoundSystem soundSystem; // サウンドシステム
 
