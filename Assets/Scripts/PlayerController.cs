@@ -37,6 +37,9 @@ namespace StudioMeowToon {
         [SerializeField]
         private float bulletSpeed = 5000.0f; // 弾の速度
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // フィールド
+
         private BombAngle bombAngle; // 弾道角度
 
         private GameObject pushed; // 押されるオブジェクト
@@ -1377,7 +1380,7 @@ STEP0:
                                     leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
                                     rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
                                 } else if (holded.tag.Equals("Holdable")) {
-                                    var _blockController = holded.GetComponent<HoldableController>();
+                                    var _blockController = holded.GetComponent<Holdable>();
                                     leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
                                     rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
                                 }
