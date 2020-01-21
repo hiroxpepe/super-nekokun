@@ -110,6 +110,12 @@ namespace StudioMeowToon {
             updateGameInfo(); // TODO: OnGUI ?
         }
 
+        public void ClearLevel() { // Levelクリア
+            Time.timeScale = 0f;
+            isLevelClear = true; // ステージクリアフラグON
+            message.text = "Level Clear!"; // クリアメッセージ表示
+        }
+
         /// <summary>
         /// 指定されたタグの中で最も近いオブジェクトを返す。(ロックオンシステム)
         /// </summary>
@@ -167,7 +173,7 @@ namespace StudioMeowToon {
 
             // ポーズ(一時停止)実行・解除
             this.UpdateAsObservable()
-                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && startButton.wasPressedThisFrame)
+                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && startButton.wasPressedThisFrame && !isLevelClear)
                 .Subscribe(_ => {
                     if (isPausing) {
                         Time.timeScale = 1f;
@@ -184,7 +190,7 @@ namespace StudioMeowToon {
                 .Where(_ => !SceneManager.GetActiveScene().name.Equals("Start"))
                 .Subscribe(_ => {
                     checkGameOver(); // GAMEオーバー確認
-                    checkLevelClear(); // レベルクリア確認
+                    checkKey(); // レベルクリア確認
                     updateGameInfo();
                     updatePlayerStatus();
                 });
@@ -207,9 +213,9 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && _fieldEnemy)
                 .Subscribe(_ => {
-                    var fieldEnemy = GameObject.Find("FieldEnemy");
-                    foreach (Transform child in fieldEnemy.transform) {
-                        child.gameObject.SetActive(true);
+                    var _enemy = GameObject.Find("FieldEnemy");
+                    foreach (Transform _child in _enemy.transform) {
+                        _child.gameObject.SetActive(true);
                     }
                 });
 
@@ -261,13 +267,11 @@ namespace StudioMeowToon {
             }
         }
 
-        private void checkLevelClear() { // 全てのアイテムを集めたら一時停止
+        private void checkKey() { // 全てのアイテムを集めたらキー出現
             if (isLevelClear == false && itemTotalCount > 0 && itemRemainCount == 0) {
-                Time.timeScale = 0f;
-                isLevelClear = true; // ステージクリアフラグON
-                message.text = "Level Clear!"; // クリアメッセージ表示
-                if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
-                    SceneManager.LoadScene("Start");
+                var _key = GameObject.Find("Keys"); // フォルダオブジェクトは有効でないとNG
+                foreach (Transform _child in _key.transform) {
+                    _child.gameObject.SetActive(true); // キー出現
                 }
             }
         }

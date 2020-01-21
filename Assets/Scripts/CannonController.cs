@@ -37,8 +37,7 @@ namespace StudioMeowToon {
             this.FixedUpdateAsObservable()
                 .Subscribe(_ => {
                     if (transform.name.Contains("_Piece")) { return; } // '破片' は無視する
-
-                    var _random = Mathf.FloorToInt(Random.Range(0.0f, 100.0f));
+                    var _random = Mathf.FloorToInt(Random.Range(0.0f, 175.0f));
                     if (_random == 3.0f) { // 3の時だけ
                         float _SPEED = 50.0f; // 回転スピード
                         Vector3 _look = player.transform.position - transform.position; // ターゲット方向へのベクトル

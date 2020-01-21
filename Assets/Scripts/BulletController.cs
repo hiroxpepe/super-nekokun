@@ -8,6 +8,12 @@ namespace StudioMeowToon {
     /// </summary>
     public class BulletController : MonoBehaviour {
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+
+        [SerializeField]
+        private float lifetime = 0.5f; // 消える時間
+
         ///////////////////////////////////////////////////////////////////////////
         // フィールド
 
@@ -34,7 +40,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     if (hits) { // 何かに接触したら
                         secondSinceHit += Time.deltaTime; // 秒を加算して
-                        if (secondSinceHit > 0.5f) { // 0.5秒後に自分を消去する
+                        if (secondSinceHit > lifetime) { // lifetime秒後に自分を消去する
                             Destroy(gameObject);
                         }
                     }
@@ -44,10 +50,9 @@ namespace StudioMeowToon {
                 });
 
             // 接触した対象の削除フラグを立てる、Player のHPを削る。
-            this.OnCollisionEnterAsObservable() // TODO: 他の物にHitしてるのでは？
+            this.OnCollisionEnterAsObservable()
                 .Subscribe(t => {
                     if (!hits) { // 初回ヒットのみ破壊の対象
-                        //Debug.Log("Hit to: " + t.gameObject.name);
                         // Block に接触した場合
                         if (t.transform.name.Contains("Block")) {
                             t.transform.GetComponent<BlockController>().DestroyWithDebris(transform); // 弾の transform を渡す
@@ -56,14 +61,15 @@ namespace StudioMeowToon {
                             } else {
                                 soundSystem.PlayDamageClip(); // ダメージを与えた
                             }
-                            //Debug.Log("BlockにHit!");
                             // Player に接触した場合
                         } else if (t.transform.tag.Contains("Player")) {
                             t.transform.GetComponent<PlayerController>().DecrementLife();
                         }
                         // TODO: ボスの破壊
                     }
-                    hits = true; // ヒットフラグON
+                    if (!t.gameObject.name.Contains("Clone")) {
+                        hits = true; // ヒットフラグON
+                    }
                 });
 
             // LateUpdate is called after all Update functions have been called.
@@ -71,6 +77,17 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                 });
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // プライベートメソッド(キャメルケース: 動詞)
+
+        ///// <summary>
+        ///// 飛散する破片に加える力のランダム数値取得。// TODO: 効かない
+        ///// </summary>
+        //private int getRandomLifetime(float lifetime) {
+        //    var _random = new System.Random();
+        //    return _random.Next((int) lifetime / 2, (int) lifetime * 2); // lifetime の2分の1から2倍の範囲で
+        //}
     }
 
 }

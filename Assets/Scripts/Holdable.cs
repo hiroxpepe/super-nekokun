@@ -7,7 +7,7 @@ namespace StudioMeowToon {
     /// <summary>
     /// 持たれる処理
     /// </summary>
-    public class HoldableController : MonoBehaviour {
+    public class Holdable : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
@@ -71,7 +71,7 @@ namespace StudioMeowToon {
         void Start() {
             // 持たれる実装用
             if (canHold) {
-                isGrounded = true; // false; MEMO: 初期設定の位置そのまま？
+                isGrounded = false; // MEMO: 初期設定の位置そのまま？
                 // 持たれる時の手の位置オブジェクト初期化
                 var _leftHandGameObject = new GameObject("LeftHand");
                 var _rightHandGameObject = new GameObject("RightHand");
@@ -226,20 +226,20 @@ namespace StudioMeowToon {
             }
         }
 
-        #region PushedDirection
+        //#region PushedDirection
 
-        /// <summary>
-        /// 押された方向を表す列挙体。
-        /// </summary>
-        private enum PushedDirection {
-            PositiveZ,
-            NegativeZ,
-            PositiveX,
-            NegativeX,
-            None
-        };
+        ///// <summary>
+        ///// 押された方向を表す列挙体。
+        ///// </summary>
+        //private enum PushedDirection {
+        //    PositiveZ,
+        //    NegativeZ,
+        //    PositiveX,
+        //    NegativeX,
+        //    None
+        //};
 
-        #endregion
+        //#endregion
     }
 
 }
