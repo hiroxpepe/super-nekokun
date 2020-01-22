@@ -32,6 +32,12 @@ namespace StudioMeowToon {
         [SerializeField]
         private Material lockonFocusMaterial; // ロックオン用マテリアル
 
+        [SerializeField]
+        private Camera mainCamera; // メインカメラ
+
+        [SerializeField]
+        private Camera eventCamera; // イベントカメラ
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
@@ -54,6 +60,8 @@ namespace StudioMeowToon {
         private bool useVibration = true; // スマホ時に振動を使うかどうか
 
         private bool isPausing = false; // ポーズ(一時停止)
+
+        private bool isEventView = false; // イベント中かどうか
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // FPS計測
@@ -92,6 +100,10 @@ namespace StudioMeowToon {
             // max: 1.25
             // ⇒ スライダーにこの値を設定する方が早い
             set => playerBombAngleValue = value; // UIの仕様が 0～1 なので
+        }
+        
+        public bool eventView { // イベント中かどうかを返す
+            get => isEventView;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,6 +167,9 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
+            // シーン名取得
+            var _activeSceneName = SceneManager.GetActiveScene().name;
+
             // ボタンを押したらスマホ振動
             this.UpdateAsObservable()
                 .Where(_ => virtualController && useVibration &&(aButton.wasPressedThisFrame || bButton.wasPressedThisFrame || xButton.wasPressedThisFrame || yButton.wasPressedThisFrame ||
@@ -173,7 +188,7 @@ namespace StudioMeowToon {
 
             // ポーズ(一時停止)実行・解除
             this.UpdateAsObservable()
-                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && startButton.wasPressedThisFrame && !isLevelClear)
+                .Where(_ => _activeSceneName.Contains("Level") && startButton.wasPressedThisFrame && !isLevelClear)
                 .Subscribe(_ => {
                     if (isPausing) {
                         Time.timeScale = 1f;
@@ -187,39 +202,63 @@ namespace StudioMeowToon {
 
             // Update is called once per frame.
             this.UpdateAsObservable()
-                .Where(_ => !SceneManager.GetActiveScene().name.Equals("Start"))
+                .Where(_ => !_activeSceneName.Equals("Start"))
                 .Subscribe(_ => {
                     checkGameOver(); // GAMEオーバー確認
-                    checkKey(); // レベルクリア確認
                     updateGameInfo();
                     updatePlayerStatus();
                 });
+
+            // 砲台全破壊 ⇒ フィールド敵出現
+            var _cannon = GameObject.Find("Cannon");
+            this.UpdateAsObservable()
+                .First(_ => _activeSceneName.Contains("Level") && _cannon.transform.childCount == 0)
+                .Subscribe(_ => {
+                    var _enemy = GameObject.Find("FieldEnemy");
+                    foreach (Transform _child in _enemy.transform) {
+                        _child.gameObject.SetActive(true);
+                    }
+                    // イベントカメラ切り替え
+                    eventCamera.gameObject.transform.parent = GameObject.Find("EnemyEventView").transform;
+                    eventCamera.gameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+                    eventCamera.gameObject.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+                    changeCamera();
+                    isEventView = true;
+                    Observable.TimerFrame(30) // FIXME: 60fpsの時は？
+                        .Subscribe(__ => {
+                            changeCamera();
+                            isEventView = false;
+                        });
+                });
+
+            // キー出現
+            this.UpdateAsObservable()
+                .First(_ => isLevelClear == false && itemTotalCount > 0 && itemRemainCount == 0)
+                .Subscribe(_ => {
+                    var _key = GameObject.Find("Keys"); // フォルダオブジェクトは有効でないとNG
+                    foreach (Transform _child in _key.transform) {
+                        _child.gameObject.SetActive(true); // キー出現
+                    }
+                    // イベントカメラ切り替え
+                    eventCamera.gameObject.transform.parent = GameObject.Find("KeyEventView").transform;
+                    eventCamera.gameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+                    eventCamera.gameObject.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+                    changeCamera();
+                    isEventView = true;
+                    Observable.TimerFrame(30) // FIXME: 60fpsの時は？
+                        .Subscribe(__ => {
+                            changeCamera();
+                            isEventView = false;
+                        });
+                });
+
+            // TODO: スタート画面の場合、おそらく以下でエラーが出てる
 
             // FixedUpdate is called just before each physics update.
             this.FixedUpdateAsObservable()
                 .Subscribe(_ => {
                     updateFpsForFixedUpdate();
                 });
-
-            // 砲台全破壊
-            var _fieldEnemy = false;
-            this.UpdateAsObservable()
-                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && GameObject.Find("Cannon").transform.childCount == 0)
-                .Subscribe(_ => {
-                    _fieldEnemy = true;
-                });
-
-            // フィールド敵出現
-            this.UpdateAsObservable()
-                .Where(_ => SceneManager.GetActiveScene().name.Contains("Level") && _fieldEnemy)
-                .Subscribe(_ => {
-                    var _enemy = GameObject.Find("FieldEnemy");
-                    foreach (Transform _child in _enemy.transform) {
-                        _child.gameObject.SetActive(true);
-                    }
-                });
-
-            // TODO: スタート画面の場合、おそらく以下でエラーが出てる
 
             initFpsForUpdate(); // FPS初期化
             initFpsForFixedUpdate(); // fixed FPS初期化
@@ -235,6 +274,10 @@ namespace StudioMeowToon {
             updateGameInfo();
 
             message.text = ""; // メッセージ初期化、非表示
+
+            // カメラ初期化 TODO: なぜ必要？
+            eventCamera.enabled = false;
+            mainCamera.enabled = true;
         }
 
         // Update is called once per frame.
@@ -263,15 +306,6 @@ namespace StudioMeowToon {
                 message.text = "Game Over!"; // GAMEオーバーメッセージ表示
                 if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
                     SceneManager.LoadScene("Start");
-                }
-            }
-        }
-
-        private void checkKey() { // 全てのアイテムを集めたらキー出現
-            if (isLevelClear == false && itemTotalCount > 0 && itemRemainCount == 0) {
-                var _key = GameObject.Find("Keys"); // フォルダオブジェクトは有効でないとNG
-                foreach (Transform _child in _key.transform) {
-                    _child.gameObject.SetActive(true); // キー出現
                 }
             }
         }
@@ -316,6 +350,11 @@ namespace StudioMeowToon {
         private void initFpsForFixedUpdate() { // fixed FPS初期化
             fpsForFixedUpdateFrameCount = 0;
             fpsForFixedUpdatePreviousTime = 0.0f;
+        }
+
+        private void changeCamera() { // カメラ切り替え
+            eventCamera.enabled = !eventCamera.enabled;
+            mainCamera.enabled = !mainCamera.enabled;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////

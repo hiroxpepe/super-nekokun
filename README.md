@@ -1,2 +1,2 @@
 # super-nekokun
-Orange the Cat Project for Unity
+Super Nekokun Project for Unity
