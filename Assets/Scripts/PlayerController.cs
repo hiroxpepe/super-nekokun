@@ -194,6 +194,11 @@ namespace StudioMeowToon {
                 return;
             }
 
+            // イベント中操作無効
+            if (gameSystem.eventView) {
+                return;
+            }
+
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // ステージをクリアした・GAMEオーバーした場合抜ける
                 if (gameSystem.levelClear || gameSystem.gameOver) {
