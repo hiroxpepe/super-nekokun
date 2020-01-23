@@ -64,6 +64,8 @@ namespace StudioMeowToon {
 
         private GameObject bodyIntoWater; // 水中での体
 
+        private bool r2Hold; // R2ボタンで持っているかどうか
+
         //////////////////////////////////////////////////////
         // その他 TODO: ⇒ speed・position オブジェクト化する
 
@@ -86,7 +88,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // パブリックメソッド
 
-        public SoundSystem GetSoundSystem() { return soundSystem; } // サウンドシステムを返す
+        //public SoundSystem GetSoundSystem() { return soundSystem; } // サウンドシステムを返す
 
         public void DecrementLife() { life--; } // HPデクリメント
 
@@ -265,11 +267,20 @@ namespace StudioMeowToon {
             }
 
             // 持つ(Rボタン)を離した
-            if (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) {
+            if (r2Hold && r2Button.wasPressedThisFrame) {
                 if (holded != null) {
                     holded.transform.parent = null; // 子オブジェクト解除
                     doUpdate.holding = false; // 持つフラグOFF
                     holded = null; // 持つオブジェクト参照解除
+                    r2Hold = false; // R2ホールドフラグOFF
+                }
+            } else if (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) {
+                if (!r2Hold) {
+                    if (holded != null) {
+                        holded.transform.parent = null; // 子オブジェクト解除
+                        doUpdate.holding = false; // 持つフラグOFF
+                        holded = null; // 持つオブジェクト参照解除
+                    }
                 }
             }
 
@@ -278,10 +289,11 @@ namespace StudioMeowToon {
             if (doUpdate.grounded && !doUpdate.climbing) {
 
                 // 持つ(Rボタン)押した
-                if (r1Button.wasPressedThisFrame) {
+                if (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)) {
                     if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
                         startFaceing(); // オブジェクトに正対する開始
                         faceToObject(holded); // オブジェクトに正対する
+                        if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
                         goto STEP0; // 弾発射を飛ばす
                     }
                 }
@@ -424,7 +436,7 @@ STEP0:
 #if DEBUG
                     Debug.Log("417 完全に空中停止した場合 speed:" + speed);
 #endif 
-                    transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
+                    transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
                     doUpdate.grounded = true; // 接地
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
                 }
@@ -432,7 +444,7 @@ STEP0:
 #if DEBUG
                     Debug.Log("425 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
 #endif 
-                    transform.Translate(0, -5.0f/*-0.05f*/ * Time.deltaTime, 0); // 下げる
+                    transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
                     doUpdate.grounded = true; // 接地
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
                 }
@@ -506,7 +518,7 @@ STEP0:
             //    lookBack(); // TODO: 未完成
             //}
 
-            // 回転 // TODO: 入力の遊びを持たせる？ // TODO: 左右2回押しで180度回転？
+            // 回転 // TODO: 入力の遊びを持たせる？ // TODO: 左右2回押しで180度回転？ TODO: 左右2回押しで90度ずつ回転の実装
             if (!doUpdate.climbing) {
                 var _ADJUST = 20; // 調整値
                 var _axis = dpadRight.isPressed ? 1 : dpadLeft.isPressed ? -1 : 0;
@@ -597,7 +609,8 @@ STEP0:
                     _ADJUST = jumpPower * 1.5f;   // 静止ジャンプ
                 }
                 _rb.useGravity = true;
-                _rb.velocity += Vector3.up * _ADJUST;
+                //_rb.velocity += Vector3.up * _ADJUST;
+                _rb.AddRelativeFor​​ce(Vector3.up * _ADJUST * 40f, ForceMode.Acceleration); // TODO: こちらの方がベター？
             }
             if (doFixedUpdate.jumpForward) { // ジャンプ中前移動 : 追加:水中移動
                 if (!checkIntoWater()) {

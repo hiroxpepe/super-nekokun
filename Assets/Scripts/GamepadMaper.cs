@@ -7,6 +7,7 @@ namespace StudioMeowToon {
     /// ゲームパッドのマッピング処理
     /// </summary>
     public class GamepadMaper : MonoBehaviour {
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
@@ -31,6 +32,10 @@ namespace StudioMeowToon {
         protected ButtonControl l1Button; // L1ボタン
 
         protected ButtonControl r1Button; // R1ボタン
+
+        protected ButtonControl l2Button; // L2ボタン
+
+        protected ButtonControl r2Button; // R2ボタン
 
         protected ButtonControl startButton; // スタートボタン
 
@@ -65,11 +70,9 @@ namespace StudioMeowToon {
             if (controllerNames.Length == 0 || controllerNames[0] == "") {
                 virtualController.SetActive(true);
                 _useVirtualController = true;
-                //Debug.Log("_useVirtualController: " + _useVirtualController);
             } else {
                 virtualController.SetActive(false);
                 _useVirtualController = false;
-                //Debug.Log("_useVirtualController: " + _useVirtualController);
             }
 
             // OS判定とゲームパッドのキー参照
@@ -79,6 +82,8 @@ namespace StudioMeowToon {
             dpadRight = Gamepad.current.dpad.right;
             l1Button = Gamepad.current.leftShoulder;
             r1Button = Gamepad.current.rightShoulder;
+            l2Button = Gamepad.current.leftTrigger;
+            r2Button = Gamepad.current.rightTrigger;
             startButton = Gamepad.current.startButton;
             selectButton = Gamepad.current.selectButton;
             if (Application.platform == RuntimePlatform.Android) {

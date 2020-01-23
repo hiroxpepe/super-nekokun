@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem.Controls;
 
 namespace StudioMeowToon {
     /// <summary>
     /// 汎用拡張メソッドクラス
     /// </summary>
     public static class Extensions {
-        public static void Method(this GameObject self) {
-            var n = self.name;
-        }
 
         public static bool LikePlayer(this GameObject self) {
             return self.tag.Contains("Player");
