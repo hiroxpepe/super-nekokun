@@ -52,11 +52,6 @@ namespace StudioMeowToon {
 
             simpleAnime.Play("Walk"); // 歩くアニメ
 
-            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_rotate: " + doUpdate.rotate); });
-            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_searching: " + doUpdate.searching); });
-            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_chasing: " + doUpdate.chasing); });
-            //this.UpdateAsObservable().Subscribe(_ => { Debug.Log("_attacking: " + doUpdate.attacking); });
-
             // 接地プレート取得
             this.OnCollisionEnterAsObservable()
                 .Where(t => t.gameObject.name.Contains("Plate"))
