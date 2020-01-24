@@ -21,6 +21,9 @@ namespace StudioMeowToon {
         [SerializeField]
         private float holdedMargin = 0.5f; // 持たれる時のクリアランス
 
+        [SerializeField]
+        private float holdedTilt = 15f; // 持たれる時の傾き
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
@@ -200,28 +203,28 @@ namespace StudioMeowToon {
                         transform.position.y + speed * Time.deltaTime, // 調整値
                         transform.parent.transform.position.z + holdedMargin // 調整値
                     );
-                    transform.rotation = Quaternion.Euler(-15f, 0f, 0f); // 15度傾ける
+                    transform.rotation = Quaternion.Euler(-holdedTilt, 0f, 0f); // 15度傾ける
                 } else if (_direction == PushedDirection.NegativeZ) { // Z軸負方向
                     transform.position = new Vector3(
                         transform.parent.transform.position.x,
                         transform.position.y + speed * Time.deltaTime,
                         transform.parent.transform.position.z - holdedMargin
                     );
-                    transform.rotation = Quaternion.Euler(15f, 0f, 0f);
+                    transform.rotation = Quaternion.Euler(holdedTilt, 0f, 0f);
                 } else if (_direction == PushedDirection.PositiveX) { // X軸正方向
                     transform.position = new Vector3(
                         transform.parent.transform.position.x + holdedMargin,
                         transform.position.y + speed * Time.deltaTime,
                         transform.parent.transform.position.z
                     );
-                    transform.rotation = Quaternion.Euler(0f, 0f, 15f);
+                    transform.rotation = Quaternion.Euler(0f, 0f, holdedTilt);
                 } else if (_direction == PushedDirection.NegativeX) { // X軸負方向
                     transform.position = new Vector3(
                         transform.parent.transform.position.x - holdedMargin,
                         transform.position.y + speed * Time.deltaTime,
                         transform.parent.transform.position.z
                     );
-                    transform.rotation = Quaternion.Euler(0f, 0f, -15f);
+                    transform.rotation = Quaternion.Euler(0f, 0f, -holdedTilt);
                 }
             }
         }

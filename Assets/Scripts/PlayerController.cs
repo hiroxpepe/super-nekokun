@@ -266,9 +266,13 @@ namespace StudioMeowToon {
                 intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
             }
 
+            // 風船につかまり浮遊中
+            if (doFixedUpdate.holdBalloon) { doUpdate.grounded = false; } 
+
             // 持つ(Rボタン)を離した
             if (r2Hold && r2Button.wasPressedThisFrame) {
                 if (holded != null) {
+                    if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
                     holded.transform.parent = null; // 子オブジェクト解除
                     doUpdate.holding = false; // 持つフラグOFF
                     holded = null; // 持つオブジェクト参照解除
@@ -277,9 +281,11 @@ namespace StudioMeowToon {
             } else if (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) {
                 if (!r2Hold) {
                     if (holded != null) {
+                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
                         holded.transform.parent = null; // 子オブジェクト解除
                         doUpdate.holding = false; // 持つフラグOFF
                         holded = null; // 持つオブジェクト参照解除
+
                     }
                 }
             }
@@ -294,6 +300,10 @@ namespace StudioMeowToon {
                         startFaceing(); // オブジェクトに正対する開始
                         faceToObject(holded); // オブジェクトに正対する
                         if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
+                        if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
+                            doUpdate.grounded = false; // 浮遊
+                            doFixedUpdate.holdBalloon = true;
+                        }
                         goto STEP0; // 弾発射を飛ばす
                     }
                 }
@@ -440,7 +450,7 @@ STEP0:
                     doUpdate.grounded = true; // 接地
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
                 }
-                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 5.0f) { // TODO: checkIntoWater 重くない？
+                if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 5.0f && !doFixedUpdate.holdBalloon) { // TODO: checkIntoWater 重くない？
 #if DEBUG
                     Debug.Log("425 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
 #endif 
@@ -449,7 +459,7 @@ STEP0:
                     doFixedUpdate.unintended = true; // 意図しない状況フラグON
                 }
                 // モバイル動作時に面に正対する TODO: ジャンプ後しばらくたってから
-                if (useVirtualController && !checkIntoWater()) {
+                if (useVirtualController && !checkIntoWater() && !doFixedUpdate.holdBalloon) { // FIXME: checkHoldBalloon()
                     faceToFace(5f);
                 }
             }
@@ -675,10 +685,26 @@ STEP0:
                 _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
                 _rb.useGravity = false;
                 _rb.AddForce(new Vector3(0, 3.8f, 0), ForceMode.Acceleration); // 3.8f は調整値
-            } else if (!doFixedUpdate.intoWater) { // 元に戻す
+                _rb.mass = 2f;
+            } else if (!doFixedUpdate.intoWater && !doFixedUpdate.holdBalloon) { // 元に戻す
                 _rb.drag = 0f;
                 _rb.angularDrag = 0f;
                 _rb.useGravity = true;
+                _rb.mass = 3.5f;
+            }
+
+            // 風船につかまる
+            if (doFixedUpdate.holdBalloon) {
+                _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
+                _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
+                _rb.useGravity = false;
+                _rb.AddForce(new Vector3(0, 1.8f, 0), ForceMode.Acceleration); // 1.8f は調整値
+                //_rb.mass = 2f;
+            } else if (!doFixedUpdate.holdBalloon && !doFixedUpdate.intoWater) { // 元に戻す
+                _rb.drag = 0f;
+                _rb.angularDrag = 0f;
+                _rb.useGravity = true;
+                //_rb.mass = 3.5f;
             }
 
             // ブロック上る下りる
@@ -1615,6 +1641,7 @@ STEP0:
             private bool _stairDown;
             private bool _unintended; // 意図していない状況
             private bool _intoWater;
+            private bool _holdBalloon;
             private bool _virtualControllerMode;
 
             public bool idol { get => _idol; set => _idol = value; }
@@ -1635,6 +1662,7 @@ STEP0:
             public bool stairDown { get => _stairDown; set => _stairDown = value; }
             public bool unintended { get => _unintended; set => _unintended = value; }
             public bool intoWater { get => _intoWater; set => _intoWater = value; }
+            public bool holdBalloon { get => _holdBalloon; set => _holdBalloon = value; }
             public bool virtualControllerMode { get => _virtualControllerMode; set => _virtualControllerMode = value; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1674,6 +1702,7 @@ STEP0:
                 _stairDown = false;
                 _unintended = false;
                 // _intoWater は初期化しない
+                // _holdBalloon は初期化しない
                 // _virtualControllerMode は初期化しない
             }
         }
