@@ -228,21 +228,6 @@ namespace StudioMeowToon {
                 }
             }
         }
-
-        //#region PushedDirection
-
-        ///// <summary>
-        ///// 押された方向を表す列挙体。
-        ///// </summary>
-        //private enum PushedDirection {
-        //    PositiveZ,
-        //    NegativeZ,
-        //    PositiveX,
-        //    NegativeX,
-        //    None
-        //};
-
-        //#endregion
     }
 
 }

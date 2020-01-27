@@ -4180,6 +4180,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: af6c367488fcf5349b728996a8a43801, type: 3}
+--- !u!1 &588429236 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4698520669086234260, guid: 3483b432c4115504a8aa6274b37454db,
+    type: 3}
+  m_PrefabInstance: {fileID: 7888001162810383443}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &594469090
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17460,6 +17466,41 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4698520669086234260, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5062712883861029871, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 5062712883861029871, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_FontData.m_MaxSize
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 5062712883861029871, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7625571346587810237, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7758757908334293911, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7758757908334293911, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7888001161460381671, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
       propertyPath: m_Layer
@@ -17485,6 +17526,21 @@ PrefabInstance:
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 715344191}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: speechImage
+      value: 
+      objectReference: {fileID: 588429236}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: speechOffset.y
+      value: 0.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: speechOffset.x
+      value: 0.35
+      objectReference: {fileID: 0}
     - target: {fileID: 7888001161674707047, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
       propertyPath: m_Mass
@@ -17629,6 +17685,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 7964502873855595239, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8336551197126263327, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3483b432c4115504a8aa6274b37454db, type: 3}
