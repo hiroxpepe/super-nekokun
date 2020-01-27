@@ -20,6 +20,21 @@ namespace StudioMeowToon {
 
     #endregion
 
+    #region Direction
+
+    /// <summary>
+    /// 方向を表す列挙体。
+    /// </summary>
+    public enum Direction {
+        PositiveZ,
+        NegativeZ,
+        PositiveX,
+        NegativeX,
+        None
+    };
+
+    #endregion
+
     #region HitsType
 
     /// <summary>
