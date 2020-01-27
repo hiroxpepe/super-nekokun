@@ -38,6 +38,12 @@ namespace StudioMeowToon {
         [SerializeField]
         private float bulletSpeed = 5000.0f; // 弾の速度
 
+        [SerializeField]
+        private GameObject speechImage; // セリフ用吹き出し
+
+        [SerializeField]
+        private Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
@@ -69,6 +75,8 @@ namespace StudioMeowToon {
 
         private Vector3 normalVector = Vector3.up; // 法線用
 
+        private Text speechText; // セリフ用吹き出しテキスト
+
         //////////////////////////////////////////////////////
         // その他 TODO: ⇒ speed・position オブジェクト化する
 
@@ -91,12 +99,16 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // パブリックメソッド
 
-        //public SoundSystem GetSoundSystem() { return soundSystem; } // サウンドシステムを返す
-
-        public void DecrementLife() { life--; } // HPデクリメント
+        /// <summary>
+        /// HPデクリメント
+        /// </summary>
+        public void DecrementLife() {
+            life--;
+            say("Ouch!", 65);
+        }
 
         /// <summary>
-        /// 敵から攻撃を受ける
+        /// エネミーから攻撃を受ける
         /// </summary>
         public void DamagedByEnemy(Vector3 forward) {
             moveByShocked(forward);
@@ -106,6 +118,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     doUpdate.damaged = false;
                 });
+            say("Oh\nmy God!", 65);
         }
 
         /// <summary>
@@ -169,13 +182,16 @@ namespace StudioMeowToon {
                 waterLevel = GameObject.Find("Water").transform.position.y; // TODO: x, z 軸で水面(水中の範囲取得)
 
                 // 水中カメラエフェクト取得
-                intoWaterFilter = GameObject.Find("Canvas");
+                intoWaterFilter = GameObject.Find("/Canvas");
 
                 // 水中での体取得
                 bodyIntoWater = GameObject.Find("Player/Body");
 
                 // 水面判定用
                 playerNeck = GameObject.Find("Bell");
+
+                // セリフ吹き出しテキスト取得
+                speechText = speechImage.GetComponentInChildren<Text>();
             }
         }
 
@@ -189,12 +205,20 @@ namespace StudioMeowToon {
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
+            // セリフ追従
+            this.UpdateAsObservable()
+                .Subscribe(_ => {
+                    speechImage.transform.position = RectTransformUtility.WorldToScreenPoint(
+                        Camera.main,
+                        transform.position + getSpeechOffset(transform.forward)
+                    );
+                });
+
             // スロープ(坂)に接触した時
             this.OnCollisionEnterAsObservable()
                 .Where(_c => _c.gameObject.name.Contains("Slope"))
                 .Subscribe(_c => {
                     normalVector = _c.GetContact(0).normal;
-                    //Debug.Log("スロープ");
                 });
 
             // スロープ(坂)に接触し続けた
@@ -202,7 +226,6 @@ namespace StudioMeowToon {
                 .Where(_c => _c.gameObject.name.Contains("Slope"))
                 .Subscribe(_c => {
                     normalVector = _c.GetContact(0).normal;
-                    //Debug.Log("スロープ(続)");
                 });
 
             // スロープ(坂)から離脱した時
@@ -210,7 +233,6 @@ namespace StudioMeowToon {
                 .Where(_c => _c.gameObject.name.Contains("Slope"))
                 .Subscribe(_c => {
                     normalVector = Vector3.up; // 法線を戻す
-                    //Debug.Log("平面");
                 });
 
         }
@@ -221,17 +243,20 @@ namespace StudioMeowToon {
 
             // ポーズ中動作停止
             if (Time.timeScale == 0f) {
+                beSilent();
                 return;
             }
 
             // イベント中操作無効
             if (gameSystem.eventView) {
+                beSilent();
                 return;
             }
 
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // ステージをクリアした・GAMEオーバーした場合抜ける
                 if (gameSystem.levelClear || gameSystem.gameOver) {
+                    beSilent();
                     return;
                 }
             }
@@ -905,6 +930,7 @@ STEP0:
                 gameSystem.DecrementItem(); // アイテム数デクリメント
                 doFixedUpdate.getItem = true;
                 Destroy(other.gameObject);
+                say("I got\na item."); // FIXME: 種別
             }
             // 水面に接触したら
             if (other.gameObject.name == "Water") {
@@ -986,6 +1012,7 @@ STEP0:
             // 弾を発射
             _bullet.GetComponent<Rigidbody>().AddForce(_force, ForceMode.Force);
             soundSystem.PlayShootClip();
+            say("Shot!", 65);
         }
 
         private float getRendererTop(GameObject target) { // TODO: Player が測っても良いのでは？
@@ -1216,6 +1243,7 @@ STEP0:
                             var _myY = transform.position.y; // 自分のy位置(0基点)を取得
                             if (_myY < _hitTop) { // 自分が前方オブジェクトより低かったら
                                 doUpdate.climbing = true; // 登るフラグON
+                                say("I grabbed\nthat."); // FIXME: 種別
                             }
                         }
                     }
@@ -1242,6 +1270,7 @@ STEP0:
                         if (_myY < _hitTop) { // 自分が前方オブジェクトより低かったら
                             transform.position += transform.forward * 0.2f * Time.deltaTime * _ADJUST; // 少し前に進む
                             doUpdate.climbing = true; // 登るフラグON
+                            say("I grabbed\nthat."); // FIXME: 種別
                         }
                     }
                 }
@@ -1463,8 +1492,10 @@ STEP0:
                     if (checkDownAsHoldableBlock() || _hit.transform.name.Contains("Item")) { // 持てるのはアイテムのみ TODO: 子のオブジェクト判定は？
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                         if (_distance < 0.3f || checkDownAsHoldableBlock()) { // 距離が近くなら
-                            // MEMO:多段継承する必要はない！
-                            Observable.EveryUpdate().Select(_ => !doUpdate.faceing && holded != null).Subscribe(_ => { // なぜ Where だとダメ？
+                            Observable.EveryUpdate() // MEMO: Observable.EveryUpdate() だと "checkToHoldItem()" から呼ばれる以外でも発火する！
+                                .Where(_ => !doUpdate.holding)
+                                .Select(_ => !doUpdate.faceing && holded != null && !doUpdate.holding) // なぜ Where だとダメ？
+                                .Subscribe(_ => {
                                 if (holded.tag.Equals("Item")) {
                                     var _itemController = holded.GetComponent<ItemController>(); // TODO: holdable で共通化？
                                     leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
@@ -1480,6 +1511,9 @@ STEP0:
                                 }
                                 holded.transform.parent = transform; // 自分の子オブジェクトにする
                                 doUpdate.holding = true; // 持つフラグON
+                                if (holded.name.Contains("Key") && !gameSystem.levelClear) { // TODO: なぜここがクリア時に呼ばれる？
+                                    say("Yeah~\nI got\n the Key!",60, 2d); // FIXME: 種別
+                                }
                             });
                             return true;
                         }
@@ -1539,6 +1573,84 @@ STEP0:
                 return true; // ブロックの底面に当たった
             }
             return false; // そうではない
+        }
+
+        /// <summary>
+        /// Player の方向を列挙体で返す。
+        /// </summary>
+        private Direction getDirection(Vector3 forwardVector) {
+            var _fX = (float) Math.Round(forwardVector.x);
+            var _fY = (float) Math.Round(forwardVector.y);
+            var _fZ = (float) Math.Round(forwardVector.z);
+            if (_fX == 0 && _fZ == 1) { // Z軸正方向
+                return Direction.PositiveZ;
+            }
+            if (_fX == 0 && _fZ == -1) { // Z軸負方向
+                return Direction.NegativeZ;
+            }
+            if (_fX == 1 && _fZ == 0) { // X軸正方向
+                return Direction.PositiveX;
+            }
+            if (_fX == -1 && _fZ == 0) { // X軸負方向
+                return Direction.NegativeX;
+            }
+            // ここに来たら二軸の差を判定する TODO: ロジック再確認
+            float _abX = Math.Abs(forwardVector.x);
+            float _abZ = Math.Abs(forwardVector.z);
+            if (_abX > _abZ) {
+                if (_fX == 1) { // X軸正方向
+                    return Direction.PositiveX;
+                }
+                if (_fX == -1) { // X軸負方向
+                    return Direction.NegativeX;
+                }
+            } else if (_abX < _abZ) {
+                if (_fZ == 1) { // Z軸正方向
+                    return Direction.PositiveZ;
+                }
+                if (_fZ == -1) { // Z軸負方向
+                    return Direction.NegativeZ;
+                }
+            }
+            return Direction.None; // 判定不明
+        }
+
+        /// <summary>
+        /// セリフ吹き出しのオフセット値を返す。MEMO: Z軸正方向が基準
+        /// </summary>
+        private Vector3 getSpeechOffset(Vector3 forwardVector) {
+            var _direction = getDirection(forwardVector);
+            if (_direction == Direction.PositiveX) {
+                return new Vector3(speechOffset.z, speechOffset.y, -speechOffset.x);
+            } else if (_direction == Direction.NegativeX) {
+                return new Vector3(speechOffset.z, speechOffset.y, speechOffset.x);
+            } else if (_direction == Direction.PositiveZ) {
+                return speechOffset;
+            } else if (_direction == Direction.NegativeZ) {
+                return new Vector3(-speechOffset.x, speechOffset.y, speechOffset.z);
+            }
+            return speechOffset;
+        }
+
+        /// <summary>
+        /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
+        /// </summary>
+        private void say(string text, int size = 60, double time = 0.5d) {
+            speechText.text = text;
+            speechText.fontSize = size;
+            speechImage.SetActive(true);
+            Observable.Timer(TimeSpan.FromSeconds(time))
+                .First()
+                .Subscribe(_ => {
+                    speechImage.SetActive(false);
+                });
+        }
+
+        /// <summary>
+        /// セリフ用吹き出しを非表示にする。
+        /// </summary>
+        private void beSilent() {
+            speechImage.SetActive(false);
         }
 
         #region DoUpdate
