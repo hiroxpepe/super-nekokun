@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UniRx;
+using UniRx.Triggers;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -65,6 +66,8 @@ namespace StudioMeowToon {
         private GameObject bodyIntoWater; // 水中での体
 
         private bool r2Hold; // R2ボタンで持っているかどうか
+
+        private Vector3 normalVector = Vector3.up; // 法線用
 
         //////////////////////////////////////////////////////
         // その他 TODO: ⇒ speed・position オブジェクト化する
@@ -185,6 +188,31 @@ namespace StudioMeowToon {
             // TODO: 実験的
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
+
+            // スロープ(坂)に接触した時
+            this.OnCollisionEnterAsObservable()
+                .Where(_c => _c.gameObject.name.Contains("Slope"))
+                .Subscribe(_c => {
+                    normalVector = _c.GetContact(0).normal;
+                    //Debug.Log("スロープ");
+                });
+
+            // スロープ(坂)に接触し続けた
+            this.OnCollisionStayAsObservable()
+                .Where(_c => _c.gameObject.name.Contains("Slope"))
+                .Subscribe(_c => {
+                    normalVector = _c.GetContact(0).normal;
+                    //Debug.Log("スロープ(続)");
+                });
+
+            // スロープ(坂)から離脱した時
+            this.OnCollisionExitAsObservable()
+                .Where(_c => _c.gameObject.name.Contains("Slope"))
+                .Subscribe(_c => {
+                    normalVector = Vector3.up; // 法線を戻す
+                    //Debug.Log("平面");
+                });
+
         }
 
         // Update is called once per frame.
@@ -593,7 +621,7 @@ STEP0:
             //    _rb.velocity = new Vector3(0, 0.2f, 0); // 押しても進まないとき
             //}
 
-            if (speed > 5.0f) { // 加速度リミッター
+            if (speed > 5.0f) { // 加速度リミッター TODO: リミッター解除機能
                 _rb.velocity = new Vector3(
                     _rb.velocity.x - (_rb.velocity.x / 10),
                     _rb.velocity.y - (_rb.velocity.y / 10),
@@ -653,17 +681,35 @@ STEP0:
             if (doFixedUpdate.run) { // 走る
                 _rb.useGravity = true; // 重力再有効化 
                 if (speed < 3.25f) { // ⇒ フレームレートに依存する 60fps,8f, 30fps:16f, 20fps:24f, 15fps:32f
-                    _rb.AddFor​​ce(Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    //_rb.AddFor​​ce(Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    var onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
+                    if (normalVector != Vector3.up) {
+                        _rb.AddFor​​ce(onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
+                    } else {
+                        _rb.AddFor​​ce(onPlane * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    }
                 }
             } else if (doFixedUpdate.walk) { // 歩く
                 _rb.useGravity = true; // 重力再有効化 
                 if (speed < 1.1f) {
-                    _rb.AddFor​​ce(Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    //_rb.AddFor​​ce(Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    var onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
+                    if (normalVector != Vector3.up) {
+                        _rb.AddFor​​ce(onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
+                    } else {
+                        _rb.AddFor​​ce(onPlane * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                    }
                 }
             } else if (doFixedUpdate.backward) { // 下がる
                 _rb.useGravity = true; // 重力再有効化 
                 if (speed < 0.75f) {
-                    _rb.AddFor​​ce(-Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 後ろに移動させる
+                    //_rb.AddFor​​ce(-Utils.TransformForward(transform.forward, speed) * _ADJUST1, ForceMode.Acceleration); // 後ろに移動させる
+                    var onPlane = Vector3.ProjectOnPlane(-Utils.TransformForward(transform.forward, speed), normalVector);
+                    if (normalVector != Vector3.up) {
+                        _rb.AddFor​​ce(onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
+                    } else {
+                        _rb.AddFor​​ce(onPlane * _ADJUST1, ForceMode.Acceleration); // 後ろに移動させる
+                    }
                 }
             } else if (doFixedUpdate.idol) {
                 _rb.useGravity = true; // 重力有効化
@@ -699,12 +745,10 @@ STEP0:
                 _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
                 _rb.useGravity = false;
                 _rb.AddForce(new Vector3(0, 1.8f, 0), ForceMode.Acceleration); // 1.8f は調整値
-                //_rb.mass = 2f;
             } else if (!doFixedUpdate.holdBalloon && !doFixedUpdate.intoWater) { // 元に戻す
                 _rb.drag = 0f;
                 _rb.angularDrag = 0f;
                 _rb.useGravity = true;
-                //_rb.mass = 3.5f;
             }
 
             // ブロック上る下りる
@@ -794,13 +838,13 @@ STEP0:
                         else {
                         }
                     }
-                }
+                } 
                 // ブロックを持つ実装 FIXME: 修正
                 if ((_name.Contains("Item") || collision.gameObject.tag.Equals("Holdable")) && !doUpdate.holding) { // TODO: Holdable 追加？
                     holded = collision.gameObject; // 持てるアイテムの参照を保持する
                 }
             }
-            // 地上・壁に接地したら
+            // 地上・壁・坂に接地したら
             else if ((_name.Contains("Ground") || _name.Contains("Wall")) && !checkIntoWater()) { // 水中ではない場合
                 simpleAnime.Play("Default"); // デフォルトアニメ
                 soundSystem.PlayGroundedClip();
@@ -819,6 +863,12 @@ STEP0:
             // 被弾したら
             else if (_name.Contains("Bullet")) {
                 soundSystem.PlayHitClip();
+            }
+
+            // スロープと接触したら
+            if (_name.Contains("Slope")) {
+                doUpdate.grounded = true; // 接地フラグON だけ
+                //Debug.Log("Slope:接触");
             }
         }
 
@@ -949,7 +999,7 @@ STEP0:
             var _fps = Application.targetFrameRate;
             var _ADJUST1 = 0;
             if (_fps == 60) _ADJUST1 = 9;
-            if (_fps == 30) _ADJUST1 = 20; // MEMO: 正直ここは詳細な検討が必要 TODO: ⇒ x, z 軸でも変動があったか調べる？
+            if (_fps == 30) _ADJUST1 = 20; // FIXME: 正直ここは詳細な検討が必要 TODO: ⇒ x, z 軸でも変動があったか調べる？
             var _y = (float) Math.Round(transform.position.y, 1, MidpointRounding.AwayFromZero);
             var _previousY = (float) Math.Round(previousPosition[_ADJUST1].y, 1, MidpointRounding.AwayFromZero);
             if (_y == _previousY) { // nフレ前の値と比較
