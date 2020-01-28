@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UniRx;
 using UniRx.Triggers;
 
@@ -8,13 +9,19 @@ namespace StudioMeowToon {
     /// </summary>
     public class EnemyController : MonoBehaviour {
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
         private SimpleAnimation simpleAnime;
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////
+        [SerializeField]
+        private GameObject speechImage; // セリフ用吹き出し
+
+        [SerializeField]
+        private Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
         private SoundSystem soundSystem; // サウンドシステム
@@ -25,13 +32,21 @@ namespace StudioMeowToon {
 
         private GameObject plate; // 移動範囲のプレート
 
+        private Text speechText; // セリフ用吹き出しテキスト
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // 更新 メソッド
+
         // Awake is called when the script instance is being loaded.
-        protected void Awake() {
+        void Awake() {
             doUpdate = DoUpdate.GetInstance(); // 状態フラグ構造体
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグ構造体
 
             // SoundSystem 取得
             soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
+
+            // セリフ吹き出しテキスト取得
+            speechText = speechImage.GetComponentInChildren<Text>();
         }
 
         // Start is called before the first frame update.
@@ -45,6 +60,22 @@ namespace StudioMeowToon {
             if (_fps == 60) _ADJUST1 = 8f;
             if (_fps == 30) _ADJUST1 = 16f;
 
+            // セリフ追従
+            this.UpdateAsObservable()
+                .Subscribe(_ => {
+                    speechImage.transform.position = RectTransformUtility.WorldToScreenPoint(
+                        Camera.main,
+                        transform.position + speechOffset
+                    );
+                });
+
+            // セリフ非表示
+            this.UpdateAsObservable()
+                .Where(_ => !isRendered)
+                .Subscribe(_ => {
+                    beSilent();
+                });
+
             // 初期値:索敵(デフォルト)
             doUpdate.ApplySearching();
 
@@ -57,7 +88,6 @@ namespace StudioMeowToon {
                 .Where(t => t.gameObject.name.Contains("Plate"))
                 .Subscribe(t => {
                     plate = t.gameObject;
-                    //Debug.Log("Plate name: " + plate.name);
                 });
 
             bool _idle = false;
@@ -83,12 +113,12 @@ namespace StudioMeowToon {
                                     transform.position.z + _rand3
                                 ));
                                 doUpdate.rotate = false;
-                                //Debug.Log("方向転換");
+                                say("I change\ndirection.");
                             } else { // 奇数
                                 simpleAnime.Play("Default"); // デフォルトアニメ
                                 _idle = true;
                                 doUpdate.rotate = false;
-                                //Debug.Log("その位置で待機");
+                                say("I wait...");
                             }
                         });
                 });
@@ -105,45 +135,45 @@ namespace StudioMeowToon {
 
             // 障害物に当たった(壁)
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Contains("EnemyWall") || 
+                .Where(t => t.gameObject.name.Contains("EnemyWall") ||
                        t.gameObject.name.Contains("Wall") && doUpdate.searching)
                 .Subscribe(_ => {
-                    //Debug.Log("[壁]障害物回避:反転");
                     transform.LookAt(new Vector3( // 接地プレートの中心を向く
                         plate.transform.position.x,
                         transform.position.y,
                         plate.transform.position.z
                     ));
+                    say("I hit\nthe wall...");
                 });
 
             // 障害物に当たった(ブロック)
             this.OnCollisionEnterAsObservable()
                 .Where(t => t.gameObject.name.Contains("Block") && doUpdate.searching)
                 .Subscribe(_ => {
-                    //Debug.Log("[ブロック]障害物回避:反転");
                     transform.rotation = Quaternion.Euler(
                         transform.rotation.x,
                         transform.rotation.y + 180f,
                         transform.rotation.z
                     );
+                    say("I hit\nthe block...");
                 });
 
             // プレイヤー発見
             this.OnTriggerEnterAsObservable()
                 .Where(t => t.gameObject.name.Equals("Player") && doUpdate.searching)
                 .Subscribe(_ => {
-                    //Debug.Log("プレイヤー発見");
                     doUpdate.ApplyChasing();
                     doFixedUpdate.ApplyRun();
+                    say("I found\nthe cat!");
                 });
 
             // プレイヤーロスト
             this.OnTriggerExitAsObservable()
                 .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.searching)
                 .Subscribe(_ => {
-                    //Debug.Log("プレイヤーロスト");
                     doUpdate.ApplySearching();
                     doFixedUpdate.ApplyWalk();
+                    say("I lost\nthe cat...");
                 });
 
             #endregion
@@ -160,6 +190,7 @@ namespace StudioMeowToon {
                         transform.position.y,
                         _player.transform.position.z
                     ));
+                    say("I'm chasing\nhim!");
                 });
 
             // 追跡中移動
@@ -200,6 +231,7 @@ namespace StudioMeowToon {
                 .Subscribe(t => {
                     doUpdate.ApplyAttacking();
                     soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
+                    say("Punch!", 65);
                     _player.transform.GetComponent<PlayerController>().DecrementLife();
                     _player.transform.GetComponent<PlayerController>().DamagedByEnemy(transform.forward);
                     Observable.TimerFrame(12) // FIXME: 60fpsの時は？
@@ -217,9 +249,10 @@ namespace StudioMeowToon {
                     Observable.TimerFrame(24).Where(_ => !_wait).Subscribe(_ => { // FIXME: 60fpsの時は？
                         _wait = true;
                         doUpdate.ApplyAttacking();
+                        soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
+                        say("Take this!", 60);
                         _player.transform.GetComponent<PlayerController>().DecrementLife();
                         _player.transform.GetComponent<PlayerController>().DamagedByEnemy(transform.forward);
-                        soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
                         Observable.TimerFrame(12) // FIXME: 60fpsの時は？
                             .Subscribe(__ => {
                                 doUpdate.ApplyChasing();
@@ -232,6 +265,52 @@ namespace StudioMeowToon {
         }
 
         #region DoUpdate
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // プライベートメソッド(キャメルケース)
+
+        /// <summary>
+        /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
+        /// </summary>
+        private void say(string text, int size = 60, double time = 0.5d) { // TODO: バッファー？
+            speechText.text = text;
+            speechText.fontSize = size;
+            speechImage.SetActive(true);
+            Observable.Timer(System.TimeSpan.FromSeconds(time))
+                .First()
+                .Subscribe(_ => {
+                    speechImage.SetActive(false);
+                });
+        }
+
+        /// <summary>
+        /// セリフ用吹き出しを非表示にする。
+        /// </summary>
+        private void beSilent() {
+            speechImage.SetActive(false);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // カメラ映り
+
+        private const string MAIN_CAMERA_TAG_NAME = "MainCamera";  // メインカメラに付いているタグ名
+
+        // メインカメラに表示されているか
+        private bool isRendered = false;
+
+        void OnBecameVisible() { // メインカメラに映った時
+            if (Camera.current.tag == MAIN_CAMERA_TAG_NAME) {
+                isRendered = true;
+                Debug.Log("isRendered: " + isRendered);
+            }
+        }
+
+        void OnBecameInvisible() { // メインカメラに映らなくなった時
+            if (Camera.current != null && Camera.current.tag == MAIN_CAMERA_TAG_NAME) {
+                isRendered = false;
+                Debug.Log("isRendered: " + isRendered);
+            }
+        }
 
         /// <summary>
         /// Update() メソッド用の構造体。
