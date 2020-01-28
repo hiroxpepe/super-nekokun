@@ -185,10 +185,10 @@ namespace StudioMeowToon {
                 intoWaterFilter = GameObject.Find("/Canvas");
 
                 // 水中での体取得
-                bodyIntoWater = GameObject.Find("Player/Body");
+                bodyIntoWater = transform.Find("Body").gameObject;
 
                 // 水面判定用
-                playerNeck = GameObject.Find("Bell");
+                playerNeck = transform.Find("Bell").gameObject;
 
                 // セリフ吹き出しテキスト取得
                 speechText = speechImage.GetComponentInChildren<Text>();
@@ -1463,6 +1463,7 @@ STEP0:
                                 doUpdate.pushing = true; // 押すフラグON
                                 pushed = _hit.transform.gameObject; // 押されるオブジェクトの参照保存
                                 transform.parent = pushed.transform; // プレイヤーを押されるオブジェクトの子にする
+                                say("I'm going\nto push.");
                                 return true;
                             }
                             //Observable.EveryUpdate().Select(_ => !doUpdate.faceing && !doUpdate.pushing).Subscribe(_ => {
@@ -1515,6 +1516,7 @@ STEP0:
                                     say("Yeah~\nI got\n the Key!",60, 2d); // FIXME: 種別
                                 }
                             });
+                            say("I'm going\nto have.");
                             return true;
                         }
                     }
