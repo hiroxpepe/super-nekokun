@@ -241,18 +241,18 @@ namespace StudioMeowToon {
                     }
                     // イベントカメラ切り替え
                     Observable.Timer(TimeSpan.FromSeconds(0.5d))
-                    .Subscribe(mainCamera => {
-                        eventCamera.gameObject.transform.parent = GameObject.Find("KeyEventView").transform;
-                        eventCamera.gameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-                        eventCamera.gameObject.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
-                        changeCamera();
-                        isEventView = true;
-                        Observable.TimerFrame(30) // FIXME: 60fpsの時は？
-                        .Subscribe(__ => {
+                        .Subscribe(mainCamera => {
+                            eventCamera.gameObject.transform.parent = GameObject.Find("KeyEventView").transform;
+                            eventCamera.gameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+                            eventCamera.gameObject.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
                             changeCamera();
-                            isEventView = false;
+                            isEventView = true;
+                            Observable.TimerFrame(30) // FIXME: 60fpsの時は？
+                                .Subscribe(__ => {
+                                    changeCamera();
+                                    isEventView = false;
+                                });
                         });
-                    });
                 });
 
             // TODO: スタート画面の場合、おそらく以下でエラーが出てる
