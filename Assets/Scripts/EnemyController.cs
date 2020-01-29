@@ -30,7 +30,13 @@ namespace StudioMeowToon {
 
         private DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
 
+        private float distance; // プレイヤーとの距離
+
         private GameObject plate; // 移動範囲のプレート
+
+        private float speechX; // セリフ用吹き出し幅
+
+        private float speechY; // セリフ用吹き出し高さ
 
         private Text speechText; // セリフ用吹き出しテキスト
 
@@ -44,6 +50,11 @@ namespace StudioMeowToon {
 
             // SoundSystem 取得
             soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
+
+            // セリフ吹き出し大きさ取得
+            var _rect = speechImage.GetComponent<RectTransform>();
+            speechX = _rect.sizeDelta.x;
+            speechY = _rect.sizeDelta.y;
 
             // セリフ吹き出しテキスト取得
             speechText = speechImage.GetComponentInChildren<Text>();
@@ -74,6 +85,15 @@ namespace StudioMeowToon {
                 .Where(_ => !isRendered)
                 .Subscribe(_ => {
                     beSilent();
+                });
+
+            // プレイヤーとの距離取得
+            this.UpdateAsObservable()
+                .Subscribe(_ => {
+                    distance = (float) System.Math.Round(
+                        Vector3.Distance(transform.position, _player.transform.position), 1, System.MidpointRounding.AwayFromZero
+                     );
+                    //Debug.Log("distance: " + distance);
                 });
 
             // 初期値:索敵(デフォルト)
@@ -264,8 +284,6 @@ namespace StudioMeowToon {
             #endregion
         }
 
-        #region DoUpdate
-
         ///////////////////////////////////////////////////////////////////////////////////////////
         // プライベートメソッド(キャメルケース)
 
@@ -273,8 +291,16 @@ namespace StudioMeowToon {
         /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
         /// </summary>
         private void say(string text, int size = 60, double time = 0.5d) { // TODO: バッファー？
+            if (!isRendered) { return; }
+
+            // プレイヤーとの距離で大きさ調整
+            var _distance = distance > 1 ? (int) (distance / 2) : 1;
+            if (_distance == 0) { _distance = 1; }
+            speechImage.GetComponent<RectTransform>().sizeDelta = new Vector2(speechX / _distance, speechY / _distance);
+            speechText.fontSize = size / (int) (_distance * 1.25f); // 調整値
+            Debug.Log("_distance: " + _distance + " x: " + speechImage.GetComponent<RectTransform>().sizeDelta.x + " y: " + speechImage.GetComponent<RectTransform>().sizeDelta.y);
+
             speechText.text = text;
-            speechText.fontSize = size;
             speechImage.SetActive(true);
             Observable.Timer(System.TimeSpan.FromSeconds(time))
                 .First()
@@ -311,6 +337,8 @@ namespace StudioMeowToon {
                 Debug.Log("isRendered: " + isRendered);
             }
         }
+
+        #region DoUpdate
 
         /// <summary>
         /// Update() メソッド用の構造体。
