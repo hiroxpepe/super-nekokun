@@ -24,8 +24,8 @@ namespace StudioMeowToon {
             if (speed < 0.95f) { // 低速の時 ※TODO:要調整
                 if (Math.Abs(Math.Round(forward.x, 1)) == 0.7d && Math.Abs(Math.Round(forward.z, 1)) == 0.7d) { // 絶対値が同じなら
                     //Debug.Log("x: " + Math.Abs(Math.Round(forward.x, 1)) + "z: " + Math.Abs(Math.Round(forward.z, 1)));
-                    //return new Vector3((forward.x * 1.2f), forward.y, (forward.z * 0.8f)); // 少しずらす
-                    return new Vector3((forward.x += 0.2f), forward.y, (forward.z -= 0.2f)); // 少しずらす
+                    return new Vector3((forward.x * 1.2f), forward.y, (forward.z * 0.8f)); // 少しずらす MEMO:ベター
+                    //return new Vector3((forward.x += 0.2f), forward.y, (forward.z -= 0.2f)); // 少しずらす
                 }
             }
             return forward;
