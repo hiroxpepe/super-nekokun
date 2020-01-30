@@ -122,12 +122,12 @@ namespace StudioMeowToon {
             }
         }
 
-        void OnCollisionExit(Collision collision) {
-            if (collision.gameObject.name.Contains("Block")) {
-                isFloat = false;
-                isGrounded = false; // 下のブロックが破壊された
-            }
-        }
+        //void OnCollisionExit(Collision collision) { // TODO: 一時的無効
+        //    if (collision.gameObject.name.Contains("Block")) {
+        //        isFloat = false;
+        //        isGrounded = false; // 下のブロックが破壊された
+        //    }
+        //}
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プライベートメソッド(キャメルケース: 動詞)
