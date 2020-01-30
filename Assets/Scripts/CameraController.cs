@@ -25,7 +25,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private Vector3 defaultLocalPosition; // カメラシステム位置 デフォルト値
+        private Vector3 defaultLocalPosition; // カメラシステム位置 デフォルト値 // x:0, y:0.95, z:-1.2
 
         private bool isForwardPosition = false; // カメラシステムが前進ポジションかどうか
 
@@ -66,6 +66,17 @@ namespace StudioMeowToon {
                 lookAround();
                 return;
             }
+
+            // 視点ズームアップ
+            if (yButton.isPressed && l1Button.isPressed && dpadUp.wasPressedThisFrame) {
+                defaultLocalPosition = new Vector3(defaultLocalPosition.x, defaultLocalPosition.y, defaultLocalPosition.z + 0.1f); 
+            }
+
+            // 視点ズームアウト
+            if (yButton.isPressed && l1Button.isPressed && dpadDown.wasPressedThisFrame) {
+                defaultLocalPosition = new Vector3(defaultLocalPosition.x, defaultLocalPosition.y, defaultLocalPosition.z - 0.1f);
+            }
+
         }
 
         // LateUpdate is called after all Update functions have been called.
