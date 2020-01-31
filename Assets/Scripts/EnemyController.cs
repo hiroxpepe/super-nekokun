@@ -71,6 +71,8 @@ namespace StudioMeowToon {
             if (_fps == 60) _ADJUST1 = 8f;
             if (_fps == 30) _ADJUST1 = 16f;
 
+            var _damaged = false; // ダメージ中フラグ　TODO: stract
+
             // セリフ追従
             this.UpdateAsObservable()
                 .Subscribe(_ => {
@@ -93,7 +95,6 @@ namespace StudioMeowToon {
                     distance = (float) System.Math.Round(
                         Vector3.Distance(transform.position, _player.transform.position), 1, System.MidpointRounding.AwayFromZero
                      );
-                    //Debug.Log("distance: " + distance);
                 });
 
             // 初期値:索敵(デフォルト)
@@ -112,7 +113,7 @@ namespace StudioMeowToon {
 
             bool _idle = false;
             this.UpdateAsObservable()
-                .Where(_ => doUpdate.searching && !doUpdate.rotate)
+                .Where(_ => doUpdate.searching && !doUpdate.rotate && !_damaged)
                 .Subscribe(_ => {
                     // ランダムで移動位置指定
                     var _rand1 = Mathf.FloorToInt(Random.Range(3f, 9f));
@@ -121,6 +122,7 @@ namespace StudioMeowToon {
                     doUpdate.rotate = true;
                     // [_rand1]秒後に
                     Observable.Timer(System.TimeSpan.FromSeconds(_rand1)) // FIXME: 60fpsの時は？
+                        //.Where(__ => !_damaged) // TODO これが必要？
                         .Subscribe(__ => {
                             var _rand4 = Mathf.FloorToInt(Random.Range(1, 6));
                             if (_rand4 % 2 == 1) { // 偶数
@@ -145,7 +147,7 @@ namespace StudioMeowToon {
 
             // 索敵中移動
             this.FixedUpdateAsObservable()
-                .Where(_ => doUpdate.searching && !_idle)
+                .Where(_ => doUpdate.searching && !_idle && !_damaged)
                 .Subscribe(_ => {
                     var _speed = _rb.velocity.magnitude; // 速度ベクトル取得
                     if (_speed < 1.1f) {
@@ -180,8 +182,9 @@ namespace StudioMeowToon {
 
             // プレイヤー発見
             this.OnTriggerEnterAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && doUpdate.searching)
+                .Where(t => t.gameObject.name.Equals("Player") && doUpdate.searching && !_damaged)
                 .Subscribe(_ => {
+                    simpleAnime.Play("Run"); // 走るアニメ
                     doUpdate.ApplyChasing();
                     doFixedUpdate.ApplyRun();
                     say("I found\nthe cat!");
@@ -189,8 +192,9 @@ namespace StudioMeowToon {
 
             // プレイヤーロスト
             this.OnTriggerExitAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.searching)
+                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.searching && !_damaged)
                 .Subscribe(_ => {
+                    simpleAnime.Play("Walk"); // 歩くアニメ
                     doUpdate.ApplySearching();
                     doFixedUpdate.ApplyWalk();
                     say("I lost\nthe cat...");
@@ -202,7 +206,7 @@ namespace StudioMeowToon {
 
             // 追跡中
             this.UpdateAsObservable()
-                .Where(_ => doUpdate.chasing)
+                .Where(_ => doUpdate.chasing && !_damaged)
                 .Subscribe(_ => {
                     simpleAnime.Play("Run"); // 走るアニメ
                     transform.LookAt(new Vector3(
@@ -215,7 +219,7 @@ namespace StudioMeowToon {
 
             // 追跡中移動
             this.FixedUpdateAsObservable()
-                .Where(_ => doUpdate.chasing)
+                .Where(_ => doUpdate.chasing && !_damaged)
                 .Subscribe(_ => {
                     var _speed = _rb.velocity.magnitude; // 速度ベクトル取得
                     if (doFixedUpdate.run) { // 走る
@@ -235,7 +239,7 @@ namespace StudioMeowToon {
 
             // パンチ攻撃中
             this.UpdateAsObservable()
-                .Where(_ => doUpdate.attacking)
+                .Where(_ => doUpdate.attacking && !_damaged)
                 .Subscribe(_ => {
                     simpleAnime.Play("Punch"); // パンチアニメ
                     transform.LookAt(new Vector3(
@@ -247,7 +251,7 @@ namespace StudioMeowToon {
 
             // プレイヤー接触時にパンチ攻撃
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking)
+                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking && !_damaged)
                 .Subscribe(t => {
                     doUpdate.ApplyAttacking();
                     soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
@@ -263,7 +267,7 @@ namespace StudioMeowToon {
             // プレイヤー接触中はパンチ攻撃を繰り返す
             bool _wait = false;
             this.OnCollisionStayAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking)
+                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking && !_damaged)
                 .Subscribe(t => {
                     doUpdate.ApplyChasing();
                     Observable.TimerFrame(24).Where(_ => !_wait).Subscribe(_ => { // FIXME: 60fpsの時は？
@@ -282,6 +286,27 @@ namespace StudioMeowToon {
                 });
 
             #endregion
+
+            #region ダメージを受ける
+
+            // 爆弾の破片に当たった
+            this.OnCollisionEnterAsObservable()
+                .Where(_ => _.gameObject.name.Contains("debris") && !_damaged)
+                .Subscribe(_ => {
+                    simpleAnime.Play("ClimbUp"); // ダメージ代用
+                    _damaged = true;
+                    say("Damn it!", 65); // FIXME: 表示されない？
+                    // 10秒後に復活
+                    Observable.Timer(System.TimeSpan.FromSeconds(10))
+                        .Subscribe(__ => {
+                            simpleAnime.Play("Walk"); // 歩くアニメ
+                            doUpdate.ApplySearching();
+                            doFixedUpdate.ApplyWalk();
+                            _damaged = false;
+                        });
+                });
+
+            #endregion
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -290,16 +315,14 @@ namespace StudioMeowToon {
         /// <summary>
         /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
         /// </summary>
-        private void say(string text, int size = 60, double time = 0.5d) { // TODO: バッファー？
+        private void say(string text, int size = 60, double time = 0.5d) { // TODO: 表示されないものがある？
             if (!isRendered) { return; }
-
             // プレイヤーとの距離で大きさ調整
             var _distance = distance > 1 ? (int) (distance / 2) : 1;
             if (_distance == 0) { _distance = 1; }
             speechImage.GetComponent<RectTransform>().sizeDelta = new Vector2(speechX / _distance, speechY / _distance);
             speechText.fontSize = size / (int) (_distance * 1.25f); // 調整値
-            Debug.Log("_distance: " + _distance + " x: " + speechImage.GetComponent<RectTransform>().sizeDelta.x + " y: " + speechImage.GetComponent<RectTransform>().sizeDelta.y);
-
+            //Debug.Log("_distance: " + _distance + " x: " + speechImage.GetComponent<RectTransform>().sizeDelta.x + " y: " + speechImage.GetComponent<RectTransform>().sizeDelta.y);
             speechText.text = text;
             speechImage.SetActive(true);
             Observable.Timer(System.TimeSpan.FromSeconds(time))
@@ -307,6 +330,14 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     speechImage.SetActive(false);
                 });
+        }
+
+        private void say(string text, double time) {
+            say(text, 60, time);
+        }
+
+        private void say(string text) {
+            say(text, 60, 0.5d);
         }
 
         /// <summary>
@@ -317,7 +348,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // カメラ映り
+        // カメラ映り TODO: UniRx
 
         private const string MAIN_CAMERA_TAG_NAME = "MainCamera";  // メインカメラに付いているタグ名
 
@@ -327,14 +358,12 @@ namespace StudioMeowToon {
         void OnBecameVisible() { // メインカメラに映った時
             if (Camera.current.tag == MAIN_CAMERA_TAG_NAME) {
                 isRendered = true;
-                Debug.Log("isRendered: " + isRendered);
             }
         }
 
         void OnBecameInvisible() { // メインカメラに映らなくなった時
             if (Camera.current != null && Camera.current.tag == MAIN_CAMERA_TAG_NAME) {
                 isRendered = false;
-                Debug.Log("isRendered: " + isRendered);
             }
         }
 

@@ -91,7 +91,7 @@ namespace StudioMeowToon {
             startButton = Gamepad.current.startButton;
             selectButton = Gamepad.current.selectButton;
             rsUp = Gamepad.current.rightStick.up;
-            rsDown = Gamepad.current.rightStick.down;
+            rsDown = _useVirtualController ? Gamepad.current.leftStick.up : Gamepad.current.rightStick.down; // InputSystem のバグ？
             if (Application.platform == RuntimePlatform.Android) {
                 // Android
                 aButton = Gamepad.current.aButton;

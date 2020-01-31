@@ -5357,7 +5357,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d54531977ecb194c95e2d3aa7a5d72a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ControlPath: <Gamepad>/rightStick/down
+  m_ControlPath: <Gamepad>/leftStick/up
 --- !u!114 &676644992
 MonoBehaviour:
   m_ObjectHideFlags: 0
