@@ -32,7 +32,7 @@ namespace StudioMeowToon {
 
         public void LookPlayer() { // TODO: 再検討
             transform.localPosition = new Vector3(0f, 0.75f, 0.8f);
-            transform.localRotation = new Quaternion(0, -180, 0, 0);
+            transform.localRotation = new Quaternion(0f, -180f, 0f, 0f);
         }
 
         public void ResetLookAround() { // カメラリセット
@@ -68,7 +68,7 @@ namespace StudioMeowToon {
             if (!xButton.isPressed) { // 視点操作モードでない場合
                 float _ADJUST = 80.0f; // 移動係数
                 if (isForwardPosition) {
-                    if (transform.localPosition.z < -0.5) { // カメラシステムをプレイヤーの頭のすぐ後ろまで移動する
+                    if (transform.localPosition.z < -0.5f) { // カメラシステムをプレイヤーの頭のすぐ後ろまで移動する
                         transform.localPosition += new Vector3(0f, 0f, 0.075f * Time.deltaTime * _ADJUST);
                     }
                     transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
@@ -86,25 +86,27 @@ namespace StudioMeowToon {
 
             // 視点ズームアップ
             if (rsUp.isPressed) {
-                if (!(defaultLocalPosition.z >= -0.6)) {
+                if (!(defaultLocalPosition.z >= -0.6f)) { // 調整値
                     defaultLocalPosition = new Vector3(
                         defaultLocalPosition.x,
                         defaultLocalPosition.y,
                         defaultLocalPosition.z + 0.05f
                     );
                     transform.localPosition = defaultLocalPosition;
+                    Debug.Log("ズームアップ");
                 }
             }
 
             // 視点ズームアウト
             if (rsDown.isPressed) {
-                if (!(defaultLocalPosition.z <= -1.55)) {
+                if (!(defaultLocalPosition.z <= -1.55f)) { // 調整値
                     defaultLocalPosition = new Vector3(
                         defaultLocalPosition.x,
                         defaultLocalPosition.y,
                         defaultLocalPosition.z - 0.05f
                     );
                     transform.localPosition = defaultLocalPosition;
+                    Debug.Log("ズームアウト");
                 }
             }
 

@@ -19,7 +19,7 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private int timer = 10;
+        private int timer = 5;
 
         [SerializeField]
         private GameObject prefabForPiece; // 破片生成用のプレハブ
@@ -27,12 +27,14 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private bool _ignition; // 点火フラグ
+        private bool have = false; // 持たれたかどうか
+
+        private bool ignition = false; // 点火フラグ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
 
-        public bool ignition { set => _ignition = value; }
+        //public bool ignition { set => _ignition = value; }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // 更新メソッド
@@ -43,25 +45,30 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Where(_ => transform.parent != null && transform.parent.name.Equals("Player")) // プレイヤーに持たれたら
                 .Subscribe(_ => {
-                    //Debug.Log("点火！");
-                    ignition = true; // 自動的に点火される
+                    have = true; // 持たれたフラグON
+                });
+
+            // 爆弾は
+            this.UpdateAsObservable()
+                .Where(_ => transform.parent == null && have) // プレイヤーが離したら
+                .Subscribe(_ => {
+                    ignition = true; // 点火される
                 });
 
             // 爆弾は
             var _once = false;
             this.UpdateAsObservable()
-                .Where(_ => _ignition && !_once) // 点火されたら
+                .Where(_ => ignition && !_once) // 点火されたら
                 .Subscribe(_ => {
                     _once = true; // 一度だけ
                     // [timer]秒後に
                     Observable.Timer(System.TimeSpan.FromSeconds(timer))
                         .Subscribe(__ => {
                             if (transform.parent != null && transform.parent.name.Equals("Player")) { // まだプレイヤーに持たれていたら
-                                transform.parent.GetComponent<PlayerController>().PurgeFromBomb(); // 強制パージ
+                                transform.parent.GetComponent<PlayerController>().PurgeFromBomb(); // 強制パージ TODO: 要る？
                             }
-                            //Debug.Log("爆発！");
                             Destroy(gameObject); // 自分を削除して
-                            explodePiece(8, 0.75f, 60); // 破片を飛ばす
+                            explodePiece(6, 0.75f, 25); // 破片を飛ばす
                         });
                 }).AddTo(this);
         }
