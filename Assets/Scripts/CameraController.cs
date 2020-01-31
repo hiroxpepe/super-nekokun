@@ -6,8 +6,6 @@ namespace StudioMeowToon {
     /// </summary>
     public class CameraController : GamepadMaper {
 
-        // TODO: カメラの視野を調節する機能：ステップ式で良い
-
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // カメラ用 GameObject への参照
 
@@ -67,20 +65,6 @@ namespace StudioMeowToon {
                 return;
             }
 
-            // 視点ズームアップ
-            if (yButton.isPressed && l1Button.isPressed && dpadUp.wasPressedThisFrame) {
-                defaultLocalPosition = new Vector3(defaultLocalPosition.x, defaultLocalPosition.y, defaultLocalPosition.z + 0.1f); 
-            }
-
-            // 視点ズームアウト
-            if (yButton.isPressed && l1Button.isPressed && dpadDown.wasPressedThisFrame) {
-                defaultLocalPosition = new Vector3(defaultLocalPosition.x, defaultLocalPosition.y, defaultLocalPosition.z - 0.1f);
-            }
-
-        }
-
-        // LateUpdate is called after all Update functions have been called.
-        void LateUpdate() {
             if (!xButton.isPressed) { // 視点操作モードでない場合
                 float _ADJUST = 80.0f; // 移動係数
                 if (isForwardPosition) {
@@ -99,6 +83,31 @@ namespace StudioMeowToon {
                     transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
                 }
             }
+
+            // 視点ズームアップ
+            if (rsUp.isPressed) {
+                if (!(defaultLocalPosition.z >= -0.6)) {
+                    defaultLocalPosition = new Vector3(
+                        defaultLocalPosition.x,
+                        defaultLocalPosition.y,
+                        defaultLocalPosition.z + 0.05f
+                    );
+                    transform.localPosition = defaultLocalPosition;
+                }
+            }
+
+            // 視点ズームアウト
+            if (rsDown.isPressed) {
+                if (!(defaultLocalPosition.z <= -1.55)) {
+                    defaultLocalPosition = new Vector3(
+                        defaultLocalPosition.x,
+                        defaultLocalPosition.y,
+                        defaultLocalPosition.z - 0.05f
+                    );
+                    transform.localPosition = defaultLocalPosition;
+                }
+            }
+
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
