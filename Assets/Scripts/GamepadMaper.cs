@@ -23,11 +23,11 @@ namespace StudioMeowToon {
 
         protected ButtonControl dpadUp; // 十字キー上ボタン
 
-        protected ButtonControl dpadDown; // 十字キー上ボタン
+        protected ButtonControl dpadDown; // 十字キー下ボタン
 
-        protected ButtonControl dpadLeft; // 十字キー上ボタン
+        protected ButtonControl dpadLeft; // 十字キー左ボタン
 
-        protected ButtonControl dpadRight; // 十字キー上ボタン
+        protected ButtonControl dpadRight; // 十字キー右ボタン
 
         protected ButtonControl l1Button; // L1ボタン
 
@@ -40,6 +40,10 @@ namespace StudioMeowToon {
         protected ButtonControl startButton; // スタートボタン
 
         protected ButtonControl selectButton; // セレクトボタン
+
+        protected ButtonControl rsUp; // Rスティック上入力
+
+        protected ButtonControl rsDown; // Rスティック下入力
 
         private bool _useVirtualController;
 
@@ -86,6 +90,8 @@ namespace StudioMeowToon {
             r2Button = Gamepad.current.rightTrigger;
             startButton = Gamepad.current.startButton;
             selectButton = Gamepad.current.selectButton;
+            rsUp = Gamepad.current.rightStick.up;
+            rsDown = Gamepad.current.rightStick.down;
             if (Application.platform == RuntimePlatform.Android) {
                 // Android
                 aButton = Gamepad.current.aButton;
