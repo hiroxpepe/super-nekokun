@@ -38,13 +38,13 @@ namespace StudioMeowToon {
 
         protected ButtonControl yButton; // Yボタン:任天堂配置
 
-        protected ButtonControl dpadUp; // 十字キー上ボタン
+        protected ButtonControl upButton; // 十字キー上ボタン
 
-        protected ButtonControl dpadDown; // 十字キー下ボタン
+        protected ButtonControl downButton; // 十字キー下ボタン
 
-        protected ButtonControl dpadLeft; // 十字キー左ボタン
+        protected ButtonControl leftButton; // 十字キー左ボタン
 
-        protected ButtonControl dpadRight; // 十字キー右ボタン
+        protected ButtonControl rightButton; // 十字キー右ボタン
 
         protected ButtonControl l1Button; // L1ボタン
 
@@ -58,9 +58,9 @@ namespace StudioMeowToon {
 
         protected ButtonControl selectButton; // セレクトボタン
 
-        protected ButtonControl rsUp; // Rスティック上入力
+        protected ButtonControl rStickUpButton; // Rスティック上入力
 
-        protected ButtonControl rsDown; // Rスティック下入力
+        protected ButtonControl rStickDownButton; // Rスティック下入力
 
         bool _useVirtualController;
 
@@ -97,18 +97,18 @@ namespace StudioMeowToon {
             }
 
             // OS判定とゲームパッドのキー参照
-            dpadUp = Gamepad.current.dpad.up;
-            dpadDown = Gamepad.current.dpad.down;
-            dpadLeft = Gamepad.current.dpad.left;
-            dpadRight = Gamepad.current.dpad.right;
+            upButton = Gamepad.current.dpad.up;
+            downButton = Gamepad.current.dpad.down;
+            leftButton = Gamepad.current.dpad.left;
+            rightButton = Gamepad.current.dpad.right;
             l1Button = Gamepad.current.leftShoulder;
             r1Button = Gamepad.current.rightShoulder;
             l2Button = Gamepad.current.leftTrigger;
             r2Button = Gamepad.current.rightTrigger;
             startButton = Gamepad.current.startButton;
             selectButton = Gamepad.current.selectButton;
-            rsUp = Gamepad.current.rightStick.up;
-            rsDown = _useVirtualController ? Gamepad.current.leftStick.up : Gamepad.current.rightStick.down; // InputSystem のバグ？
+            rStickUpButton = Gamepad.current.rightStick.up;
+            rStickDownButton = _useVirtualController ? Gamepad.current.leftStick.up : Gamepad.current.rightStick.down; // InputSystem のバグ？
             if (Application.platform == RuntimePlatform.Android) {
                 // Android
                 aButton = Gamepad.current.aButton;

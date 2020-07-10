@@ -321,7 +321,7 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////
             // 水中かどうかチェック
             if (checkIntoWater()) {
-                if (dpadUp.isPressed) {
+                if (upButton.isPressed) {
                     simpleAnime.Play("Swim"); // 泳ぐアニメ
                 } else {
                     simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
@@ -408,13 +408,13 @@ STEP0:
                         holded = null; // 持つオブジェクト参照解除
                     }
                     ////////////////////////////////////////////////////////////
-                    if (dpadLeft.isPressed) { // 左
+                    if (leftButton.isPressed) { // 左
                         if (!doUpdate.throwing) {
                             simpleAnime.Play("Push");
                         } else if (doUpdate.throwed) {
                             simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
                         }
-                    } else if (dpadLeft.isPressed) { // 右
+                    } else if (leftButton.isPressed) { // 右
                         if (!doUpdate.throwing) {
                             simpleAnime.Play("Push");
                         } else if (doUpdate.throwed) {
@@ -423,7 +423,7 @@ STEP0:
                     }
                 }
 
-                if (dpadUp.isPressed) { // 上を押した時
+                if (upButton.isPressed) { // 上を押した時
                     if (l1Button.isPressed) {
                         bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
                         return;
@@ -451,7 +451,7 @@ STEP0:
                         // 階段を下がるかチェック
                         checkStairDown();
                     }
-                } else if (dpadDown.isPressed) { // 下を押した時
+                } else if (downButton.isPressed) { // 下を押した時
                     if (l1Button.isPressed) {
                         bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
                         return;
@@ -465,7 +465,7 @@ STEP0:
                     }
                     soundSystem.PlayWalkClip();
                     doFixedUpdate.backward = true;
-                } else if (dpadUp.isPressed == false && dpadDown.isPressed == false) { // 上下を離した時
+                } else if (upButton.isPressed == false && downButton.isPressed == false) { // 上下を離した時
                     if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
                         if (!doUpdate.throwing) {
                             if (aButton.isPressed) { // Aボタン押しっぱなし
@@ -490,7 +490,7 @@ STEP0:
                 }
 
                 // 上を押しながら、押す(Aボタン)
-                if (aButton.wasPressedThisFrame && dpadUp.isPressed) {
+                if (aButton.wasPressedThisFrame && upButton.isPressed) {
                     if (checkToPushBlock()) {
                         //startFaceing(); // オブジェクトに正対する開始
                         faceToObject(pushed); // オブジェクトに正対する
@@ -502,7 +502,7 @@ STEP0:
             else if (!doUpdate.grounded && !doUpdate.climbing) {
                 doUpdate.secondsAfterJumped += Time.deltaTime; // ジャンプ後経過秒インクリメント
                 // 空中で移動
-                var _axis = dpadUp.isPressed ? 1 : dpadDown.isPressed ? -1 : 0;
+                var _axis = upButton.isPressed ? 1 : downButton.isPressed ? -1 : 0;
                 if (_axis == 1) { // 前移動
                     doFixedUpdate.jumpForward = true;
                     if (checkIntoWater()) { soundSystem.PlayWaterForwardClip(); }
@@ -540,7 +540,7 @@ STEP0:
                 if (yButton.wasPressedThisFrame && checkIntoWater()) { soundSystem.PlayWaterSinkClip(); } // 水中で沈む音
                 if (!doUpdate.climbing) { // 上り降り発動なら
                     if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプが発動してなかったら
-                        if (dpadDown.isPressed) { // ハシゴを降りる
+                        if (downButton.isPressed) { // ハシゴを降りる
                             if (previousPosition[0].y - (0.1f * Time.deltaTime) > transform.position.y) {
                                 checkToClimbDownByLadder();
                             }
@@ -601,7 +601,7 @@ STEP0:
             // 回転 // TODO: 入力の遊びを持たせる？ // TODO: 左右2回押しで180度回転？ TODO: 左右2回押しで90度ずつ回転の実装
             if (!doUpdate.climbing) {
                 var _ADJUST = 20; // 調整値
-                var _axis = dpadRight.isPressed ? 1 : dpadLeft.isPressed ? -1 : 0;
+                var _axis = rightButton.isPressed ? 1 : leftButton.isPressed ? -1 : 0;
                 if (aButton.isPressed && doUpdate.grounded) { // Aボタン押しながら左右でサイドステップ※接地時のみ
                     if (_axis == -1) {
                         if (speed < 2.0f) {
@@ -836,9 +836,9 @@ STEP0:
         // LateUpdate is called after all Update functions have been called.
         void LateUpdate() {
             if (doUpdate.climbing) { // 捕まり反転ジャンプの準備
-                if (dpadLeft.isPressed) {
+                if (leftButton.isPressed) {
                     AxisToggle.Left = AxisToggle.Left == true ? false : true;
-                } else if (dpadRight.isPressed) {
+                } else if (rightButton.isPressed) {
                     AxisToggle.Right = AxisToggle.Right == true ? false : true;
                 }
                 if (l1Button.isPressed) { // Lボタン押しっぱなし TODO: ボタンの変更
@@ -1060,7 +1060,7 @@ STEP0:
             var _MOVE = 0.8f;
             var _fX = (float) Math.Round(transform.forward.x);
             var _fZ = (float) Math.Round(transform.forward.z);
-            var _axis = dpadRight.isPressed ? 1 : dpadLeft.isPressed ? -1 : 0;
+            var _axis = rightButton.isPressed ? 1 : leftButton.isPressed ? -1 : 0;
             if (_fX == 0 && _fZ == 1) { // Z軸正方向
                 transform.localPosition = new Vector3(
                     transform.localPosition.x + (_axis * _MOVE * Time.deltaTime),
@@ -1314,14 +1314,14 @@ STEP0:
                 var _myY = transform.position.y; // 自分のy位置(0基点)を取得
                 if (Math.Round(_myY, 3) + 5f * Time.deltaTime < Math.Round(_hitTop, 3)) { // 自分が前方オブジェクトより低かったら TODO: 5f は調整値、デルタタイムを掛けて fps 調整
                     faceToFace(); // 面に正対する
-                    if (dpadUp.isPressed) { // 上を押した時
+                    if (upButton.isPressed) { // 上を押した時
                         transform.Translate(0, 1f * Time.deltaTime, 0); // 上る
                         doUpdate.grounded = false; // 接地フラグOFF
                         if (_rayBox.transform.position.y > transform.position.y) { // キャラ高さの範囲で
                             _rayBox.transform.localPosition = new Vector3(0, _rayBox.transform.localPosition.y - (1f * 1.5f * Time.deltaTime), 0.1f); // RayBoxは逆に動かす
                         }
                         soundSystem.PlayClimbClip();
-                    } else if (dpadDown.isPressed) { // 下を押した時
+                    } else if (downButton.isPressed) { // 下を押した時
                         transform.Translate(0, -1f * Time.deltaTime, 0); // 降りる
                         doUpdate.grounded = false; // 接地フラグOFF
                         if (_rayBox.transform.position.y < transform.position.y + 0.4f) { // キャラ高さの範囲で 0.4 は_rayBoxの元の位置
@@ -1412,7 +1412,7 @@ STEP0:
         void doStairDown() { // 階段を下りる
             doFixedUpdate.stairDown = true;
             // 上下を離した時
-            if (dpadUp.isPressed == false && dpadDown.isPressed == false) {
+            if (upButton.isPressed == false && downButton.isPressed == false) {
                 doUpdate.stairDowning = false;
                 stairDowned = null; // 階段の参照解除
                 doFixedUpdate.idol = true; // 念のため重力有効化
@@ -1432,7 +1432,7 @@ STEP0:
             doFixedUpdate.stairUp = true;
             if (getRendererTop(stairUped) > transform.position.y) {
                 // 上下を離した時
-                if (dpadUp.isPressed == false && dpadDown.isPressed == false) {
+                if (upButton.isPressed == false && downButton.isPressed == false) {
                     doUpdate.stairUping = false;
                     stairUped = null; // 階段の参照解除
                     doFixedUpdate.idol = true; // 念のため重力有効化

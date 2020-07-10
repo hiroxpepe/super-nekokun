@@ -190,7 +190,7 @@ namespace StudioMeowToon {
             // ボタンを押したらスマホ振動
             this.UpdateAsObservable()
                 .Where(_ => virtualController && useVibration &&(aButton.wasPressedThisFrame || bButton.wasPressedThisFrame || xButton.wasPressedThisFrame || yButton.wasPressedThisFrame ||
-                    dpadUp.wasPressedThisFrame || dpadDown.wasPressedThisFrame || dpadLeft.wasPressedThisFrame || dpadRight.wasPressedThisFrame ||
+                    upButton.wasPressedThisFrame || downButton.wasPressedThisFrame || leftButton.wasPressedThisFrame || rightButton.wasPressedThisFrame ||
                     l1Button.wasPressedThisFrame || r1Button.wasPressedThisFrame || selectButton.wasPressedThisFrame || startButton.wasPressedThisFrame))
                 .Subscribe(_ => {
                     AndroidVibrator.Vibrate(50L);
