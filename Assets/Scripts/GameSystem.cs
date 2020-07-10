@@ -32,53 +32,53 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private Text information; // アイテム数表示用テキストUI
+        Text information; // アイテム数表示用テキストUI
 
         [SerializeField]
-        private Text message; // メッセージ表示用テキストUI
+        Text message; // メッセージ表示用テキストUI
 
         [SerializeField]
-        private Text debug; // デバッグ表示用テキストUI
+        Text debug; // デバッグ表示用テキストUI
 
         [SerializeField]
-        private Slider playerLifeUI; // Player HPのUI
+        Slider playerLifeUI; // Player HPのUI
 
         [SerializeField]
-        private Slider playerBombAngleUI; // Player 弾道角度のUI
+        Slider playerBombAngleUI; // Player 弾道角度のUI
 
         [SerializeField]
-        private Material lockonFocusMaterial; // ロックオン用マテリアル
+        Material lockonFocusMaterial; // ロックオン用マテリアル
 
         [SerializeField]
-        private Camera mainCamera; // メインカメラ
+        Camera mainCamera; // メインカメラ
 
         [SerializeField]
-        private Camera eventCamera; // イベントカメラ
+        Camera eventCamera; // イベントカメラ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private int itemTotalCount = 0; // アイテム総数
+        int itemTotalCount = 0; // アイテム総数
 
-        private int itemRemainCount = 0; // アイテム残数
+        int itemRemainCount = 0; // アイテム残数
 
-        private bool isGameOver = false; // GAMEオーバーフラグ
+        bool isGameOver = false; // GAMEオーバーフラグ
 
-        private bool isLevelClear = false; // ステージクリアフラグ
+        bool isLevelClear = false; // ステージクリアフラグ
 
-        private float playerLifeValue = 10f; // Player HP;
+        float playerLifeValue = 10f; // Player HP;
 
-        private float playerBombAngleValue = 0f; // Player 弾道角度;
+        float playerBombAngleValue = 0f; // Player 弾道角度;
 
-        private GameObject lockonTarget = null; // ロックオン対象
+        GameObject lockonTarget = null; // ロックオン対象
 
-        private Material lockonOriginalMaterial; // ロックオン対象の元のマテリアル
+        Material lockonOriginalMaterial; // ロックオン対象の元のマテリアル
 
-        private bool useVibration = true; // スマホ時に振動を使うかどうか
+        bool useVibration = true; // スマホ時に振動を使うかどうか
 
-        private bool isPausing = false; // ポーズ(一時停止)
+        bool isPausing = false; // ポーズ(一時停止)
 
-        private bool isEventView = false; // イベント中かどうか
+        bool isEventView = false; // イベント中かどうか
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // FPS計測
@@ -319,7 +319,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プライベートメソッド(キャメルケース: 動詞)
 
-        private void checkGameOver() {
+        void checkGameOver() {
             if (playerLifeValue == 0) {
                 Time.timeScale = 0f;
                 isGameOver = true; // GAMEオーバーフラグON
@@ -330,19 +330,19 @@ namespace StudioMeowToon {
             }
         }
 
-        private void updatePlayerStatus() { // Player のステイタス表示
+        void updatePlayerStatus() { // Player のステイタス表示
             playerLifeUI.value = playerLifeValue;
             playerBombAngleUI.value = playerBombAngleValue;
         }
 
-        private void updateGameInfo() { // GAME の情報を表示
+        void updateGameInfo() { // GAME の情報を表示
             updateFpForUpdate(); // FPS更新
             information.text = "Item (" + itemRemainCount + "/" + itemTotalCount + ")" + 
                                "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) + 
                                "\r\nfps2 " + string.Format("{0:F3}", Math.Round(fpsForFixedUpdate, 3, MidpointRounding.AwayFromZero)); // 残りアイテム数表示
         }
 
-        private void updateFpForUpdate() { // FPS更新
+        void updateFpForUpdate() { // FPS更新
             ++fpsForUpdateFrameCount; // FPS取得
             float _time = Time.realtimeSinceStartup - fpsForUpdatePreviousTime;
             if (_time >= 0.5f) {
@@ -352,12 +352,12 @@ namespace StudioMeowToon {
             }
         }
 
-        private void initFpsForUpdate() { // FPS初期化
+        void initFpsForUpdate() { // FPS初期化
             fpsForUpdateFrameCount = 0;
             fpsForUpdatePreviousTime = 0.0f;
         }
 
-        private void updateFpsForFixedUpdate() { // fixed FPS更新
+        void updateFpsForFixedUpdate() { // fixed FPS更新
             ++fpsForFixedUpdateFrameCount; // fixed FPS取得
             float _time = Time.realtimeSinceStartup - fpsForFixedUpdatePreviousTime;
             if (_time >= 0.5f) {
@@ -367,12 +367,12 @@ namespace StudioMeowToon {
             }
         }
 
-        private void initFpsForFixedUpdate() { // fixed FPS初期化
+        void initFpsForFixedUpdate() { // fixed FPS初期化
             fpsForFixedUpdateFrameCount = 0;
             fpsForFixedUpdatePreviousTime = 0.0f;
         }
 
-        private void changeCamera() { // カメラ切り替え
+        void changeCamera() { // カメラ切り替え
             eventCamera.enabled = !eventCamera.enabled;
             mainCamera.enabled = !mainCamera.enabled;
         }

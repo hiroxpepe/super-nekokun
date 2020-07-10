@@ -29,16 +29,16 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private float lifetime = 0.5f; // 消える時間
+        float lifetime = 0.5f; // 消える時間
 
         ///////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private float secondSinceHit = 0f; // ヒットしてからの経過秒
+        float secondSinceHit = 0f; // ヒットしてからの経過秒
 
-        private bool hits = false; // 弾が何かにあたったかどうか
+        bool hits = false; // 弾が何かにあたったかどうか
 
-        private SoundSystem soundSystem; // サウンドシステム
+        SoundSystem soundSystem; // サウンドシステム
 
         ///////////////////////////////////////////////////////////////////////////
         // 更新メソッド
@@ -101,7 +101,7 @@ namespace StudioMeowToon {
         ///// <summary>
         ///// 飛散する破片に加える力のランダム数値取得。// TODO: 効かない
         ///// </summary>
-        //private int getRandomLifetime(float lifetime) {
+        //int getRandomLifetime(float lifetime) {
         //    var _random = new System.Random();
         //    return _random.Next((int) lifetime / 2, (int) lifetime * 2); // lifetime の2分の1から2倍の範囲で
         //}
