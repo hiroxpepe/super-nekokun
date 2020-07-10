@@ -38,9 +38,9 @@ namespace StudioMeowToon {
 
         Vector3[] previousPosition; // 10フレ分の位置を保存
 
-        AutoDestroyParam autoDestroyParam; // 自動削除用パラメータ構造体
+        AutoDestroyParam autoDestroyParam; // 自動削除用パラメータクラス
 
-        ShockParam shockParam; // 衝撃用パラメータ構造体
+        ShockParam shockParam; // 衝撃用パラメータクラス
 
         Vector3 bulletUp; // 当たった弾のベクトルUp
 
@@ -201,9 +201,9 @@ namespace StudioMeowToon {
         #region AutoDestroyParam
 
         /// <summary>
-        /// 自動削除用のパラメーター構造体。
+        /// 自動削除用のパラメータークラス。
         /// </summary>
-        protected struct AutoDestroyParam {
+        protected class AutoDestroyParam {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
@@ -243,9 +243,9 @@ namespace StudioMeowToon {
         #region ShockParam
 
         /// <summary>
-        /// 衝撃用のパラメーター構造体。
+        /// 衝撃用のパラメータークラス。
         /// </summary>
-        protected struct ShockParam {
+        protected class ShockParam {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
