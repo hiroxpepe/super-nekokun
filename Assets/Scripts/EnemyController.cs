@@ -111,7 +111,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     distance = (float) System.Math.Round(
                         Vector3.Distance(transform.position, _player.transform.position), 1, System.MidpointRounding.AwayFromZero
-                     );
+                    );
                 });
 
             // 初期値:索敵(デフォルト)
@@ -174,8 +174,7 @@ namespace StudioMeowToon {
 
             // 障害物に当たった(壁)
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Contains("EnemyWall") ||
-                       t.gameObject.name.Contains("Wall") && doUpdate.searching)
+                .Where(t => doUpdate.searching && (t.gameObject.name.Contains("EnemyWall") || t.gameObject.name.Contains("Wall")))
                 .Subscribe(_ => {
                     transform.LookAt(new Vector3( // 接地プレートの中心を向く
                         plate.transform.position.x,
@@ -187,7 +186,7 @@ namespace StudioMeowToon {
 
             // 障害物に当たった(ブロック)
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Contains("Block") && doUpdate.searching)
+                .Where(t => doUpdate.searching && t.gameObject.name.Contains("Block") )
                 .Subscribe(_ => {
                     transform.rotation = Quaternion.Euler(
                         transform.rotation.x,
@@ -199,7 +198,7 @@ namespace StudioMeowToon {
 
             // プレイヤー発見
             this.OnTriggerEnterAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && doUpdate.searching && !_damaged)
+                .Where(t => doUpdate.searching && !_damaged && t.gameObject.name.Equals("Player"))
                 .Subscribe(_ => {
                     simpleAnime.Play("Run"); // 走るアニメ
                     doUpdate.ApplyChasing();
@@ -209,7 +208,7 @@ namespace StudioMeowToon {
 
             // プレイヤーロスト
             this.OnTriggerExitAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.searching && !_damaged)
+                .Where(t => !doUpdate.searching && !_damaged && t.gameObject.name.Equals("Player"))
                 .Subscribe(_ => {
                     simpleAnime.Play("Walk"); // 歩くアニメ
                     doUpdate.ApplySearching();
@@ -268,7 +267,7 @@ namespace StudioMeowToon {
 
             // プレイヤー接触時にパンチ攻撃
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking && !_damaged)
+                .Where(t => !doUpdate.attacking && !_damaged && t.gameObject.name.Equals("Player"))
                 .Subscribe(t => {
                     doUpdate.ApplyAttacking();
                     soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
@@ -284,7 +283,7 @@ namespace StudioMeowToon {
             // プレイヤー接触中はパンチ攻撃を繰り返す
             bool _wait = false;
             this.OnCollisionStayAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player") && !doUpdate.attacking && !_damaged)
+                .Where(t => !doUpdate.attacking && !_damaged && t.gameObject.name.Equals("Player"))
                 .Subscribe(t => {
                     doUpdate.ApplyChasing();
                     Observable.TimerFrame(24).Where(_ => !_wait).Subscribe(_ => { // FIXME: 60fpsの時は？
@@ -308,7 +307,7 @@ namespace StudioMeowToon {
 
             // 爆弾の破片に当たった
             this.OnCollisionEnterAsObservable()
-                .Where(_ => _.gameObject.name.Contains("debris") && !_damaged)
+                .Where(t => !_damaged && t.gameObject.name.Contains("debris"))
                 .Subscribe(_ => {
                     simpleAnime.Play("ClimbUp"); // ダメージ代用
                     _damaged = true;
