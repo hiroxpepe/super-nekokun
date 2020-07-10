@@ -74,9 +74,9 @@ namespace StudioMeowToon {
 
         GameObject stairDowned; // 階段を下りられるオブジェクト
 
-        DoUpdate doUpdate; // Update() メソッド用フラグ構造体
+        DoUpdate doUpdate; // Update() メソッド用フラグクラス
 
-        DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
+        DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグクラス
 
         int life; // ヒットポイント
 
@@ -189,9 +189,9 @@ namespace StudioMeowToon {
         // Awake is called when the script instance is being loaded.
         void Awake() {
 
-            doUpdate = DoUpdate.GetInstance(); // 状態フラグ構造体
-            doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグ構造体
-            bombAngle = BombAngle.GetInstance(); // 弾道角度用構造体
+            doUpdate = DoUpdate.GetInstance(); // 状態フラグクラス
+            doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
+            bombAngle = BombAngle.GetInstance(); // 弾道角度用クラス
             life = 10; // HP初期化
 
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
@@ -1675,9 +1675,9 @@ STEP0:
         #region DoUpdate
 
         /// <summary>
-        /// Update() メソッド用の構造体。
+        /// Update() メソッド用のクラス。
         /// </summary>
-        protected struct DoUpdate {
+        protected class DoUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド(アンダースコアorキャメルケース)
@@ -1797,9 +1797,9 @@ STEP0:
         #region DoFixedUpdate
 
         /// <summary>
-        /// FixedUpdate() メソッド用の構造体。
+        /// FixedUpdate() メソッド用のクラス。
         /// </summary>
-        protected struct DoFixedUpdate {
+        protected class DoFixedUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
@@ -1893,9 +1893,9 @@ STEP0:
         #region BombAngle
 
         /// <summary>
-        /// 弾道角度用の構造体。
+        /// 弾道角度用のクラス。
         /// </summary>
-        protected struct BombAngle {
+        protected class BombAngle {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド

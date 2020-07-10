@@ -43,9 +43,9 @@ namespace StudioMeowToon {
 
         SoundSystem soundSystem; // サウンドシステム
 
-        DoUpdate doUpdate; // Update() メソッド用フラグ構造体
+        DoUpdate doUpdate; // Update() メソッド用フラグクラス
 
-        DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
+        DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグクラス
 
         float distance; // プレイヤーとの距離
 
@@ -62,8 +62,8 @@ namespace StudioMeowToon {
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
-            doUpdate = DoUpdate.GetInstance(); // 状態フラグ構造体
-            doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグ構造体
+            doUpdate = DoUpdate.GetInstance(); // 状態フラグクラス
+            doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
 
             // SoundSystem 取得
             soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
@@ -387,9 +387,9 @@ namespace StudioMeowToon {
         #region DoUpdate
 
         /// <summary>
-        /// Update() メソッド用の構造体。
+        /// Update() メソッド用のクラス。
         /// </summary>
-        protected struct DoUpdate {
+        protected class DoUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド(アンダースコアorキャメルケース)
@@ -466,9 +466,9 @@ namespace StudioMeowToon {
         #region DoFixedUpdate
 
         /// <summary>
-        /// FixedUpdate() メソッド用の構造体。
+        /// FixedUpdate() メソッド用のクラス。
         /// </summary>
-        protected struct DoFixedUpdate {
+        protected class DoFixedUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
