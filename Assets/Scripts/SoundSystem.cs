@@ -27,59 +27,59 @@ namespace StudioMeowToon {
         // BGM・効果音への参照
 
         [SerializeField]
-        private AudioClip itemClip; // アイテム取得時効果音
+        AudioClip itemClip; // アイテム取得時効果音
 
         [SerializeField]
-        private AudioClip jumpClip; // ジャンプ効果音
+        AudioClip jumpClip; // ジャンプ効果音
 
         [SerializeField]
-        private AudioClip climbClip; // 登る効果音
+        AudioClip climbClip; // 登る効果音
 
         [SerializeField]
-        private AudioClip walkClip; // 歩く効果音
+        AudioClip walkClip; // 歩く効果音
 
         [SerializeField]
-        private AudioClip runClip; // 走る効果音
+        AudioClip runClip; // 走る効果音
 
         [SerializeField]
-        private AudioClip groundedClip; // 着地効果音
+        AudioClip groundedClip; // 着地効果音
 
         [SerializeField]
-        private AudioClip hitClip; // 弾に当たる効果音
+        AudioClip hitClip; // 弾に当たる効果音
 
         [SerializeField]
-        private AudioClip shootClip; // 弾の発射効果音
+        AudioClip shootClip; // 弾の発射効果音
 
         [SerializeField]
-        private AudioClip explosionClip; // 破壊された効果音
+        AudioClip explosionClip; // 破壊された効果音
 
         [SerializeField]
-        private AudioClip damageClip; // ダメージを与えた効果音
+        AudioClip damageClip; // ダメージを与えた効果音
 
         [SerializeField]
-        private AudioClip knockedupClip; // ブロックを下から叩いた効果音
+        AudioClip knockedupClip; // ブロックを下から叩いた効果音
 
         [SerializeField]
-        private AudioClip waterInClip; // 水中に入る効果音
+        AudioClip waterInClip; // 水中に入る効果音
 
         [SerializeField]
-        private AudioClip waterSinkClip; // 水中で沈む効果音
+        AudioClip waterSinkClip; // 水中で沈む効果音
 
         [SerializeField]
-        private AudioClip waterForwardClip; // 水中で進む効果音
+        AudioClip waterForwardClip; // 水中で進む効果音
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private string nowPlayingClipSe1; // 今再生中の効果音1
+        string nowPlayingClipSe1; // 今再生中の効果音1
 
-        private string nowPlayingClipSe2; // 今再生中の効果音2
+        string nowPlayingClipSe2; // 今再生中の効果音2
 
-        private AudioSource se1AudioSource; // 効果音用オーディオソース1
+        AudioSource se1AudioSource; // 効果音用オーディオソース1
 
-        private AudioSource bgmAudioSource; // BGM用オーディオソース
+        AudioSource bgmAudioSource; // BGM用オーディオソース
 
-        private AudioSource se2AudioSource; // 効果音用オーディオソース2
+        AudioSource se2AudioSource; // 効果音用オーディオソース2
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // パブリックメソッド

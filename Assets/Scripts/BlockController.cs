@@ -31,66 +31,66 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private int movementToX = 0;
+        int movementToX = 0;
 
         [SerializeField]
-        private int movementToY = 0;
+        int movementToY = 0;
 
         [SerializeField]
-        private int movementToZ = 0;
+        int movementToZ = 0;
 
         [SerializeField]
-        private float movementSpeed = 0.5f;
+        float movementSpeed = 0.5f;
 
         [SerializeField]
-        private GameObject prefabForPiece; // 破片生成用のプレハブ
+        GameObject prefabForPiece; // 破片生成用のプレハブ
 
         [SerializeField]
-        private bool canPush; // 押すことが出来るかフラグ
+        bool canPush; // 押すことが出来るかフラグ
 
         [SerializeField]
-        private int life = 1; // HP(耐久度)
+        int life = 1; // HP(耐久度)
 
         [SerializeField]
-        private bool canHold = false; // 持たれることが出来るかフラグ
+        bool canHold = false; // 持たれることが出来るかフラグ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private Vector3 origin;
+        Vector3 origin;
 
-        private Vector3 toReach;
+        Vector3 toReach;
 
-        private bool positiveX = true;
+        bool positiveX = true;
 
-        private bool positiveY = true;
+        bool positiveY = true;
 
-        private bool positiveZ = true;
+        bool positiveZ = true;
 
-        private GameObject player; // プレイヤーオブジェクト
+        GameObject player; // プレイヤーオブジェクト
 
-        private GameObject item; // アイテムオブジェクト
+        GameObject item; // アイテムオブジェクト
 
-        private bool isItemOnThis = false; // アイテムオブジェクトが上にのっているかフラグ
+        bool isItemOnThis = false; // アイテムオブジェクトが上にのっているかフラグ
 
-        private bool isPlayerOnThis = false; // プレイヤーオブジェクトが上にのっているかフラグ
+        bool isPlayerOnThis = false; // プレイヤーオブジェクトが上にのっているかフラグ
 
-        private bool isPushed; // 押されるフラグ
+        bool isPushed; // 押されるフラグ
 
-        private float pushedCount; // 押されるカウント
+        float pushedCount; // 押されるカウント
 
-        private float pushedDistance; // 押された距離
+        float pushedDistance; // 押された距離
 
-        private ExplodeParam explodeParam; // 破片生成用のパラメータ構造体
+        ExplodeParam explodeParam; // 破片生成用のパラメータ構造体
 
-        private DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用 フラグ
+        DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用 フラグ
 
         // 持たれる機能実装 TODO: _Item を付けなくても持てるように
-        private bool isGrounded; // 接地フラグ
+        bool isGrounded; // 接地フラグ
 
-        private Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
+        Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
 
-        private Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
+        Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -128,18 +128,18 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // ロックオンシステム
 
-        private const string MAIN_CAMERA_TAG_NAME = "MainCamera";  // メインカメラに付いているタグ名
+        const string MAIN_CAMERA_TAG_NAME = "MainCamera";  // メインカメラに付いているタグ名
 
         // メインカメラに表示されているか
-        private bool isRendered = false;
+        bool isRendered = false;
 
-        private void OnBecameVisible() { // メインカメラに映った時
+        void OnBecameVisible() { // メインカメラに映った時
             if (Camera.current.tag == MAIN_CAMERA_TAG_NAME) {
                 isRendered = true;
             }
         }
 
-        private void OnBecameInvisible() { // メインカメラに映らなくなった時
+        void OnBecameInvisible() { // メインカメラに映らなくなった時
             if (Camera.current != null && Camera.current.tag == MAIN_CAMERA_TAG_NAME) {
                 isRendered = false;
             }
@@ -368,7 +368,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 破片を生成する。
         /// </summary>
-        private void explodePiece(int number = 8, float scale = 0.25f, int force = 15) {
+        void explodePiece(int number = 8, float scale = 0.25f, int force = 15) {
             var _random = new System.Random(); // 乱数発生元
             var _min = -getRandomForce(force);
             var _max = getRandomForce(force);
@@ -396,7 +396,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 飛散する破片に加える力のランダム数値取得。
         /// </summary>
-        private int getRandomForce(int force) {
+        int getRandomForce(int force) {
             var _random = new System.Random();
             return _random.Next((int) force / 2, (int) force * 2); // force の2分の1から2倍の範囲で
         }
@@ -404,7 +404,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// ブロックの位置をグリッドに合わせ微調整する。
         /// </summary>
-        private void align() {
+        void align() {
             transform.position = new Vector3(
                 (float) Math.Round(transform.position.x, 1, MidpointRounding.AwayFromZero),
                 (float) Math.Round(transform.position.y, 1, MidpointRounding.AwayFromZero),
@@ -415,7 +415,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// ブロックの位置をグリッドに合わせ微調整する。
         /// </summary>
-        private void align2() {
+        void align2() {
             transform.position = new Vector3(
                 (float) Math.Round(transform.position.x * 2, 0, MidpointRounding.AwayFromZero) / 2, // 0.5単位にする為、2倍して2で割る
                 (float) Math.Round(transform.position.y * 2, 0, MidpointRounding.AwayFromZero) / 2,
@@ -427,7 +427,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 自身のY位置を取得する。
         /// </summary>
-        private float getTop() {
+        float getTop() {
             float _height = GetComponent<Renderer>().bounds.size.y; // オブジェクトの高さ取得 
             float _y = transform.position.y; // オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // オブジェクトのTOP取得
@@ -437,7 +437,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 自動的に移動する。
         /// </summary>
-        private void moveAuto() {
+        void moveAuto() {
             // X軸正方向
             if (positiveX) {
                 if (Math.Round(transform.localPosition.x) < Math.Round(toReach.x)) {
@@ -524,7 +524,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// ブロックが押される。
         /// </summary>
-        private void bePushed() {
+        void bePushed() {
             if (transform.name == player.transform.parent.name) { // Player が自分の子オブジェクトなら押されている状況
                 Ray _ray1 = new Ray(getPushedOriginVector3(transform, player.transform.forward, 1), getPushedDirectionVector3(player.transform.forward));
                 if (Physics.Raycast(_ray1, out RaycastHit _hit1, 2f)) {
@@ -570,7 +570,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// Player に押された方向を列挙体で返す。
         /// </summary>
-        private PushedDirection getPushedDirection(Vector3 forwardVector) {
+        PushedDirection getPushedDirection(Vector3 forwardVector) {
             var _fX = (float) Math.Round(forwardVector.x);
             var _fY = (float) Math.Round(forwardVector.y);
             var _fZ = (float) Math.Round(forwardVector.z);
@@ -610,14 +610,14 @@ namespace StudioMeowToon {
         /// <summary>
         /// Player に押された方向のベクトル値返す。
         /// </summary>
-        private Vector3 getPushedDirectionVector3(Vector3 forwardVector) {
+        Vector3 getPushedDirectionVector3(Vector3 forwardVector) {
             return new Vector3((float) Math.Round(forwardVector.x), 0, (float) Math.Round(forwardVector.z));
         }
 
         /// <summary>
         /// 押されるブロックが前方をサーチする時のRayポイント(※4箇所)を取得する。
         /// </summary>
-        private Vector3 getPushedOriginVector3(Transform pushed, Vector3 forwardVector, int idx) {
+        Vector3 getPushedOriginVector3(Transform pushed, Vector3 forwardVector, int idx) {
             var _OFFSET = 0.48f;
             if (getPushedDirection(forwardVector) == PushedDirection.PositiveZ) { // Z軸正方向
                 if (idx == 1) {
@@ -664,7 +664,7 @@ namespace StudioMeowToon {
         }
 
         // 衝突したオブジェクトの側面に当たったか判定する
-        private float getHitTop(GameObject hit) {
+        float getHitTop(GameObject hit) {
             float _height = hit.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _y = hit.transform.position.y; // 対象オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // 対象オブジェクトのTOP取得
@@ -674,7 +674,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// プレイヤーに持ち上げられる。
         /// </summary>
-        private void beHolded(float speed = 2.0f) {
+        void beHolded(float speed = 2.0f) {
             if (transform.localPosition.y < 0.6f) { // 親に持ち上げられた位置に移動する: 0.6fは調整値
                 var _direction = getPushedDirection(transform.parent.forward);
                 if (_direction == PushedDirection.PositiveZ) { // Z軸正方向
@@ -714,7 +714,7 @@ namespace StudioMeowToon {
         ///// <summary>
         ///// 押された方向を表す列挙体。
         ///// </summary>
-        //private enum PushedDirection {
+        //enum PushedDirection {
         //    PositiveZ,
         //    NegativeZ,
         //    PositiveX,
@@ -734,7 +734,7 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            private bool _explode;
+            bool _explode;
 
             public bool explode { get => _explode; set => _explode = value; }
 
@@ -773,16 +773,16 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            private int _number; // 破片の数
+            int _number; // 破片の数
 
-            private float _scale; // 破片の拡縮値
+            float _scale; // 破片の拡縮値
 
-            private int _force; // 破片飛散時に加える力
+            int _force; // 破片飛散時に加える力
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // コンストラクタ
 
-            private ExplodeParam(int number, float scale, int force) {
+            ExplodeParam(int number, float scale, int force) {
                 this._number = number;
                 this._scale = scale;
                 this._force = force;

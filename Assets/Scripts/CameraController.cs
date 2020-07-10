@@ -27,22 +27,22 @@ namespace StudioMeowToon {
         // カメラ用 GameObject への参照
 
         [SerializeField]
-        private GameObject mainCamera;
+        GameObject mainCamera;
 
         [SerializeField]
-        private GameObject verticalAxis;
+        GameObject verticalAxis;
 
         [SerializeField]
-        private GameObject horizontalAxis;
+        GameObject horizontalAxis;
 
         // 光源:デフォルト 44,16,100,100
         
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private Vector3 defaultLocalPosition; // カメラシステム位置 デフォルト値 // x:0, y:0.95, z:-1.2
+        Vector3 defaultLocalPosition; // カメラシステム位置 デフォルト値 // x:0, y:0.95, z:-1.2
 
-        private bool isForwardPosition = false; // カメラシステムが前進ポジションかどうか
+        bool isForwardPosition = false; // カメラシステムが前進ポジションかどうか
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // パブリックメソッド
@@ -147,7 +147,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プライベートメソッド
 
-        private void checkSix() {
+        void checkSix() {
             var _player = transform.parent.gameObject;
             Ray _ray = new Ray( // プレイヤーの位置から後方を確認する
                 new Vector3(
@@ -166,7 +166,7 @@ namespace StudioMeowToon {
             }
         }
 
-        private void resetLookAround() { // 一人称視点カメラリセット
+        void resetLookAround() { // 一人称視点カメラリセット
             // 位置 X: 0, Y:0.95, Z:-1.2 ※CameraSystemに設定 // Y:0.75 → 0.95
             // 回転 X:15, Y:0   , Z:0    ※MainCameraに設定
             // 拡縮 X: 1, Y:1   , Z:1
@@ -177,7 +177,7 @@ namespace StudioMeowToon {
             mainCamera.transform.localEulerAngles = new Vector3(15f, 0f, 0f); // カメラ本体は少し下向き
         }
 
-        private void lookAround() { // 一人称視点カメラ操作
+        void lookAround() { // 一人称視点カメラ操作
             float _ADJUST = 80.0f; // 回転係数
             mainCamera.transform.localEulerAngles = new Vector3(0f, 0f, 0f); // カメラ本体を水平に
             if (dpadUp.isPressed) { // 上

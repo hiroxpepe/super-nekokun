@@ -39,7 +39,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // イベントハンドラ
 
-        private void OnTriggerStay(Collider other) {
+        void OnTriggerStay(Collider other) {
             // Player と接触したら
             if (other.tag == "Player") {
                 var _render = GetComponent<MeshRenderer>();

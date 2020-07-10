@@ -30,32 +30,32 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private SimpleAnimation simpleAnime;
+        SimpleAnimation simpleAnime;
 
         [SerializeField]
-        private GameObject speechImage; // セリフ用吹き出し
+        GameObject speechImage; // セリフ用吹き出し
 
         [SerializeField]
-        private Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
+        Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private SoundSystem soundSystem; // サウンドシステム
+        SoundSystem soundSystem; // サウンドシステム
 
-        private DoUpdate doUpdate; // Update() メソッド用フラグ構造体
+        DoUpdate doUpdate; // Update() メソッド用フラグ構造体
 
-        private DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
+        DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
 
-        private float distance; // プレイヤーとの距離
+        float distance; // プレイヤーとの距離
 
-        private GameObject plate; // 移動範囲のプレート
+        GameObject plate; // 移動範囲のプレート
 
-        private float speechX; // セリフ用吹き出し幅
+        float speechX; // セリフ用吹き出し幅
 
-        private float speechY; // セリフ用吹き出し高さ
+        float speechY; // セリフ用吹き出し高さ
 
-        private Text speechText; // セリフ用吹き出しテキスト
+        Text speechText; // セリフ用吹き出しテキスト
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // 更新 メソッド
@@ -332,7 +332,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
         /// </summary>
-        private void say(string text, int size = 60, double time = 0.5d) { // TODO: 表示されないものがある？
+        void say(string text, int size = 60, double time = 0.5d) { // TODO: 表示されないものがある？
             if (!isRendered) { return; }
             // プレイヤーとの距離で大きさ調整
             var _distance = distance > 1 ? (int) (distance / 2) : 1;
@@ -349,28 +349,28 @@ namespace StudioMeowToon {
                 });
         }
 
-        private void say(string text, double time) {
+        void say(string text, double time) {
             say(text, 60, time);
         }
 
-        private void say(string text) {
+        void say(string text) {
             say(text, 60, 0.5d);
         }
 
         /// <summary>
         /// セリフ用吹き出しを非表示にする。
         /// </summary>
-        private void beSilent() {
+        void beSilent() {
             speechImage.SetActive(false);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // カメラ映り TODO: UniRx
 
-        private const string MAIN_CAMERA_TAG_NAME = "MainCamera";  // メインカメラに付いているタグ名
+        const string MAIN_CAMERA_TAG_NAME = "MainCamera";  // メインカメラに付いているタグ名
 
         // メインカメラに表示されているか
-        private bool isRendered = false;
+        bool isRendered = false;
 
         void OnBecameVisible() { // メインカメラに映った時
             if (Camera.current.tag == MAIN_CAMERA_TAG_NAME) {
@@ -394,11 +394,11 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド(アンダースコアorキャメルケース)
 
-            private bool _grounded; // 接地フラグ
-            private bool _searching; // 索敵中フラグ
-            private bool _rotate; //回転中フラグ
-            private bool _chasing; // 追跡中フラグ
-            private bool _attacking; // 攻撃中フラグ
+            bool _grounded; // 接地フラグ
+            bool _searching; // 索敵中フラグ
+            bool _rotate; //回転中フラグ
+            bool _chasing; // 追跡中フラグ
+            bool _attacking; // 攻撃中フラグ
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // プロパティ(キャメルケース)
@@ -473,10 +473,10 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            //private bool _idol;
-            private bool _run;
-            private bool _walk;
-            private bool _jump;
+            //bool _idol;
+            bool _run;
+            bool _walk;
+            bool _jump;
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // プロパティ(キャメルケース)

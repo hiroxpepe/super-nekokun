@@ -36,17 +36,17 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private int timer = 5;
+        int timer = 5;
 
         [SerializeField]
-        private GameObject prefabForPiece; // 破片生成用のプレハブ
+        GameObject prefabForPiece; // 破片生成用のプレハブ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private bool have = false; // 持たれたかどうか
+        bool have = false; // 持たれたかどうか
 
-        private bool ignition = false; // 点火フラグ
+        bool ignition = false; // 点火フラグ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -96,7 +96,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 破片を生成する。
         /// </summary>
-        private void explodePiece(int number = 8, float scale = 0.25f, int force = 15) {
+        void explodePiece(int number = 8, float scale = 0.25f, int force = 15) {
             var _random = new System.Random(); // 乱数発生元
             var _min = -getRandomForce(force);
             var _max = getRandomForce(force);
@@ -125,7 +125,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 飛散する破片に加える力のランダム数値取得。
         /// </summary>
-        private int getRandomForce(int force) {
+        int getRandomForce(int force) {
             var _random = new System.Random();
             return _random.Next((int) force / 2, (int) force * 2); // force の2分の1から2倍の範囲で
         }

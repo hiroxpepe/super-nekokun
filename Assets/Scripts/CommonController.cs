@@ -29,22 +29,22 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private bool canClimb; // 上ることが出来るかフラグ
+        bool canClimb; // 上ることが出来るかフラグ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private Vector3 defaultPosition; // 初期配置位置
+        Vector3 defaultPosition; // 初期配置位置
 
-        private Vector3[] previousPosition; // 10フレ分の位置を保存
+        Vector3[] previousPosition; // 10フレ分の位置を保存
 
-        private AutoDestroyParam autoDestroyParam; // 自動削除用パラメータ構造体
+        AutoDestroyParam autoDestroyParam; // 自動削除用パラメータ構造体
 
-        private ShockParam shockParam; // 衝撃用パラメータ構造体
+        ShockParam shockParam; // 衝撃用パラメータ構造体
 
-        private Vector3 bulletUp; // 当たった弾のベクトルUp
+        Vector3 bulletUp; // 当たった弾のベクトルUp
 
-        private Vector3 bulletForward; // 当たった弾のベクトルForward
+        Vector3 bulletForward; // 当たった弾のベクトルForward
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -55,7 +55,7 @@ namespace StudioMeowToon {
 
         public bool autoDestroy { set { autoDestroyParam.enable = value; autoDestroyParam.limit = getRandomLimit(2.0f); } } // 2秒後に自動的に消去する
 
-        private float getRandomLimit(float limit) { // 自動削除される秒数のランダム要素
+        float getRandomLimit(float limit) { // 自動削除される秒数のランダム要素
             var _random = new System.Random();
             return _random.Next(2, (int) limit * 25); // 2秒から (limit * 25倍) 秒の範囲で
         }
@@ -120,7 +120,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 10フレ前分の位置情報保存する。※使用していない
         /// </summary>
-        private void cashPreviousPosition() {
+        void cashPreviousPosition() {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 弾に当たった衝撃時の挙動。
         /// </summary>
-        private void doShock() {
+        void doShock() {
             if (shockParam.reHits) { // 再ヒット時にリセット
                 transform.position = shockParam.position; // 完全に元の位置に戻る
                 shockParam.second = 0f;
@@ -157,7 +157,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 自動で自身を削除する。
         /// </summary>
-        private void doAutoDestroy() {
+        void doAutoDestroy() {
             if (autoDestroyParam.enable) { // 自動削除有効なら
                 autoDestroyParam.second += Time.deltaTime;
                 if (autoDestroyParam.second > 0.1f) { // 0.1秒後にコライダー判定ON
@@ -173,7 +173,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 自動で徐々に透明化する。
         /// </summary>
-        private void fadeoutToDestroy() {
+        void fadeoutToDestroy() {
             if (autoDestroyParam.second > autoDestroyParam.limit - 0.8f) { // 時間0.8秒前から
                 var _render = GetComponent<MeshRenderer>();
                 var _materialList = _render.materials;
@@ -189,7 +189,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 弾の衝撃で少し後ろ上に動く、Player が下から叩いて少し上に動く。
         /// </summary>
-        private void moveByShocked() {
+        void moveByShocked() {
             var _ADJUST = 3;
             if (shockParam.hitsType == HitsType.Bullet) {
                 transform.position = shockParam.position + (bulletForward + bulletUp) / _ADJUST;
@@ -208,16 +208,16 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            private float _second; // 削除までの秒加算用
+            float _second; // 削除までの秒加算用
 
-            private float _limit; // 何秒後に削除されるか
+            float _limit; // 何秒後に削除されるか
 
-            private bool _enable; // 自動削除発動フラグ
+            bool _enable; // 自動削除発動フラグ
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // コンストラクタ(パスカルケース: 動詞)
 
-            private AutoDestroyParam(float second, float limit, bool enable) {
+            AutoDestroyParam(float second, float limit, bool enable) {
                 _second = second;
                 _limit = limit;
                 _enable = enable;
@@ -250,24 +250,24 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            private float _second; // 秒加算用
+            float _second; // 秒加算用
 
-            private float _limit; // 何秒で戻るか
+            float _limit; // 何秒で戻るか
 
-            private bool _enable; // 衝撃発動フラグ
+            bool _enable; // 衝撃発動フラグ
 
-            private bool _moved; // 移動したかフラグ
+            bool _moved; // 移動したかフラグ
 
-            private bool _reHits; // 移動中に再ヒットしたかフラグ
+            bool _reHits; // 移動中に再ヒットしたかフラグ
 
-            private Vector3 _position; // 衝撃時の位置保存
+            Vector3 _position; // 衝撃時の位置保存
 
-            private HitsType _hitsType; // ぶつかった相手の種別
+            HitsType _hitsType; // ぶつかった相手の種別
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // コンストラクタ(パスカルケース: 動詞)
 
-            private ShockParam(float second, float limit, bool enable, bool moved, bool reHits) {
+            ShockParam(float second, float limit, bool enable, bool moved, bool reHits) {
                 _second = second;
                 _limit = limit;
                 _enable = enable;

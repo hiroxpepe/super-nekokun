@@ -120,7 +120,7 @@ namespace StudioMeowToon {
             }
         }
 
-        private static bool isAndroid() {
+        static bool isAndroid() {
 #if UNITY_ANDROID && !UNITY_EDITOR
             return true;
 #else

@@ -29,15 +29,15 @@ namespace StudioMeowToon {
         // フィールド
 
         [SerializeField]
-        private GameObject player; // プレイヤー
+        GameObject player; // プレイヤー
 
         [SerializeField]
-        private GameObject bullet; // 弾の元
+        GameObject bullet; // 弾の元
 
         [SerializeField]
-        private float bulletSpeed = 2000f; // 弾の速度
+        float bulletSpeed = 2000f; // 弾の速度
 
-        private SoundSystem soundSystem; // サウンドシステム
+        SoundSystem soundSystem; // サウンドシステム
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // 更新メソッド
