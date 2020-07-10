@@ -26,13 +26,13 @@ namespace StudioMeowToon {
     public class BulletController : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         float lifetime = 0.5f; // 消える時間
 
         ///////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         float secondSinceHit = 0f; // ヒットしてからの経過秒
 
@@ -41,7 +41,7 @@ namespace StudioMeowToon {
         SoundSystem soundSystem; // サウンドシステム
 
         ///////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
@@ -96,7 +96,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         ///// <summary>
         ///// 飛散する破片に加える力のランダム数値取得。// TODO: 効かない

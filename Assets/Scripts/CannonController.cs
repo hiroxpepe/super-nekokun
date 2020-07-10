@@ -26,7 +26,7 @@ namespace StudioMeowToon {
     public class CannonController : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         [SerializeField]
         GameObject player; // プレイヤー
@@ -40,7 +40,7 @@ namespace StudioMeowToon {
         SoundSystem soundSystem; // サウンドシステム
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         void Awake() {

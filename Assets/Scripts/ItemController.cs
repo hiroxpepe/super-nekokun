@@ -28,13 +28,13 @@ namespace StudioMeowToon {
     public class ItemController : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         bool isFloat = false; // 浮遊フラグ ※現状で持てない
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         bool isGrounded; // 接地フラグ
 
@@ -43,7 +43,7 @@ namespace StudioMeowToon {
         Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         /// <summary>
         /// プレイヤーに持たれているかどうか。
@@ -61,7 +61,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド(パスカルケース)
+        // public Methods [verb]
 
         public Transform GetLeftHandTransform() { // キャラにIKで持たれる用
             return leftHandTransform;
@@ -72,7 +72,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Start is called before the first frame update.
         void Start() {
@@ -131,7 +131,7 @@ namespace StudioMeowToon {
         // TODO: ブロックの上には一つしかアイテムが置けない
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // イベントハンドラ
+        // Event handler
 
         void OnCollisionEnter(Collision collision) {
             if (collision.gameObject.name.Contains("Ground") || collision.gameObject.name.Contains("Block")) {
@@ -147,7 +147,7 @@ namespace StudioMeowToon {
         //}
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         // 衝突したオブジェクトの側面に当たったか判定する
         float getHitTop(GameObject hit) {

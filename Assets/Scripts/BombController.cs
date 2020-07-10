@@ -33,7 +33,7 @@ namespace StudioMeowToon {
         // 砲台から発射された爆弾をプレイヤーが拾って攻撃する。
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         int timer = 5;
@@ -42,19 +42,19 @@ namespace StudioMeowToon {
         GameObject prefabForPiece; // 破片生成用のプレハブ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         bool have = false; // 持たれたかどうか
 
         bool ignition = false; // 点火フラグ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         //public bool ignition { set => _ignition = value; }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Start is called before the first frame update
         void Start() {
@@ -91,7 +91,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         /// <summary>
         /// 破片を生成する。
