@@ -26,13 +26,13 @@ namespace StudioMeowToon {
     public class CommonController : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         bool canClimb; // 上ることが出来るかフラグ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         Vector3 defaultPosition; // 初期配置位置
 
@@ -47,7 +47,7 @@ namespace StudioMeowToon {
         Vector3 bulletForward; // 当たった弾のベクトルForward
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         public bool climbable { get => canClimb; } // 上ることが出来るかフラグを返す
 
@@ -82,7 +82,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         protected void Awake() {
@@ -124,7 +124,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         /// <summary>
         /// 弾に当たった衝撃時の挙動。
@@ -206,7 +206,7 @@ namespace StudioMeowToon {
         protected class AutoDestroyParam {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド
+            // Fields
 
             float _second; // 削除までの秒加算用
 
@@ -215,7 +215,7 @@ namespace StudioMeowToon {
             bool _enable; // 自動削除発動フラグ
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ(パスカルケース: 動詞)
+            // Constructor
 
             AutoDestroyParam(float second, float limit, bool enable) {
                 _second = second;
@@ -228,7 +228,7 @@ namespace StudioMeowToon {
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プロパティ(キャメルケース: 名詞、形容詞)
+            // Properties [noun, adjectives] 
 
             public float second { get => _second; set => _second = value; }
 
@@ -248,7 +248,7 @@ namespace StudioMeowToon {
         protected class ShockParam {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド
+            // Fields
 
             float _second; // 秒加算用
 
@@ -265,7 +265,7 @@ namespace StudioMeowToon {
             HitsType _hitsType; // ぶつかった相手の種別
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ(パスカルケース: 動詞)
+            // Constructor
 
             ShockParam(float second, float limit, bool enable, bool moved, bool reHits) {
                 _second = second;
@@ -282,7 +282,7 @@ namespace StudioMeowToon {
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プロパティ(キャメルケース: 名詞、形容詞)
+            // Properties [noun, adjectives] 
 
             public float second { get => _second; set => _second = value; }
 
@@ -299,7 +299,7 @@ namespace StudioMeowToon {
             public HitsType hitsType { get => _hitsType; set => _hitsType = value; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // パブリックメソッド(パスカルケース: 動詞)
+            // public Methods [verb]
 
             public void Reset() {
                 _second = 0f;

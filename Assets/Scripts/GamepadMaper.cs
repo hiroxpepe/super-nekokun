@@ -26,7 +26,7 @@ namespace StudioMeowToon {
     public class GamepadMaper : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         protected GameObject virtualController; // バーチャルコントロール // TODO ⇒ static ?
 
@@ -65,12 +65,12 @@ namespace StudioMeowToon {
         bool _useVirtualController;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         public bool useVirtualController { get => _useVirtualController; } // バーチャルコントローラー使用かどうか
 
         ///////////////////////////////////////////////////////////////////////////
-        // 更新 メソッド
+        // update Methods
 
         // Start is called before the first frame update.
         protected void Start() {
@@ -83,7 +83,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         void mapGamepad() {
             // 物理ゲームパッド接続判定

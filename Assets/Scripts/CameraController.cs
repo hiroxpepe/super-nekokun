@@ -38,14 +38,14 @@ namespace StudioMeowToon {
         // 光源:デフォルト 44,16,100,100
         
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         Vector3 defaultLocalPosition; // カメラシステム位置 デフォルト値 // x:0, y:0.95, z:-1.2
 
         bool isForwardPosition = false; // カメラシステムが前進ポジションかどうか
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド
+        // public Methods [verb]
 
         public void LookPlayer() { // TODO: 再検討
             transform.localPosition = new Vector3(0f, 0.75f, 0.8f);
@@ -57,7 +57,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Start is called before the first frame update
         new void Start() {
@@ -130,7 +130,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // イベントハンドラ
+        // Event handler
 
         void OnTriggerEnter(Collider other) {
             if (other.name.Contains("Block") || other.name.Contains("Wall")) {
@@ -145,7 +145,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド
+        // private Methods [verb]
 
         void checkSix() {
             var _player = transform.parent.gameObject;

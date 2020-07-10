@@ -28,7 +28,7 @@ namespace StudioMeowToon {
     public class BlockController : CommonController {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         int movementToX = 0;
@@ -55,7 +55,7 @@ namespace StudioMeowToon {
         bool canHold = false; // 持たれることが出来るかフラグ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         Vector3 origin;
 
@@ -93,7 +93,7 @@ namespace StudioMeowToon {
         Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         /// <summary>
         /// 押すことが出来るかどうか。
@@ -145,13 +145,13 @@ namespace StudioMeowToon {
             }
         }
 
-        // TODO: プロパティ化
+        // TODO: to a property
         public bool IsRenderedInMainCamera() { // メインカメラに写っているかどうか
             return isRendered;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド(パスカルケース)
+        // public Methods [verb]
 
         public void DestroyWithDebris(Transform bullet, int numberOfPiece = 8) { // 破片を発生させて消去する
             if (destroyable) { // 破壊可能の場合
@@ -191,7 +191,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         new void Awake() {
@@ -308,7 +308,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // イベントハンドラ
+        // Event handler
 
         void OnCollisionEnter(Collision collision) {
             //if (collision.gameObject.tag.Contains("Player")) {
@@ -363,7 +363,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         /// <summary>
         /// 破片を生成する。
@@ -732,14 +732,14 @@ namespace StudioMeowToon {
         protected class DoFixedUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド
+            // Fields
 
             bool _explode;
 
             public bool explode { get => _explode; set => _explode = value; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ
+            // Constructor
 
             /// <summary>
             /// 初期化済みのインスタンスを返す。
@@ -751,7 +751,7 @@ namespace StudioMeowToon {
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // パブリックメソッド
+            // public Methods [verb]
 
             /// <summary>
             /// 全フィールドの初期化
@@ -771,7 +771,7 @@ namespace StudioMeowToon {
         protected class ExplodeParam {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド
+            // Fields
 
             int _number; // 破片の数
 
@@ -780,7 +780,7 @@ namespace StudioMeowToon {
             int _force; // 破片飛散時に加える力
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ
+            // Constructor
 
             ExplodeParam(int number, float scale, int force) {
                 this._number = number;
@@ -797,7 +797,7 @@ namespace StudioMeowToon {
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プロパティ
+            // Properties [noun, adjectives] 
 
             public int number { get => _number; }
 
