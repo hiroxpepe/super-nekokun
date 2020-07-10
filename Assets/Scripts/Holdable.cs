@@ -30,25 +30,25 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private bool canHold = true; // 持たれることが出来るかフラグ
+        bool canHold = true; // 持たれることが出来るかフラグ
 
         [SerializeField]
-        private float holdedHeight = 0.5f; // 持たれる時の高さ調整値
+        float holdedHeight = 0.5f; // 持たれる時の高さ調整値
 
         [SerializeField]
-        private float holdedMargin = 0.5f; // 持たれる時のクリアランス
+        float holdedMargin = 0.5f; // 持たれる時のクリアランス
 
         [SerializeField]
-        private float holdedTilt = 15f; // 持たれる時の傾き
+        float holdedTilt = 15f; // 持たれる時の傾き
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private bool isGrounded; // 接地フラグ
+        bool isGrounded; // 接地フラグ
 
-        private Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
+        Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
 
-        private Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
+        Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -151,7 +151,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// ブロックの位置をグリッドに合わせ微調整する。
         /// </summary>
-        private void align2() {
+        void align2() {
             transform.position = new Vector3(
                 (float) Math.Round(transform.position.x * 2, 0, MidpointRounding.AwayFromZero) / 2, // 0.5単位にする為、2倍して2で割る
                 (float) Math.Round(transform.position.y * 2, 0, MidpointRounding.AwayFromZero) / 2,
@@ -161,7 +161,7 @@ namespace StudioMeowToon {
         }
 
         // 衝突したオブジェクトの側面に当たったか判定する
-        private float getHitTop(GameObject hit) {
+        float getHitTop(GameObject hit) {
             float _height = hit.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _y = hit.transform.position.y; // 対象オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // 対象オブジェクトのTOP取得
@@ -171,7 +171,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// Player に押された方向を列挙体で返す。
         /// </summary>
-        private PushedDirection getPushedDirection(Vector3 forwardVector) {
+        PushedDirection getPushedDirection(Vector3 forwardVector) {
             var _fX = (float) Math.Round(forwardVector.x);
             var _fY = (float) Math.Round(forwardVector.y);
             var _fZ = (float) Math.Round(forwardVector.z);
@@ -211,7 +211,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// プレイヤーに持ち上げられる。
         /// </summary>
-        private void beHolded(float speed = 2.0f) {
+        void beHolded(float speed = 2.0f) {
             if (transform.localPosition.y < holdedHeight) { // 親に持ち上げられた位置に移動する: 0.6fは調整値
                 var _direction = getPushedDirection(transform.parent.forward);
                 if (_direction == PushedDirection.PositiveZ) { // Z軸正方向

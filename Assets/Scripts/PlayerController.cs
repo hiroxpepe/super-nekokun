@@ -32,81 +32,81 @@ namespace StudioMeowToon {
         // 設定・参照
 
         [SerializeField]
-        private GameSystem gameSystem; // ゲームシステム
+        GameSystem gameSystem; // ゲームシステム
 
         [SerializeField]
-        private SoundSystem soundSystem; // サウンドシステム
+        SoundSystem soundSystem; // サウンドシステム
 
         [SerializeField]
-        private CameraController cameraController; // カメラシステム
+        CameraController cameraController; // カメラシステム
 
         [SerializeField]
-        private float jumpPower = 5.0f;
+        float jumpPower = 5.0f;
 
         [SerializeField]
-        private float rotationalSpeed = 5.0f;
+        float rotationalSpeed = 5.0f;
 
         [SerializeField]
-        private SimpleAnimation simpleAnime;
+        SimpleAnimation simpleAnime;
 
         [SerializeField]
-        private GameObject bullet; // 弾の元
+        GameObject bullet; // 弾の元
 
         [SerializeField]
-        private float bulletSpeed = 5000.0f; // 弾の速度
+        float bulletSpeed = 5000.0f; // 弾の速度
 
         [SerializeField]
-        private GameObject speechImage; // セリフ用吹き出し
+        GameObject speechImage; // セリフ用吹き出し
 
         [SerializeField]
-        private Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
+        Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private BombAngle bombAngle; // 弾道角度
+        BombAngle bombAngle; // 弾道角度
 
-        private GameObject pushed; // 押されるオブジェクト
+        GameObject pushed; // 押されるオブジェクト
 
-        private GameObject holded; // 持たれるオブジェクト
+        GameObject holded; // 持たれるオブジェクト
 
-        private GameObject stairUped; // 階段を上られるオブジェクト
+        GameObject stairUped; // 階段を上られるオブジェクト
 
-        private GameObject stairDowned; // 階段を下りられるオブジェクト
+        GameObject stairDowned; // 階段を下りられるオブジェクト
 
-        private DoUpdate doUpdate; // Update() メソッド用フラグ構造体
+        DoUpdate doUpdate; // Update() メソッド用フラグ構造体
 
-        private DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
+        DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグ構造体
 
-        private int life; // ヒットポイント
+        int life; // ヒットポイント
 
-        private float waterLevel; // 水面の高さ TODO:プレイヤーのフィールドでOK?
+        float waterLevel; // 水面の高さ TODO:プレイヤーのフィールドでOK?
 
-        private GameObject playerNeck; // プレイヤーの水面判定用
+        GameObject playerNeck; // プレイヤーの水面判定用
 
-        private GameObject intoWaterFilter; // 水中でのカメラエフェクト用
+        GameObject intoWaterFilter; // 水中でのカメラエフェクト用
 
-        private GameObject bodyIntoWater; // 水中での体
+        GameObject bodyIntoWater; // 水中での体
 
-        private bool r2Hold; // R2ボタンで持っているかどうか
+        bool r2Hold; // R2ボタンで持っているかどうか
 
-        private Vector3 normalVector = Vector3.up; // 法線用
+        Vector3 normalVector = Vector3.up; // 法線用
 
-        private Text speechText; // セリフ用吹き出しテキスト
+        Text speechText; // セリフ用吹き出しテキスト
 
         //////////////////////////////////////////////////////
         // その他 TODO: ⇒ speed・position オブジェクト化する
 
-        private float speed; // 速度ベクトル
+        float speed; // 速度ベクトル
 
-        private float previousSpeed; // 1フレ前の速度ベクトル
+        float previousSpeed; // 1フレ前の速度ベクトル
 
-        private Vector3[] previousPosition = new Vector3[30]; // 30フレ分前のポジション保存用
+        Vector3[] previousPosition = new Vector3[30]; // 30フレ分前のポジション保存用
 
         ////////// TODO: 実験的
-        private System.Diagnostics.Stopwatch sw;
+        System.Diagnostics.Stopwatch sw;
 
-        private Quaternion originalRotation;
+        Quaternion originalRotation;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -141,7 +141,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// 攻撃の衝撃で少し後ろ上に動く。
         /// </summary>
-        private void moveByShocked(Vector3 forward) {
+        void moveByShocked(Vector3 forward) {
             var _ADJUST = 2.5f; // 調整値
             transform.position += (forward + new Vector3(0f, 0.5f, 0)) / _ADJUST; // 0.5fは上方向調整値
         }
@@ -149,10 +149,10 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////
 
         //　IK左手位置用のTransform
-        private Transform leftHandTransform;
+        Transform leftHandTransform;
 
         //　IK右手位置用のTransform
-        private Transform rightHandTransform;
+        Transform rightHandTransform;
 
         void OnAnimatorIK() {
             if (doUpdate.holding) { // 持つフラグON
@@ -924,7 +924,7 @@ STEP0:
             }
         }
 
-        private void OnCollisionExit(Collision collision) {
+        void OnCollisionExit(Collision collision) {
             // ブロックから離れたら
             var _name = collision.gameObject.name;
             if (_name.Contains("Block")) {
@@ -981,7 +981,7 @@ STEP0:
         // プライベート メソッド(キャメルケース: 動詞)
 
         // TODO: 一時凍結
-        private void lookBack() { // 後ろをふりかえる
+        void lookBack() { // 後ろをふりかえる
             float _SPEED = 10.01f; // 回転スピード
             var _behind = transform.Find("Behind").gameObject;
             //transform.LookAt(_behind.transform);
@@ -997,7 +997,7 @@ STEP0:
         /// <summary>
         /// nフレ前分の位置情報保存する。
         /// </summary>
-        private void cashPreviousPosition() {
+        void cashPreviousPosition() {
             for (var i = previousPosition.Length - 1 ; i > -1; i--) {
                 if (i > 0) {
                     previousPosition[i] = previousPosition[i - 1]; // 0 ～ 19 を保存
@@ -1011,7 +1011,7 @@ STEP0:
             }
         }
 
-        private void bomb() { // 弾を撃つ TODO: fps で加える値を変化？
+        void bomb() { // 弾を撃つ TODO: fps で加える値を変化？
             // 弾の複製
             var _bullet = Instantiate(bullet) as GameObject;
 
@@ -1032,14 +1032,14 @@ STEP0:
             say("Shot!", 65);
         }
 
-        private float getRendererTop(GameObject target) { // TODO: Player が測っても良いのでは？
+        float getRendererTop(GameObject target) { // TODO: Player が測っても良いのでは？
             float _height = target.GetComponent<Renderer>().bounds.size.y; // オブジェクトの高さ取得 
             float _y = target.transform.position.y; // オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // オブジェクトのTOP取得
             return _top;
         }
 
-        private bool isUpOrDown() { // 上下変動があったかどうか
+        bool isUpOrDown() { // 上下変動があったかどうか
             var _fps = Application.targetFrameRate;
             var _ADJUST1 = 0;
             if (_fps == 60) _ADJUST1 = 9;
@@ -1055,7 +1055,7 @@ STEP0:
             }
         }
 
-        private void moveSide() { // 上り下り中に横に移動する
+        void moveSide() { // 上り下り中に横に移動する
             faceToFace();
             var _MOVE = 0.8f;
             var _fX = (float) Math.Round(transform.forward.x);
@@ -1084,7 +1084,7 @@ STEP0:
             }
         }
 
-        private void flatToFace() { // 面に高さを合わせる // TODO:※試験中
+        void flatToFace() { // 面に高さを合わせる // TODO:※試験中
             transform.localPosition = new Vector3(
                 transform.localPosition.x,
                 (float) Math.Round(transform.position.y, 2, MidpointRounding.AwayFromZero),
@@ -1092,7 +1092,7 @@ STEP0:
             );
         }
 
-        private void faceToFace(float speed = 20.0f) { // 面に正対する
+        void faceToFace(float speed = 20.0f) { // 面に正対する
             float _SPEED = speed; // 回転スピード
             var _fX = (float) Math.Round(transform.forward.x);
             var _fZ = (float) Math.Round(transform.forward.z);
@@ -1110,7 +1110,7 @@ STEP0:
         /// <summary>
         /// 面への正対が許容範囲かチェックする。
         /// </summary>
-        private bool checkToFace() {
+        bool checkToFace() {
             var _fX = (float) Math.Round(transform.forward.x);
             var _fZ = (float) Math.Round(transform.forward.z);
             if (_fX == 0 && _fZ == 1) { // Z軸正方向
@@ -1128,7 +1128,7 @@ STEP0:
         /// <summary>
         /// オブジェクトに正対する。
         /// </summary>
-        private void faceToObject(GameObject target, float speed = 2.0f) {
+        void faceToObject(GameObject target, float speed = 2.0f) {
             if (!target.name.Contains("Block")) { // FIXME: ブロック以外は取り合えず無効
                 doUpdate.faceing = false;
             }
@@ -1181,18 +1181,18 @@ STEP0:
         /// <summary>
         /// オブジェクトに正対するフラグの開始。
         /// </summary>
-        private void startFaceing() {
+        void startFaceing() {
             doUpdate.faceing = true;
         }
 
         ///// <summary>
         ///// オブジェクトに正対するフラグの解除。
         ///// </summary>
-        //private void doneFaceing() {
+        //void doneFaceing() {
         //    doUpdate.faceing = false;
         //}
 
-        private void lockOnTarget() { // ロックオン対象の方向に回転
+        void lockOnTarget() { // ロックオン対象の方向に回転
             var target = gameSystem.SerchNearTargetByTag(gameObject, "Block");
             if (target != null) {
                 float _SPEED = 3.0f; // 回転スピード
@@ -1202,7 +1202,7 @@ STEP0:
             }
         }
 
-        private void readyForBackJump() { // 捕まり反転ジャンプの準備
+        void readyForBackJump() { // 捕まり反転ジャンプの準備
             simpleAnime.Play("Default"); // デフォルトアニメ
             var _h = transform.Find("Head").gameObject;
             var _e = transform.Find("Ear").gameObject;
@@ -1233,7 +1233,7 @@ STEP0:
             }
         }
 
-        private void doBackJump() { // 捕まり反転ジャンプ
+        void doBackJump() { // 捕まり反転ジャンプ
             transform.Rotate(0, 180f, 0); // 180度反転
             doUpdate.climbing = false; // 登るフラグOFF
             doUpdate.lookBackJumping = true; // 反転ジャンプフラグON
@@ -1242,7 +1242,7 @@ STEP0:
             doFixedUpdate.reverseJump = true;
         }
 
-        private void checkToClimb() {
+        void checkToClimb() {
             var _rayBox = transform.Find("RayBox").gameObject; // RayBoxから前方サーチする
             Ray _ray = new Ray(_rayBox.transform.position, transform.forward);
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.2f)) { // 前方にレイを投げて反応があった場合
@@ -1268,7 +1268,7 @@ STEP0:
             }
         }
 
-        private void checkToClimbDownByLadder() { // ハシゴを降りるとき限定
+        void checkToClimbDownByLadder() { // ハシゴを降りるとき限定
             int _fps = Application.targetFrameRate;
             float _ADJUST = 0;
             if (_fps == 60) _ADJUST = 75.0f; // 調整値
@@ -1294,7 +1294,7 @@ STEP0:
             }
         }
 
-        private void climb() { // ハシゴ上り降り
+        void climb() { // ハシゴ上り降り
             var _rayBox = transform.Find("RayBox").gameObject; // RayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y, _rayBox.transform.position.z),
@@ -1364,7 +1364,7 @@ STEP0:
             }
         }
 
-        private void checkStairUp() { // 階段を上るフラグチェック ※【注意】Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
+        void checkStairUp() { // 階段を上るフラグチェック ※【注意】Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
             var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
@@ -1384,7 +1384,7 @@ STEP0:
             }
         }
 
-        private void checkStairDown() { // 階段を下りるフラグチェック ※【注意】Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
+        void checkStairDown() { // 階段を下りるフラグチェック ※【注意】Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
             var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
@@ -1409,7 +1409,7 @@ STEP0:
             }
         }
 
-        private void doStairDown() { // 階段を下りる
+        void doStairDown() { // 階段を下りる
             doFixedUpdate.stairDown = true;
             // 上下を離した時
             if (dpadUp.isPressed == false && dpadDown.isPressed == false) {
@@ -1428,7 +1428,7 @@ STEP0:
             faceToFace(5f); // 面に正対する
         }
 
-        private void doStairUp() { // 階段を上る
+        void doStairUp() { // 階段を上る
             doFixedUpdate.stairUp = true;
             if (getRendererTop(stairUped) > transform.position.y) {
                 // 上下を離した時
@@ -1460,7 +1460,7 @@ STEP0:
             faceToFace(5f); // 面に正対する
         }
 
-        private bool checkToPushBlock() {
+        bool checkToPushBlock() {
             var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
@@ -1496,7 +1496,7 @@ STEP0:
             return false;
         }
 
-        private bool checkToHoldItem() {
+        bool checkToHoldItem() {
             if (holded != null) { // 持つオブジェクトの参照があれば
                 var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
                 Ray _ray = new Ray(
@@ -1542,14 +1542,14 @@ STEP0:
             return false;
         }
 
-        private bool checkDownAsHoldableBlock() { // 足元の下が持てるブロックかどうか
+        bool checkDownAsHoldableBlock() { // 足元の下が持てるブロックかどうか
             if (holded != null) {
                 return true;
             } // TODO: 修正
             return false;
         }
 
-        private bool checkIntoWater() { // 水中にいるかチェック TODO: 空間が水中でなはい時は？
+        bool checkIntoWater() { // 水中にいるかチェック TODO: 空間が水中でなはい時は？
             if (playerNeck.transform.position.y + 0.25f < waterLevel) { // 0.25f は体を水面に沈める為の調整値
                 //transform.GetComponent<CapsuleCollider>().enabled = false; // コライダー切り替え
                 //if (_level.transform.position.y < waterLevel) { bodyIntoWater.GetComponent<CapsuleCollider>().enabled = true; }
@@ -1563,14 +1563,14 @@ STEP0:
         }
 
         // レイを投げた対象のtop位置を取得
-        private float getRaycastHitTop(RaycastHit hit) {
+        float getRaycastHitTop(RaycastHit hit) {
             float _hitHeight = hit.collider.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _hitY = hit.transform.position.y; // 対象オブジェクトの(※中心)y座標取得
             return _hitHeight + _hitY; // 対象オブジェクトのtop位置取得
         }
 
         // 衝突したオブジェクトの側面に当たったか判定する
-        private bool isHitSide(GameObject target) {
+        bool isHitSide(GameObject target) {
             float _targetHeight = target.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _targetY = target.transform.position.y; // 対象オブジェクトの(※中心)y座標取得
             float _targetTop = _targetHeight + _targetY; // 衝突したオブジェクトのTOP取得
@@ -1583,7 +1583,7 @@ STEP0:
         }
 
         // 衝突したブロックの下に当たったか判定する
-        private bool isHitBlockBottom(GameObject target) {
+        bool isHitBlockBottom(GameObject target) {
             var _targetBottom = target.transform.position.y; // 当たったブロックの底面の高さ
             float _height = GetComponent<CapsuleCollider>().bounds.size.y; // 自分のコライダーの高さ
             float _y = transform.position.y; // 自分のy座標(※0基点)
@@ -1597,7 +1597,7 @@ STEP0:
         /// <summary>
         /// Player の方向を列挙体で返す。
         /// </summary>
-        private Direction getDirection(Vector3 forwardVector) {
+        Direction getDirection(Vector3 forwardVector) {
             var _fX = (float) Math.Round(forwardVector.x);
             var _fY = (float) Math.Round(forwardVector.y);
             var _fZ = (float) Math.Round(forwardVector.z);
@@ -1637,7 +1637,7 @@ STEP0:
         /// <summary>
         /// セリフ吹き出しのオフセット値を返す。MEMO: Z軸正方向が基準
         /// </summary>
-        private Vector3 getSpeechOffset(Vector3 forwardVector) {
+        Vector3 getSpeechOffset(Vector3 forwardVector) {
             var _direction = getDirection(forwardVector);
             if (_direction == Direction.PositiveX) {
                 return new Vector3(speechOffset.z, speechOffset.y, -speechOffset.x);
@@ -1654,7 +1654,7 @@ STEP0:
         /// <summary>
         /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
         /// </summary>
-        private void say(string text, int size = 60, double time = 0.5d) {
+        void say(string text, int size = 60, double time = 0.5d) {
             speechText.text = text;
             speechText.fontSize = size;
             speechImage.SetActive(true);
@@ -1668,7 +1668,7 @@ STEP0:
         /// <summary>
         /// セリフ用吹き出しを非表示にする。
         /// </summary>
-        private void beSilent() {
+        void beSilent() {
             speechImage.SetActive(false);
         }
 
@@ -1682,25 +1682,25 @@ STEP0:
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド(アンダースコアorキャメルケース)
 
-            private bool _grounded; // 接地フラグ
-            private bool _climbing; // 上り降りフラグ
-            private bool _pushing; // 押すフラグ
-            private bool _holding; // 持つフラグ
-            private bool _faceing; // 正対するフラグ
-            private bool _stairUping; // 階段上りフラグ
-            private bool _stairDowning; // 階段下りフラグ
-            private bool _lookBackJumping; // 捕まり反転ジャンプフラグ
+            bool _grounded; // 接地フラグ
+            bool _climbing; // 上り降りフラグ
+            bool _pushing; // 押すフラグ
+            bool _holding; // 持つフラグ
+            bool _faceing; // 正対するフラグ
+            bool _stairUping; // 階段上りフラグ
+            bool _stairDowning; // 階段下りフラグ
+            bool _lookBackJumping; // 捕まり反転ジャンプフラグ
 
-            private float _secondsAfterJumped; // ジャンプして何秒経ったか
+            float _secondsAfterJumped; // ジャンプして何秒経ったか
 
-            private bool _throwing;
-            private bool _throwed;
-            private float _throwingTime;
-            private float _throwedTime;
-            private bool _bombing;
-            private bool _bombed;
+            bool _throwing;
+            bool _throwed;
+            float _throwingTime;
+            float _throwedTime;
+            bool _bombing;
+            bool _bombed;
 
-            private bool _damaged; // ダメージを受けるフラグ
+            bool _damaged; // ダメージを受けるフラグ
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // プロパティ(キャメルケース)
@@ -1769,7 +1769,7 @@ STEP0:
             ///////////////////////////////////////////////////////////////////////////////////////////
             // プライベートメソッド(キャメルケース)
 
-            private void throwBomb(float time) {
+            void throwBomb(float time) {
                 if (_throwing && !_bombed && _throwingTime > 0.5f) {
                     _bombing = true;
                 } else if (_throwing && _bombed && _throwingTime > 0.5f) {
@@ -1804,26 +1804,26 @@ STEP0:
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            private bool _idol;
-            private bool _run;
-            private bool _walk;
-            private bool _jump;
-            private bool _reverseJump;
-            private bool _backward;
-            private bool _sideStepLeft;
-            private bool _sideStepRight;
-            private bool _climbUp;
-            private bool _cancelClimb;
-            private bool _jumpForward;
-            private bool _jumpBackward;
-            private bool _grounded;
-            private bool _getItem;
-            private bool _stairUp;
-            private bool _stairDown;
-            private bool _unintended; // 意図していない状況
-            private bool _intoWater;
-            private bool _holdBalloon;
-            private bool _virtualControllerMode;
+            bool _idol;
+            bool _run;
+            bool _walk;
+            bool _jump;
+            bool _reverseJump;
+            bool _backward;
+            bool _sideStepLeft;
+            bool _sideStepRight;
+            bool _climbUp;
+            bool _cancelClimb;
+            bool _jumpForward;
+            bool _jumpBackward;
+            bool _grounded;
+            bool _getItem;
+            bool _stairUp;
+            bool _stairDown;
+            bool _unintended; // 意図していない状況
+            bool _intoWater;
+            bool _holdBalloon;
+            bool _virtualControllerMode;
 
             public bool idol { get => _idol; set => _idol = value; }
             public bool run { get => _run; set => _run = value; }
@@ -1900,7 +1900,7 @@ STEP0:
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
 
-            private float _value;
+            float _value;
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // パブリックメソッド
@@ -1926,7 +1926,7 @@ STEP0:
             ///////////////////////////////////////////////////////////////////////////////////////////
             // プライベートメソッド
 
-            private void init() {
+            void init() {
                 _value = 1f;
             }
 
@@ -1936,7 +1936,7 @@ STEP0:
 
         #region AxisToggle
 
-        private class AxisToggle {
+        class AxisToggle {
             public static bool Up = false;
             public static bool Down = false;
             public static bool Left = false;

@@ -62,7 +62,7 @@ namespace StudioMeowToon {
 
         protected ButtonControl rsDown; // Rスティック下入力
 
-        private bool _useVirtualController;
+        bool _useVirtualController;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -85,7 +85,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プライベートメソッド(キャメルケース: 動詞)
 
-        private void mapGamepad() {
+        void mapGamepad() {
             // 物理ゲームパッド接続判定
             var controllerNames = Input.GetJoystickNames();
             if (controllerNames.Length == 0 || controllerNames[0] == "") {

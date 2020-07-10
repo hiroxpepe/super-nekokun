@@ -31,16 +31,16 @@ namespace StudioMeowToon {
         // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
 
         [SerializeField]
-        private bool isFloat = false; // 浮遊フラグ ※現状で持てない
+        bool isFloat = false; // 浮遊フラグ ※現状で持てない
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // フィールド
 
-        private bool isGrounded; // 接地フラグ
+        bool isGrounded; // 接地フラグ
 
-        private Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
+        Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
 
-        private Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
+        Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // プロパティ(キャメルケース: 名詞、形容詞)
@@ -150,7 +150,7 @@ namespace StudioMeowToon {
         // プライベートメソッド(キャメルケース: 動詞)
 
         // 衝突したオブジェクトの側面に当たったか判定する
-        private float getHitTop(GameObject hit) {
+        float getHitTop(GameObject hit) {
             float _height = hit.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _y = hit.transform.position.y; // 対象オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // 対象オブジェクトのTOP取得
