@@ -27,7 +27,7 @@ namespace StudioMeowToon {
     public class EnemyController : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         SimpleAnimation simpleAnime;
@@ -39,7 +39,7 @@ namespace StudioMeowToon {
         Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         SoundSystem soundSystem; // サウンドシステム
 
@@ -58,7 +58,7 @@ namespace StudioMeowToon {
         Text speechText; // セリフ用吹き出しテキスト
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        // 更新 メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
@@ -88,7 +88,7 @@ namespace StudioMeowToon {
             if (_fps == 60) _ADJUST1 = 8f;
             if (_fps == 30) _ADJUST1 = 16f;
 
-            var _damaged = false; // ダメージ中フラグ　TODO: stract
+            var _damaged = false; // ダメージ中フラグ TODO: class
 
             // セリフ追従
             this.UpdateAsObservable()
@@ -327,7 +327,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース)
+        // private Methods [verb]
 
         /// <summary>
         /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
@@ -392,7 +392,7 @@ namespace StudioMeowToon {
         protected class DoUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド(アンダースコアorキャメルケース)
+            // Fields
 
             bool _grounded; // 接地フラグ
             bool _searching; // 索敵中フラグ
@@ -401,7 +401,7 @@ namespace StudioMeowToon {
             bool _attacking; // 攻撃中フラグ
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プロパティ(キャメルケース)
+            // Properties [noun, adjectives] 
 
             public bool grounded { get => _grounded; set => _grounded = value; }
 
@@ -414,7 +414,7 @@ namespace StudioMeowToon {
             public bool attacking { get => _attacking; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ(パスカルケース)
+            // Constructor
 
             /// <summary>
             /// 初期化済みのインスタンスを返す。
@@ -426,7 +426,7 @@ namespace StudioMeowToon {
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // パブリックメソッド(パスカルケース)
+            // public Methods [verb]
 
             public void ApplySearching() {
                 _searching = true;
@@ -457,8 +457,6 @@ namespace StudioMeowToon {
                 _rotate = false;
             }
 
-            ///////////////////////////////////////////////////////////////////////////////////////////
-            // プライベートメソッド(キャメルケース)
         }
 
         #endregion
@@ -471,7 +469,7 @@ namespace StudioMeowToon {
         protected class DoFixedUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド
+            // Fields
 
             //bool _idol;
             bool _run;
@@ -479,7 +477,7 @@ namespace StudioMeowToon {
             bool _jump;
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プロパティ(キャメルケース)
+            // Properties [noun, adjectives] 
 
             //public bool idol { get => _idol; set => _idol = value; }
 
@@ -491,7 +489,7 @@ namespace StudioMeowToon {
 
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ
+            // Constructor
 
             /// <summary>
             /// 初期化済みのインスタンスを返す。
@@ -503,7 +501,7 @@ namespace StudioMeowToon {
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // パブリックメソッド
+            // public Methods [verb]
 
             public void ApplyRun() {
                 _run = false;

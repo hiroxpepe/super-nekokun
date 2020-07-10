@@ -29,7 +29,7 @@ namespace StudioMeowToon {
     public class PlayerController : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         GameSystem gameSystem; // ゲームシステム
@@ -62,7 +62,7 @@ namespace StudioMeowToon {
         Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         BombAngle bombAngle; // 弾道角度
 
@@ -109,12 +109,12 @@ namespace StudioMeowToon {
         Quaternion originalRotation;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         public bool Faceing { get => doUpdate.faceing; } // オブジェクトに正対中かどうか
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド
+        // public Methods [verb]
 
         /// <summary>
         /// HPデクリメント
@@ -148,10 +148,10 @@ namespace StudioMeowToon {
 
         ///////////////////////////////////////////////////////////////////////////
 
-        //　IK左手位置用のTransform
+        // IK左手位置用のTransform
         Transform leftHandTransform;
 
-        //　IK右手位置用のTransform
+        // IK右手位置用のTransform
         Transform rightHandTransform;
 
         void OnAnimatorIK() {
@@ -184,7 +184,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////
-        // 更新 メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
@@ -850,7 +850,7 @@ STEP0:
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // イベントハンドラ
+        // Event handler
 
         void OnCollisionEnter(Collision collision) {
             // ブロックに接触したら
@@ -1680,7 +1680,7 @@ STEP0:
         protected class DoUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド(アンダースコアorキャメルケース)
+            // Fields
 
             bool _grounded; // 接地フラグ
             bool _climbing; // 上り降りフラグ
@@ -1703,7 +1703,7 @@ STEP0:
             bool _damaged; // ダメージを受けるフラグ
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プロパティ(キャメルケース)
+            // Properties [noun, adjectives] 
 
             public bool grounded { get => _grounded; set => _grounded = value; }
             public bool climbing { get => _climbing; set => _climbing = value; }
@@ -1721,7 +1721,7 @@ STEP0:
             public bool damaged { get => _damaged; set => _damaged = value; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ(パスカルケース)
+            // Constructor
 
             /// <summary>
             /// 初期化済みのインスタンスを返す。
@@ -1733,7 +1733,7 @@ STEP0:
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // パブリックメソッド(パスカルケース)
+            // public Methods [verb]
 
             public void ResetState() {
                 _grounded = false;
@@ -1767,7 +1767,7 @@ STEP0:
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プライベートメソッド(キャメルケース)
+            // private Methods [verb]
 
             void throwBomb(float time) {
                 if (_throwing && !_bombed && _throwingTime > 0.5f) {
@@ -1802,7 +1802,7 @@ STEP0:
         protected class DoFixedUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド
+            // Fields
 
             bool _idol;
             bool _run;
@@ -1847,7 +1847,7 @@ STEP0:
             public bool virtualControllerMode { get => _virtualControllerMode; set => _virtualControllerMode = value; }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ
+            // Constructor
 
             /// <summary>
             /// 初期化済みのインスタンスを返す。
@@ -1859,7 +1859,7 @@ STEP0:
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // パブリックメソッド
+            // public Methods [verb]
 
             /// <summary>
             /// 全フィールドの初期化
@@ -1898,12 +1898,12 @@ STEP0:
         protected class BombAngle {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // フィールド
+            // Fields
 
             float _value;
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // パブリックメソッド
+            // public Methods [verb]
 
             public float Value {
                 get { return _value; }
@@ -1915,7 +1915,7 @@ STEP0:
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // コンストラクタ
+            // Constructor
 
             public static BombAngle GetInstance() {
                 var _instance = new BombAngle();
@@ -1924,7 +1924,7 @@ STEP0:
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
-            // プライベートメソッド
+            // private Methods [verb]
 
             void init() {
                 _value = 1f;

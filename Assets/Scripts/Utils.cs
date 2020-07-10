@@ -25,7 +25,7 @@ namespace StudioMeowToon {
     public class Utils { // 何もしなくても別のスクリプトから呼び出せる
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド(パスカルケース: 動詞)
+        // public Methods [verb]
 
         /// <summary>
         /// localPosition Y座標だけ入れ替える。TODO: 拡張メソッドで localPosition.ReplaceY(5f); とか実装？

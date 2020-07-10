@@ -69,7 +69,7 @@ namespace StudioMeowToon {
         AudioClip waterForwardClip; // 水中で進む効果音
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         string nowPlayingClipSe1; // 今再生中の効果音1
 
@@ -82,7 +82,7 @@ namespace StudioMeowToon {
         AudioSource se2AudioSource; // 効果音用オーディオソース2
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド
+        // public Methods [verb]
 
         public void PlayItemClip() { // アイテム取得時の効果音を鳴らす
             if (se1AudioSource.isPlaying) {
@@ -187,7 +187,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Start is called before the first frame update
         void Start() {

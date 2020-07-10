@@ -29,7 +29,7 @@ namespace StudioMeowToon {
     public class GameSystem : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         Text information; // アイテム数表示用テキストUI
@@ -56,7 +56,7 @@ namespace StudioMeowToon {
         Camera eventCamera; // イベントカメラ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         int itemTotalCount = 0; // アイテム総数
 
@@ -98,7 +98,7 @@ namespace StudioMeowToon {
         float fpsForFixedUpdate = 0f; // FixedUpdate() FPS
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         public bool gameOver { // GAMEオーバーかどうかを返す
             get => isGameOver;
@@ -124,7 +124,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド
+        // public Methods [verb]
 
         public void GameStart() {
             SceneManager.LoadScene("Level1"); // Level1に遷移
@@ -172,7 +172,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
@@ -317,7 +317,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         void checkGameOver() {
             if (playerLifeValue == 0) {
@@ -378,7 +378,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // デバッグ
+        // Debug
 
         public void TRACE(string value) {
             debug.text = value;

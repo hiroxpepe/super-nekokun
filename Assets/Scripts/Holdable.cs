@@ -27,7 +27,7 @@ namespace StudioMeowToon {
     public class Holdable : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 設定・参照 (bool => is+形容詞、has+過去分詞、can+動詞原型、三単現動詞)
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
         bool canHold = true; // 持たれることが出来るかフラグ
@@ -42,7 +42,7 @@ namespace StudioMeowToon {
         float holdedTilt = 15f; // 持たれる時の傾き
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // フィールド
+        // Fields
 
         bool isGrounded; // 接地フラグ
 
@@ -51,7 +51,7 @@ namespace StudioMeowToon {
         Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プロパティ(キャメルケース: 名詞、形容詞)
+        // Properties [noun, adjectives] 
 
         /// <summary>
         /// プレイヤーに持たれているかどうか。
@@ -69,7 +69,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // パブリックメソッド(パスカルケース)
+        // public Methods [verb]
 
         // 持たれる実装用
         public Transform GetLeftHandTransform() { // キャラにIKで持たれる用
@@ -81,7 +81,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // 更新メソッド
+        // update Methods
 
         // Awake is called when the script instance is being loaded.
         protected void Awake() {
@@ -146,7 +146,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベートメソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         /// <summary>
         /// ブロックの位置をグリッドに合わせ微調整する。
