@@ -102,7 +102,7 @@ namespace StudioMeowToon {
             }
 
             // 視点ズームアップ
-            if (rsUp.isPressed) {
+            if (rStickUpButton.isPressed) {
                 if (!(defaultLocalPosition.z >= -0.6f)) { // 調整値
                     defaultLocalPosition = new Vector3(
                         defaultLocalPosition.x,
@@ -115,7 +115,7 @@ namespace StudioMeowToon {
             }
 
             // 視点ズームアウト
-            if (rsDown.isPressed) {
+            if (rStickDownButton.isPressed) {
                 if (!(defaultLocalPosition.z <= -1.55f)) { // 調整値
                     defaultLocalPosition = new Vector3(
                         defaultLocalPosition.x,
@@ -180,13 +180,13 @@ namespace StudioMeowToon {
         void lookAround() { // 一人称視点カメラ操作
             float _ADJUST = 80.0f; // 回転係数
             mainCamera.transform.localEulerAngles = new Vector3(0f, 0f, 0f); // カメラ本体を水平に
-            if (dpadUp.isPressed) { // 上
+            if (upButton.isPressed) { // 上
                 verticalAxis.transform.Rotate(1.0f * Time.deltaTime * _ADJUST, 0f, 0f);
-            } else if (dpadDown.isPressed) { // 下
+            } else if (downButton.isPressed) { // 下
                 verticalAxis.transform.Rotate(-1.0f * Time.deltaTime * _ADJUST, 0f, 0f);
-            } else if (dpadLeft.isPressed) { // 左
+            } else if (leftButton.isPressed) { // 左
                 horizontalAxis.transform.Rotate(0f, -1.0f * Time.deltaTime * _ADJUST, 0f);
-            } else if (dpadRight.isPressed) { // 右
+            } else if (rightButton.isPressed) { // 右
                 horizontalAxis.transform.Rotate(0f, 1.0f * Time.deltaTime * _ADJUST, 0f);
             }
             if (transform.localPosition.z < 0.1f) { // カメラシステムをキャラの目の位置に移動する
