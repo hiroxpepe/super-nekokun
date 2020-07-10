@@ -81,7 +81,7 @@ namespace StudioMeowToon {
 
         float pushedDistance; // 押された距離
 
-        ExplodeParam explodeParam; // 破片生成用のパラメータ構造体
+        ExplodeParam explodeParam; // 破片生成用のパラメータクラス
 
         DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用 フラグ
 
@@ -727,9 +727,9 @@ namespace StudioMeowToon {
         #region DoFixedUpdate
 
         /// <summary>
-        /// FixedUpdate() メソッド用のフラグ構造体。
+        /// FixedUpdate() メソッド用のフラグクラス。
         /// </summary>
-        protected struct DoFixedUpdate {
+        protected class DoFixedUpdate {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
@@ -766,9 +766,9 @@ namespace StudioMeowToon {
         #region ExplodeParam
 
         /// <summary>
-        /// 破片生成用のパラメーター構造体。
+        /// 破片生成用のパラメータークラス。
         /// </summary>
-        protected struct ExplodeParam {
+        protected class ExplodeParam {
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             // フィールド
