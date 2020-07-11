@@ -330,44 +330,37 @@ namespace StudioMeowToon {
                 // 接地フラグONの場合
                 this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing)
                     .Subscribe(_ => {
-                        // 持つ(Rボタン)押した
-                        if (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)) {
-                            if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
-                                startFaceing(); // オブジェクトに正対する開始
-                                faceToObject(holded); // オブジェクトに正対する
-                                if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
-                                if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
-                                    doUpdate.grounded = false; // 浮遊
-                                    doFixedUpdate.holdBalloon = true;
-                                }
-                                goto STEP0; // 弾発射を飛ばす
-                            }
-                        }
                         if (doUpdate.bombing) {
                             bomb(); // 弾を撃つ
                             doUpdate.bombed = true;
-                            goto STEP1;
                         } else if (aButton.isPressed && doUpdate.throwed) {
                             simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
-                            goto STEP1;
                         } else if (yButton.isPressed && doUpdate.throwed) {
                             simpleAnime.CrossFade("Run", 0.3f); // 投げるから走るアニメ
-                            goto STEP1;
                         } else if (doUpdate.throwed) {
                             simpleAnime.CrossFade("Walk", 0.5f); // 投げるから歩くアニメ
-                            goto STEP1;
                         } else if (r1Button.wasPressedThisFrame) { // Rボタンを押した時
                             if (!doUpdate.holding || !doUpdate.faceing) { // Item を持っていなかったら、またはオブジェクトに正対中でなければ
                                 simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
                                 doUpdate.throwing = true;
                             }
-                            goto STEP1;
                         }
-                    STEP0:
-                    STEP1:
-                        return;
                     });
-                    
+
+                // 持つ・撃つ(Rボタン)押した
+                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
+                    .Subscribe(_ => {
+                        if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
+                            startFaceing(); // オブジェクトに正対する開始
+                            faceToObject(holded); // オブジェクトに正対する
+                            if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
+                            if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
+                                doUpdate.grounded = false; // 浮遊
+                                doFixedUpdate.holdBalloon = true;
+                            }
+                        }
+                    });
+
                 // Aボタン押しっぱなし
                 this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
                     .Subscribe(_ => {
