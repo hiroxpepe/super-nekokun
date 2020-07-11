@@ -273,27 +273,6 @@ namespace StudioMeowToon {
                     // 風船につかまり浮遊中
                     if (doFixedUpdate.holdBalloon) { doUpdate.grounded = false; }
 
-                    // 持つ(Rボタン)を離した
-                    if (r2Hold && r2Button.wasPressedThisFrame) {
-                        if (holded != null) {
-                            if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
-                            holded.transform.parent = null; // 子オブジェクト解除
-                            doUpdate.holding = false; // 持つフラグOFF
-                            holded = null; // 持つオブジェクト参照解除
-                            r2Hold = false; // R2ホールドフラグOFF
-                        }
-                    } else if (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) {
-                        if (!r2Hold) {
-                            if (holded != null) {
-                                if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
-                                holded.transform.parent = null; // 子オブジェクト解除
-                                doUpdate.holding = false; // 持つフラグOFF
-                                holded = null; // 持つオブジェクト参照解除
-
-                            }
-                        }
-                    }
-
                     // ロック(Lボタン)を押して続けている // TODO: 敵ロック
                     if (l1Button.isPressed) {
                         //lockOnTarget(); // TODO: 捕まり反転ジャンプの時に向いてしまう…
@@ -319,6 +298,29 @@ namespace StudioMeowToon {
                     }
                 });
 
+                // 持つ(Rボタン)を離した (R2ホールド)
+                this.UpdateAsObservable().Where(_ => continueUpdate() && r2Hold && r2Button.wasPressedThisFrame)
+                    .Subscribe(_ => {
+                        if (holded != null) {
+                            if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                            holded.transform.parent = null; // 子オブジェクト解除
+                            doUpdate.holding = false; // 持つフラグOFF
+                            holded = null; // 持つオブジェクト参照解除
+                            r2Hold = false; // R2ホールドフラグOFF
+                        }
+                    });
+
+                // 持つ(Rボタン)を離した
+                this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !r2Hold)
+                    .Subscribe(_ => {
+                        if (holded != null) {
+                            if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                            holded.transform.parent = null; // 子オブジェクト解除
+                            doUpdate.holding = false; // 持つフラグOFF
+                            holded = null; // 持つオブジェクト参照解除
+                        }
+                    });
+
                 this.UpdateAsObservable().Where(_ => continueUpdate())
                     .Subscribe(_ => {
                     });
@@ -326,9 +328,9 @@ namespace StudioMeowToon {
                 this.UpdateAsObservable().Where(_ => continueUpdate())
                     .Subscribe(_ => {
                     });
-                
+
                 // 接地フラグONの場合
-                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing)
+                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding)
                     .Subscribe(_ => {
                         if (doUpdate.bombing) {
                             bomb(); // 弾を撃つ
