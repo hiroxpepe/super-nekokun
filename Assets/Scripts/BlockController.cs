@@ -305,65 +305,68 @@ namespace StudioMeowToon {
                         }
                     }
                 });
-        }
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // Event handler
+            // プレイヤーが上に乗った
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.IsPlayer())
+                .Subscribe(x => {
+                    if (isUnderBy(x)) {
+                        player = x.gameObject;
+                        isPlayerOnThis = true;
+                    }
+                });
 
-        void OnCollisionEnter(Collision collision) {
-            //if (collision.gameObject.tag.Contains("Player")) {
-            if (collision.gameObject.IsPlayer()) {
-                // プレイヤーが上に乗った
-                if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
-                    Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
-                    player = collision.gameObject;
-                    isPlayerOnThis = true;
-                }
-            }
-            if (collision.gameObject.name.Contains("Item")) { // TODO: LikeItem()
-                // アイテムが上に乗った
-                if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
-                    Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
-                    item = collision.gameObject;
-                    isItemOnThis = true;
-                }
-            }
-        }
+            // アイテムが上に乗った
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeItem())
+                .Subscribe(x => {
+                    if (isUnderBy(x)) {
+                        item = x.gameObject;
+                        isItemOnThis = true;
+                    }
+                });
 
-        void OnCollisionStay(Collision collision) {
-            if (collision.gameObject.tag.Contains("Player")) {
-                // プレイヤーが上に乗っている
-                if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
-                    Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
-                    player = collision.gameObject;
-                    isPlayerOnThis = true;
-                }
-            }
-            if (collision.gameObject.name.Contains("Item")) {
-                // アイテムが上に乗っている
-                if (Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) <
-                    Math.Round(collision.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f) { //  + 0.1f は誤差
-                    item = collision.gameObject;
-                    isItemOnThis = true;
-                }
-            }
-        }
+            // プレイヤーが上に乗っている
+            this.OnCollisionStayAsObservable().Where(x => x.gameObject.IsPlayer())
+                 .Subscribe(x => {
+                     if (isUnderBy(x)) {
+                         player = x.gameObject;
+                         isPlayerOnThis = true;
+                     }
+                 });
 
-        void OnCollisionExit(Collision collision) {
-            if (collision.gameObject.tag.Contains("Player")) {
-                // プレイヤーが上から離れた
-                player = null;
-                isPlayerOnThis = false;
-            }
-            if (collision.gameObject.name.Contains("Item")) { // TODO: ここが子オブジェクトになるんので動作してない 親がプやいやになったら外す
-                // アイテムが上から離れた
-                item = null;
-                isItemOnThis = false;
-            }
+            // アイテムが上に乗っている
+            (this).OnCollisionStayAsObservable().Where(x => x.gameObject.LikeItem())
+                 .Subscribe(x => {
+                     if (isUnderBy(x)) {
+                         item = x.gameObject;
+                         isItemOnThis = true;
+                     }
+                 });
+
+            // プレイヤーが上から離れた
+            this.OnCollisionExitAsObservable().Where(x => x.gameObject.IsPlayer())
+                .Subscribe(_ => {
+                    player = null;
+                    isPlayerOnThis = false;
+                });
+
+            // アイテムが上から離れた
+            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeItem())
+                .Subscribe(_ => {
+                    item = null;
+                    isItemOnThis = false;
+                });
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // private Methods [verb]
+
+        /// <summary>
+        /// 接触対象より下かどうかを返す。
+        /// </summary>
+        bool isUnderBy(Collision x) {
+            //  + 0.1f は誤差
+            return Math.Round(getTop(), 2, MidpointRounding.AwayFromZero) < Math.Round(x.transform.position.y, 2, MidpointRounding.AwayFromZero) + 0.1f;
+        }
 
         /// <summary>
         /// 破片を生成する。

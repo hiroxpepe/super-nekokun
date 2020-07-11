@@ -829,22 +829,21 @@ namespace StudioMeowToon {
                 doFixedUpdate.ResetMotion(); // 物理挙動フラグ初期化
             });
 
-        }
-
-        // LateUpdate is called after all Update functions have been called.
-        void LateUpdate() {
-            if (doUpdate.climbing) { // 捕まり反転ジャンプの準備
-                if (leftButton.isPressed) {
-                    AxisToggle.Left = AxisToggle.Left == true ? false : true;
-                } else if (rightButton.isPressed) {
-                    AxisToggle.Right = AxisToggle.Right == true ? false : true;
+            // LateUpdate is called after all Update functions have been called.
+            this.LateUpdateAsObservable().Subscribe(_ => {
+                if (doUpdate.climbing) { // 捕まり反転ジャンプの準備
+                    if (leftButton.isPressed) {
+                        AxisToggle.Left = AxisToggle.Left == true ? false : true;
+                    } else if (rightButton.isPressed) {
+                        AxisToggle.Right = AxisToggle.Right == true ? false : true;
+                    }
+                    if (l1Button.isPressed) { // Lボタン押しっぱなし TODO: ボタンの変更
+                        readyForBackJump();
+                    }
                 }
-                if (l1Button.isPressed) { // Lボタン押しっぱなし TODO: ボタンの変更
-                    readyForBackJump();
-                }
-            }
 
-            cashPreviousPosition(); // 10フレ前分の位置情報保存
+                cashPreviousPosition(); // 10フレ前分の位置情報保存
+            });
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -976,7 +975,7 @@ namespace StudioMeowToon {
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // プライベート メソッド(キャメルケース: 動詞)
+        // private Methods [verb]
 
         // TODO: 一時凍結
         void lookBack() { // 後ろをふりかえる
@@ -1204,7 +1203,7 @@ namespace StudioMeowToon {
             simpleAnime.Play("Default"); // デフォルトアニメ
             var _h = transform.Find("Head").gameObject;
             var _e = transform.Find("Ear").gameObject;
-            var _cs = transform.Find("CameraSystem").gameObject;
+            var _cs = transform.Find("CameraController").gameObject;
             float _SPEED = 100; // 回転スピード※ゆっくり回転は効かない
             var _fX = (float) Math.Round(transform.forward.x);
             var _fZ = (float) Math.Round(transform.forward.z);

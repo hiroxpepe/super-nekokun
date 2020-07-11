@@ -31,6 +31,19 @@ namespace StudioMeowToon {
         public static bool IsPlayer(this GameObject self) {
             return self.tag.Equals("Player");
         }
+
+        public static bool LikeItem(this GameObject self) {
+            return self.tag.Contains("Item");
+        }
+
+        public static bool LikeBlock(this GameObject self) {
+            return self.tag.Contains("Block");
+        }
+
+        public static bool LikeGround(this GameObject self) {
+            return self.tag.Contains("Ground");
+        }
+
     }
 
 }

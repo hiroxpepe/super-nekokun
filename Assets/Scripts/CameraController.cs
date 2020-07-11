@@ -67,6 +67,7 @@ namespace StudioMeowToon {
 
             defaultLocalPosition = transform.localPosition; // デフォルトのカメラポジション保存
 
+            // Update is called once per frame.
             this.UpdateAsObservable().Subscribe(_ => {
                 // 視点操作のリセット
                 if (xButton.wasReleasedThisFrame) {
@@ -125,21 +126,19 @@ namespace StudioMeowToon {
                     }
                 }
             });
-        }
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // Event handler
+            // カメラ前進ポジションフラグON
+            this.OnTriggerEnterAsObservable().Where(x => x.name.Contains("Block") || x.name.Contains("Wall"))
+                .Subscribe(_ => {
+                    isForwardPosition = true;
+                });
 
-        void OnTriggerEnter(Collider other) {
-            if (other.name.Contains("Block") || other.name.Contains("Wall")) {
-                isForwardPosition = true; // カメラ前進ポジションフラグON
-            }
-        }
+            // カメラ前進ポジションフラグON
+            this.OnTriggerStayAsObservable().Where(x => x.name.Contains("Block") || x.name.Contains("Wall"))
+                 .Subscribe(_ => {
+                     isForwardPosition = true;
+                 });
 
-        void OnTriggerStay(Collider other) {
-            if (other.name.Contains("Block") || other.name.Contains("Wall")) {
-                isForwardPosition = true; // カメラ前進ポジションフラグON
-            }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
