@@ -205,8 +205,8 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start(); // 基底クラスのメソッド実行
             origin = transform.localPosition;
-            // TODO: 自分のx,y,z の縮尺率を掛ける
-            // TODO:開始点-終了点が0.5おかしい
+            // FIXME: 自分の x,y,z の縮尺率を掛ける
+            // FIXME: 開始点-終了点が0.5おかしい
             toReach = new Vector3(origin.x + movementToX, origin.y + movementToY, origin.z + movementToZ);
 
             // 持たれる実装用
@@ -244,7 +244,7 @@ namespace StudioMeowToon {
                     // 自動移動
                     if (!gameObject.name.Contains("_Piece")) { // 破片ではない場合
                         if (movementToX != 0 || movementToY != 0 || movementToZ != 0) { // TODO: canAutoMove 実装?
-                            // TODO: ブロックの上にアイテムを二つ置いて、また持ったらバグる
+                            // FIXME: ブロックの上にアイテムを二つ置いて、また持ったらバグる
                             if (item == null || item.GetComponent<ItemController>().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
                                 item = null;
                                 isItemOnThis = false;
