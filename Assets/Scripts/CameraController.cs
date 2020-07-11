@@ -15,6 +15,8 @@
  */
 
 using UnityEngine;
+using UniRx;
+using UniRx.Triggers;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -64,84 +66,79 @@ namespace StudioMeowToon {
             base.Start();
 
             defaultLocalPosition = transform.localPosition; // デフォルトのカメラポジション保存
-        }
 
-        // Update is called once per frame
-        new void Update() {
-            base.Update();
-
-            // 視点操作のリセット
-            if (xButton.wasReleasedThisFrame) {
-                resetLookAround();
-                return;
-            }
-
-            // 視点操作(Xボタン押しっぱなし)
-            if (xButton.isPressed) {
-                lookAround();
-                return;
-            }
-
-            if (!xButton.isPressed) { // 視点操作モードでない場合
-                float _ADJUST = 80.0f; // 移動係数
-                if (isForwardPosition) {
-                    if (transform.localPosition.z < -0.5f) { // カメラシステムをプレイヤーの頭のすぐ後ろまで移動する
-                        transform.localPosition += new Vector3(0f, 0f, 0.075f * Time.deltaTime * _ADJUST);
-                    }
-                    transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
-                    checkSix();
-                } else if (!isForwardPosition) {
-                    if (transform.localPosition.z > defaultLocalPosition.z) {
-                        transform.localPosition -= new Vector3(0f, 0f, 0.035f * Time.deltaTime * _ADJUST);
-                    }
-                    if (transform.localPosition.y > defaultLocalPosition.y) {
-                        transform.localPosition -= new Vector3(0f, 0.035f * Time.deltaTime * _ADJUST, 0f);
-                    }
-                    transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+            // Update is called once per frame.
+            this.UpdateAsObservable().Subscribe(_ => {
+                // 視点操作のリセット
+                if (xButton.wasReleasedThisFrame) {
+                    resetLookAround();
+                    return;
                 }
-            }
 
-            // 視点ズームアップ
-            if (rStickUpButton.isPressed) {
-                if (!(defaultLocalPosition.z >= -0.6f)) { // 調整値
-                    defaultLocalPosition = new Vector3(
-                        defaultLocalPosition.x,
-                        defaultLocalPosition.y,
-                        defaultLocalPosition.z + 0.05f
-                    );
-                    transform.localPosition = defaultLocalPosition;
-                    Debug.Log("ズームアップ");
+                // 視点操作(Xボタン押しっぱなし)
+                if (xButton.isPressed) {
+                    lookAround();
+                    return;
                 }
-            }
 
-            // 視点ズームアウト
-            if (rStickDownButton.isPressed) {
-                if (!(defaultLocalPosition.z <= -1.55f)) { // 調整値
-                    defaultLocalPosition = new Vector3(
-                        defaultLocalPosition.x,
-                        defaultLocalPosition.y,
-                        defaultLocalPosition.z - 0.05f
-                    );
-                    transform.localPosition = defaultLocalPosition;
-                    Debug.Log("ズームアウト");
+                if (!xButton.isPressed) { // 視点操作モードでない場合
+                    float _ADJUST = 80.0f; // 移動係数
+                    if (isForwardPosition) {
+                        if (transform.localPosition.z < -0.5f) { // カメラシステムをプレイヤーの頭のすぐ後ろまで移動する
+                            transform.localPosition += new Vector3(0f, 0f, 0.075f * Time.deltaTime * _ADJUST);
+                        }
+                        transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+                        checkSix();
+                    } else if (!isForwardPosition) {
+                        if (transform.localPosition.z > defaultLocalPosition.z) {
+                            transform.localPosition -= new Vector3(0f, 0f, 0.035f * Time.deltaTime * _ADJUST);
+                        }
+                        if (transform.localPosition.y > defaultLocalPosition.y) {
+                            transform.localPosition -= new Vector3(0f, 0.035f * Time.deltaTime * _ADJUST, 0f);
+                        }
+                        transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
+                    }
                 }
-            }
 
-        }
+                // 視点ズームアップ
+                if (rStickUpButton.isPressed) {
+                    if (!(defaultLocalPosition.z >= -0.6f)) { // 調整値
+                        defaultLocalPosition = new Vector3(
+                            defaultLocalPosition.x,
+                            defaultLocalPosition.y,
+                            defaultLocalPosition.z + 0.05f
+                        );
+                        transform.localPosition = defaultLocalPosition;
+                        Debug.Log("ズームアップ");
+                    }
+                }
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // Event handler
+                // 視点ズームアウト
+                if (rStickDownButton.isPressed) {
+                    if (!(defaultLocalPosition.z <= -1.55f)) { // 調整値
+                        defaultLocalPosition = new Vector3(
+                            defaultLocalPosition.x,
+                            defaultLocalPosition.y,
+                            defaultLocalPosition.z - 0.05f
+                        );
+                        transform.localPosition = defaultLocalPosition;
+                        Debug.Log("ズームアウト");
+                    }
+                }
+            });
 
-        void OnTriggerEnter(Collider other) {
-            if (other.name.Contains("Block") || other.name.Contains("Wall")) {
-                isForwardPosition = true; // カメラ前進ポジションフラグON
-            }
-        }
+            // カメラ前進ポジションフラグON
+            this.OnTriggerEnterAsObservable().Where(x => x.name.Contains("Block") || x.name.Contains("Wall"))
+                .Subscribe(_ => {
+                    isForwardPosition = true;
+                });
 
-        void OnTriggerStay(Collider other) {
-            if (other.name.Contains("Block") || other.name.Contains("Wall")) {
-                isForwardPosition = true; // カメラ前進ポジションフラグON
-            }
+            // カメラ前進ポジションフラグON
+            this.OnTriggerStayAsObservable().Where(x => x.name.Contains("Block") || x.name.Contains("Wall"))
+                 .Subscribe(_ => {
+                     isForwardPosition = true;
+                 });
+
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
