@@ -844,115 +844,114 @@ namespace StudioMeowToon {
 
                 cashPreviousPosition(); // 10フレ前分の位置情報保存
             });
+
+            // ブロックに接触したら
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBlock())
+                .Subscribe(x => {
+                    if (isUpOrDown()) { // 上下変動がある場合
+                        // 上に乗った状況
+                        if (!isHitSide(x.gameObject)) {
+                            simpleAnime.Play("Default"); // デフォルトアニメ
+                            soundSystem.PlayGroundedClip();
+                            doUpdate.grounded = true; // 接地フラグON
+                            doUpdate.lookBackJumping = false; // 捕まり反転ジャンプフラグOFF
+                            doUpdate.stairUping = false; // 階段上りフラグOFF
+                            doUpdate.stairDowning = false; // 階段下りフラグOFF
+                            doFixedUpdate.idol = true;
+                            doFixedUpdate.grounded = true;
+                            cameraController.ResetLookAround(); // カメラ初期化
+                            doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
+                            flatToFace(); // 面に合わせる TODO:※試験的
+                        } else if (isHitSide(x.gameObject)) {
+                            // 下に当たった場合
+                            if (isHitBlockBottom(x.gameObject)) {
+                                soundSystem.PlayKnockedupClip();
+                                x.gameObject.GetComponent<CommonController>().shockedBy = transform; // 下から衝撃を与える
+                            }
+                            // 横に当たった場合
+                            else {
+                            }
+                        }
+                    }
+                });
+
+            // 地上・壁・坂に接地したら
+            this.OnCollisionEnterAsObservable().Where(x => !x.gameObject.LikeBlock() && (x.gameObject.LikeGround() || x.gameObject.LikeWall()) && !checkIntoWater())
+                .Subscribe(_ => {
+                    simpleAnime.Play("Default"); // デフォルトアニメ
+                    soundSystem.PlayGroundedClip();
+                    doUpdate.grounded = true; // 接地フラグON
+                    doUpdate.lookBackJumping = false; // 振り返りジャンプフラグOFF
+                    doFixedUpdate.idol = true;
+                    doFixedUpdate.grounded = true;
+                    cameraController.ResetLookAround(); // カメラ初期化
+                    doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
+                    flatToFace(); // 面に合わせる TODO:※試験的
+                });
+
+            // 持てるアイテム・ブロックと接触したら
+            this.OnCollisionEnterAsObservable().Where(x => (x.gameObject.LikeItem() || x.gameObject.Holdable()) && !doUpdate.holding)
+                .Subscribe(x => {
+                    holded = x.gameObject; // 持てるアイテムの参照を保持する
+                });
+
+            // 被弾したら FIXME: ここでOK？
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBullet())
+                .Subscribe(_ => {
+                    soundSystem.PlayHitClip();
+                });
+
+            // スロープと接触したら
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeSlope())
+                .Subscribe(_ => {
+                    doUpdate.grounded = true; // 接地フラグON だけ
+                });
+
+            // ブロックに接触し続けている
+            this.OnCollisionStayAsObservable().Where(x => x.gameObject.LikeBlock())
+                .Subscribe(x => {
+                    // 横に当たった場合
+                    if (isHitSide(x.gameObject)) {
+                        // TODO:
+                    }
+                });
+
+            // アイテムブロックから離れたら
+            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeBlock() && x.gameObject.LikeItem())
+                .Subscribe(_ => {
+                    if (!doUpdate.holding) { // 持つ(Rボタン)を離した
+                        holded = null; // 持てるブロックの参照を解除する
+                    }
+                });
+
+            // アイテム or "Holdable" から離れたら
+            this.OnCollisionExitAsObservable().Where(x => (x.gameObject.LikeItem() || x.gameObject.Holdable()) && !doUpdate.holding)
+                .Subscribe(_ => {
+                    holded = null; // 持てるブロックの参照を解除する
+                });
+
+            // アイテムと接触したら消す
+            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.IsItem())
+                .Subscribe(x => {
+                    soundSystem.PlayItemClip(); // 効果音を鳴らす
+                    gameSystem.DecrementItem(); // アイテム数デクリメント
+                    doFixedUpdate.getItem = true;
+                    Destroy(x.gameObject);
+                    say("I got\na item."); // FIXME: 種別
+                });
+
+            // 水面に接触したら
+            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.LikeWater())
+                .Subscribe(_ => {
+                    if (transform.localPosition.y + 0.75f > waterLevel) { // 0.75f は調整値 ⇒ TODO:再検討
+                        soundSystem.PlayWaterInClip();
+                    }
+                });
+
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Event handler
-
-        void OnCollisionEnter(Collision collision) {
-            // ブロックに接触したら
-            var _name = collision.gameObject.name;
-            if (_name.Contains("Block")) {
-                if (isUpOrDown()) { // 上下変動がある場合
-                    // 上に乗った状況
-                    if (!isHitSide(collision.gameObject)) {
-                        simpleAnime.Play("Default"); // デフォルトアニメ
-                        soundSystem.PlayGroundedClip();
-                        doUpdate.grounded = true; // 接地フラグON
-                        doUpdate.lookBackJumping = false; // 捕まり反転ジャンプフラグOFF
-                        doUpdate.stairUping = false; // 階段上りフラグOFF
-                        doUpdate.stairDowning = false; // 階段下りフラグOFF
-                        doFixedUpdate.idol = true;
-                        doFixedUpdate.grounded = true;
-                        cameraController.ResetLookAround(); // カメラ初期化
-                        doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
-                        flatToFace(); // 面に合わせる TODO:※試験的
-                    } else if (isHitSide(collision.gameObject)) {
-                        // 下に当たった場合
-                        if (isHitBlockBottom(collision.gameObject)) {
-                            soundSystem.PlayKnockedupClip();
-                            collision.gameObject.GetComponent<CommonController>().shockedBy = transform; // 下から衝撃を与える
-                        }
-                        // 横に当たった場合
-                        else {
-                        }
-                    }
-                } 
-                // ブロックを持つ実装 FIXME: 修正
-                if ((_name.Contains("Item") || collision.gameObject.tag.Equals("Holdable")) && !doUpdate.holding) { // TODO: Holdable 追加？
-                    holded = collision.gameObject; // 持てるアイテムの参照を保持する
-                }
-            }
-            // 地上・壁・坂に接地したら
-            else if ((_name.Contains("Ground") || _name.Contains("Wall")) && !checkIntoWater()) { // 水中ではない場合
-                simpleAnime.Play("Default"); // デフォルトアニメ
-                soundSystem.PlayGroundedClip();
-                doUpdate.grounded = true; // 接地フラグON
-                doUpdate.lookBackJumping = false; // 振り返りジャンプフラグOFF
-                doFixedUpdate.idol = true;
-                doFixedUpdate.grounded = true;
-                cameraController.ResetLookAround(); // カメラ初期化
-                doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
-                flatToFace(); // 面に合わせる TODO:※試験的
-            }
-            // 持てるアイテムと接触したら
-            else if ((_name.Contains("Item") || collision.gameObject.tag.Equals("Holdable")) && !doUpdate.holding) { // FIXME: Holdable 追加？
-                holded = collision.gameObject; // 持てるアイテムの参照を保持する
-            }
-            // 被弾したら
-            else if (_name.Contains("Bullet")) {
-                soundSystem.PlayHitClip();
-            }
-
-            // スロープと接触したら
-            if (_name.Contains("Slope")) {
-                doUpdate.grounded = true; // 接地フラグON だけ
-                //Debug.Log("Slope:接触");
-            }
-        }
-
-        void OnCollisionStay(Collision collision) {
-            // ブロックに接触し続けている
-            var _name = collision.gameObject.name;
-            if (_name.Contains("Block")) {
-                // 横に当たった場合
-                if (isHitSide(collision.gameObject)) {
-                }
-            }
-        }
-
-        void OnCollisionExit(Collision collision) {
-            // ブロックから離れたら
-            var _name = collision.gameObject.name;
-            if (_name.Contains("Block")) {
-                // ブロックを持つ実装 TODO: 修正
-                if (_name.Contains("Item")) { // TODO: Holdable 追加？
-                    // 持つ(Rボタン)を離した
-                    if (!doUpdate.holding) {
-                        holded = null; // 持てるブロックの参照を解除する
-                    }
-                }
-            } else if ((_name.Contains("Item") || collision.gameObject.tag.Equals("Holdable")) && !doUpdate.holding) { // FIXME: Holdable 追加？
-                holded = null; // 持てるブロックの参照を解除する
-            }
-        }
-
-        void OnTriggerEnter(Collider other) {
-            // アイテムと接触したら消す
-            if (other.gameObject.tag == "Item") {
-                soundSystem.PlayItemClip(); // 効果音を鳴らす
-                gameSystem.DecrementItem(); // アイテム数デクリメント
-                doFixedUpdate.getItem = true;
-                Destroy(other.gameObject);
-                say("I got\na item."); // FIXME: 種別
-            }
-            // 水面に接触したら
-            if (other.gameObject.name == "Water") {
-                if (transform.localPosition.y + 0.75f > waterLevel) { // 0.75f は調整値 ⇒ TODO:再検討
-                    soundSystem.PlayWaterInClip();
-                }
-            }
-        }
 
         void OnGUI() {
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討

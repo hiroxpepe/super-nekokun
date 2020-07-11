@@ -15,7 +15,6 @@
  */
 
 using UnityEngine;
-using UnityEngine.InputSystem.Controls;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -25,7 +24,7 @@ namespace StudioMeowToon {
     public static class Extensions {
 
         public static bool LikePlayer(this GameObject self) {
-            return self.tag.Contains("Player");
+            return self.name.Contains("Player");
         }
 
         public static bool IsPlayer(this GameObject self) {
@@ -33,15 +32,39 @@ namespace StudioMeowToon {
         }
 
         public static bool LikeItem(this GameObject self) {
-            return self.tag.Contains("Item");
+            return self.name.Contains("Item");
+        }
+
+        public static bool IsItem(this GameObject self) {
+            return self.tag.Equals("Item"); // TODO: "Getable"
         }
 
         public static bool LikeBlock(this GameObject self) {
-            return self.tag.Contains("Block");
+            return self.name.Contains("Block");
         }
 
         public static bool LikeGround(this GameObject self) {
-            return self.tag.Contains("Ground");
+            return self.name.Contains("Ground");
+        }
+
+        public static bool LikeWall(this GameObject self) {
+            return self.name.Contains("Wall");
+        }
+
+        public static bool LikeSlope(this GameObject self) {
+            return self.name.Contains("Slope");
+        }
+
+        public static bool LikeWater(this GameObject self) {
+            return self.name.Contains("Water");
+        }
+
+        public static bool LikeBullet(this GameObject self) {
+            return self.name.Contains("Bullet");
+        }
+
+        public static bool Holdable(this GameObject self) {
+            return self.tag.Equals("Holdable");
         }
 
     }
