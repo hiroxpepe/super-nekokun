@@ -252,340 +252,343 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate())
                 .Subscribe(_ => {
 
-                doUpdate.IncrementTime(Time.deltaTime); // 時間インクリメント
-
-                ///////////////////////////////////////////////////////////////////////////////////////
-                // 水中かどうかチェック
-                if (checkIntoWater()) {
-                    if (upButton.isPressed) {
-                        simpleAnime.Play("Swim"); // 泳ぐアニメ
+                    ///////////////////////////////////////////////////////////////////////////////////////
+                    // 水中かどうかチェック
+                    if (checkIntoWater()) {
+                        if (upButton.isPressed) {
+                            simpleAnime.Play("Swim"); // 泳ぐアニメ
+                        } else {
+                            simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
+                        }
+                        if (transform.localPosition.y + 0.9f < waterLevel) { // 0.9f は調整値
+                            intoWaterFilter.GetComponent<Image>().enabled = true;
+                        } else if (transform.localPosition.y + 0.85f > waterLevel) { // 0.8f は調整値(※浮上時は速く切り替える)
+                            intoWaterFilter.GetComponent<Image>().enabled = false;
+                        }
+                        doUpdate.grounded = false;
                     } else {
-                        simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
+                        intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
                     }
-                    if (transform.localPosition.y + 0.9f < waterLevel) { // 0.9f は調整値
-                        intoWaterFilter.GetComponent<Image>().enabled = true;
-                    } else if (transform.localPosition.y + 0.85f > waterLevel) { // 0.8f は調整値(※浮上時は速く切り替える)
-                        intoWaterFilter.GetComponent<Image>().enabled = false;
-                    }
-                    doUpdate.grounded = false;
-                } else {
-                    intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
-                }
 
-                // 風船につかまり浮遊中
-                if (doFixedUpdate.holdBalloon) { doUpdate.grounded = false; }
+                    // 風船につかまり浮遊中
+                    if (doFixedUpdate.holdBalloon) { doUpdate.grounded = false; }
 
-                // 持つ(Rボタン)を離した
-                if (r2Hold && r2Button.wasPressedThisFrame) {
-                    if (holded != null) {
-                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
-                        holded.transform.parent = null; // 子オブジェクト解除
-                        doUpdate.holding = false; // 持つフラグOFF
-                        holded = null; // 持つオブジェクト参照解除
-                        r2Hold = false; // R2ホールドフラグOFF
-                    }
-                } else if (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) {
-                    if (!r2Hold) {
+                    // 持つ(Rボタン)を離した
+                    if (r2Hold && r2Button.wasPressedThisFrame) {
                         if (holded != null) {
                             if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
                             holded.transform.parent = null; // 子オブジェクト解除
                             doUpdate.holding = false; // 持つフラグOFF
                             holded = null; // 持つオブジェクト参照解除
-
+                            r2Hold = false; // R2ホールドフラグOFF
                         }
-                    }
-                }
+                    } else if (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) {
+                        if (!r2Hold) {
+                            if (holded != null) {
+                                if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                                holded.transform.parent = null; // 子オブジェクト解除
+                                doUpdate.holding = false; // 持つフラグOFF
+                                holded = null; // 持つオブジェクト参照解除
 
-                ///////////////////////////////////////////////////////////////////////////////////////
-                // 接地フラグONの場合
-                if (doUpdate.grounded && !doUpdate.climbing) {
-
-                    // 持つ(Rボタン)押した
-                    if (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)) {
-                        if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
-                            startFaceing(); // オブジェクトに正対する開始
-                            faceToObject(holded); // オブジェクトに正対する
-                            if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
-                            if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
-                                doUpdate.grounded = false; // 浮遊
-                                doFixedUpdate.holdBalloon = true;
-                            }
-                            goto STEP0; // 弾発射を飛ばす
-                        }
-                    }
-
-                    if (doUpdate.bombing) {
-                        bomb(); // 弾を撃つ
-                        doUpdate.bombed = true;
-                        goto STEP1;
-                    } else if (aButton.isPressed && doUpdate.throwed) {
-                        simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
-                        goto STEP1;
-                    } else if (yButton.isPressed && doUpdate.throwed) {
-                        simpleAnime.CrossFade("Run", 0.3f); // 投げるから走るアニメ
-                        goto STEP1;
-                    } else if (doUpdate.throwed) {
-                        simpleAnime.CrossFade("Walk", 0.5f); // 投げるから歩くアニメ
-                        goto STEP1;
-                    } else if (r1Button.wasPressedThisFrame) { // Rボタンを押した時
-                        if (!doUpdate.holding || !doUpdate.faceing) { // Item を持っていなかったら、またはオブジェクトに正対中でなければ
-                            simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
-                            doUpdate.throwing = true;
-                        }
-                        goto STEP1;
-                    }
-
-                STEP0:
-                    if (aButton.isPressed) { // Aボタン押しっぱなし
-                                             // MEMO: 追加:しゃがむ時、持ってるモノを離す ///////////////
-                        if (holded != null) {
-                            holded.transform.parent = null; // 子オブジェクト解除
-                            doUpdate.holding = false; // 持つフラグOFF
-                            holded = null; // 持つオブジェクト参照解除
-                        }
-                        ////////////////////////////////////////////////////////////
-                        if (leftButton.isPressed) { // 左
-                            if (!doUpdate.throwing) {
-                                simpleAnime.Play("Push");
-                            } else if (doUpdate.throwed) {
-                                simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
-                            }
-                        } else if (leftButton.isPressed) { // 右
-                            if (!doUpdate.throwing) {
-                                simpleAnime.Play("Push");
-                            } else if (doUpdate.throwed) {
-                                simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
                             }
                         }
                     }
 
-                    if (upButton.isPressed) { // 上を押した時
-                        if (l1Button.isPressed) {
-                            bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                            return;
-                        }
-                        if (yButton.isPressed) { // Yボタン押しっぱなしなら
-                            if (!doUpdate.throwing) {
-                                simpleAnime.Play("Run"); // 走るアニメ
-                                soundSystem.PlayRunClip();
+                    ///////////////////////////////////////////////////////////////////////////////////////
+                    // 接地フラグONの場合
+                    if (doUpdate.grounded && !doUpdate.climbing) {
+
+                        // 持つ(Rボタン)押した
+                        if (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)) {
+                            if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
+                                startFaceing(); // オブジェクトに正対する開始
+                                faceToObject(holded); // オブジェクトに正対する
+                                if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
+                                if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
+                                    doUpdate.grounded = false; // 浮遊
+                                    doFixedUpdate.holdBalloon = true;
+                                }
+                                goto STEP0; // 弾発射を飛ばす
                             }
-                            doFixedUpdate.run = true;
-                        } else {
-                            if (!doUpdate.throwing) {
-                                if (aButton.isPressed) { // Aボタン押しっぱなし
-                                    simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
-                                } else {
-                                    simpleAnime.Play("Walk"); // 歩くアニメ
-                                    soundSystem.PlayWalkClip();
+                        }
+
+                        if (doUpdate.bombing) {
+                            bomb(); // 弾を撃つ
+                            doUpdate.bombed = true;
+                            goto STEP1;
+                        } else if (aButton.isPressed && doUpdate.throwed) {
+                            simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
+                            goto STEP1;
+                        } else if (yButton.isPressed && doUpdate.throwed) {
+                            simpleAnime.CrossFade("Run", 0.3f); // 投げるから走るアニメ
+                            goto STEP1;
+                        } else if (doUpdate.throwed) {
+                            simpleAnime.CrossFade("Walk", 0.5f); // 投げるから歩くアニメ
+                            goto STEP1;
+                        } else if (r1Button.wasPressedThisFrame) { // Rボタンを押した時
+                            if (!doUpdate.holding || !doUpdate.faceing) { // Item を持っていなかったら、またはオブジェクトに正対中でなければ
+                                simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
+                                doUpdate.throwing = true;
+                            }
+                            goto STEP1;
+                        }
+
+                    STEP0:
+                        if (aButton.isPressed) { // Aボタン押しっぱなし
+                                                 // MEMO: 追加:しゃがむ時、持ってるモノを離す ///////////////
+                            if (holded != null) {
+                                holded.transform.parent = null; // 子オブジェクト解除
+                                doUpdate.holding = false; // 持つフラグOFF
+                                holded = null; // 持つオブジェクト参照解除
+                            }
+                            ////////////////////////////////////////////////////////////
+                            if (leftButton.isPressed) { // 左
+                                if (!doUpdate.throwing) {
+                                    simpleAnime.Play("Push");
+                                } else if (doUpdate.throwed) {
+                                    simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
+                                }
+                            } else if (leftButton.isPressed) { // 右
+                                if (!doUpdate.throwing) {
+                                    simpleAnime.Play("Push");
+                                } else if (doUpdate.throwed) {
+                                    simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
                                 }
                             }
-                            doFixedUpdate.walk = true;
                         }
-                        // 階段を上がるかチェック
-                        checkStairUp();
-                        if (doUpdate.stairUping != true) {
-                            // 階段を下がるかチェック
-                            checkStairDown();
-                        }
-                    } else if (downButton.isPressed) { // 下を押した時
-                        if (l1Button.isPressed) {
-                            bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                            return;
-                        }
-                        if (!doUpdate.throwing) {
-                            if (aButton.isPressed) { // Aボタン押しっぱなし
-                                simpleAnime.Play("Push"); // しゃがむアニメ代用
-                            } else {
-                                simpleAnime.Play("Backward"); // 後ろアニメ
+
+                        if (upButton.isPressed) { // 上を押した時
+                            if (l1Button.isPressed) {
+                                bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
+                                return;
                             }
-                        }
-                        soundSystem.PlayWalkClip();
-                        doFixedUpdate.backward = true;
-                    } else if (upButton.isPressed == false && downButton.isPressed == false) { // 上下を離した時
-                        if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
+                            if (yButton.isPressed) { // Yボタン押しっぱなしなら
+                                if (!doUpdate.throwing) {
+                                    simpleAnime.Play("Run"); // 走るアニメ
+                                    soundSystem.PlayRunClip();
+                                }
+                                doFixedUpdate.run = true;
+                            } else {
+                                if (!doUpdate.throwing) {
+                                    if (aButton.isPressed) { // Aボタン押しっぱなし
+                                        simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
+                                    } else {
+                                        simpleAnime.Play("Walk"); // 歩くアニメ
+                                        soundSystem.PlayWalkClip();
+                                    }
+                                }
+                                doFixedUpdate.walk = true;
+                            }
+                            // 階段を上がるかチェック
+                            checkStairUp();
+                            if (doUpdate.stairUping != true) {
+                                // 階段を下がるかチェック
+                                checkStairDown();
+                            }
+                        } else if (downButton.isPressed) { // 下を押した時
+                            if (l1Button.isPressed) {
+                                bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
+                                return;
+                            }
                             if (!doUpdate.throwing) {
                                 if (aButton.isPressed) { // Aボタン押しっぱなし
                                     simpleAnime.Play("Push"); // しゃがむアニメ代用
                                 } else {
-                                    simpleAnime.Play("Default"); // デフォルトアニメ
+                                    simpleAnime.Play("Backward"); // 後ろアニメ
                                 }
                             }
+                            soundSystem.PlayWalkClip();
+                            doFixedUpdate.backward = true;
+                        } else if (upButton.isPressed == false && downButton.isPressed == false) { // 上下を離した時
+                            if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
+                                if (!doUpdate.throwing) {
+                                    if (aButton.isPressed) { // Aボタン押しっぱなし
+                                        simpleAnime.Play("Push"); // しゃがむアニメ代用
+                                    } else {
+                                        simpleAnime.Play("Default"); // デフォルトアニメ
+                                    }
+                                }
+                                soundSystem.StopClip();
+                                doFixedUpdate.idol = true;
+                            }
+                        }
+
+                        // ジャンプ(Bボタン)
+                        if (bButton.wasPressedThisFrame) {
+                            doUpdate.InitThrowBomb(); // 爆撃フラグOFF
+                            simpleAnime.Play("Jump"); // ジャンプアニメ
+                            soundSystem.PlayJumpClip();
+                            doUpdate.grounded = false;
+                            doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット
+                            doFixedUpdate.jump = true;
+                        }
+
+                        // 上を押しながら、押す(Aボタン)
+                        if (aButton.wasPressedThisFrame && upButton.isPressed) {
+                            if (checkToPushBlock()) {
+                                //startFaceing(); // オブジェクトに正対する開始
+                                faceToObject(pushed); // オブジェクトに正対する
+                            }
+                        }
+                    }
+                    ///////////////////////////////////////////////////////////////////////////////////////
+                    // ジャンプ中 ※水中もここに来る
+                    else if (!doUpdate.grounded && !doUpdate.climbing) {
+                        doUpdate.secondsAfterJumped += Time.deltaTime; // ジャンプ後経過秒インクリメント
+                                                                       // 空中で移動
+                        var _axis = upButton.isPressed ? 1 : downButton.isPressed ? -1 : 0;
+                        if (_axis == 1) { // 前移動
+                            doFixedUpdate.jumpForward = true;
+                            if (checkIntoWater()) { soundSystem.PlayWaterForwardClip(); }
+                        } else if (_axis == -1) { // 後ろ移動
+                            doFixedUpdate.jumpBackward = true;
+                            if (checkIntoWater()) { soundSystem.StopClip(); }
+                        } else {
+                            if (checkIntoWater()) { soundSystem.StopClip(); }
+                        }
+                        if (Math.Round(previousSpeed, 4) == Math.Round(speed, 4) && !doUpdate.lookBackJumping && (doUpdate.secondsAfterJumped > 0.1f && doUpdate.secondsAfterJumped < 0.4f)) { // 完全に空中停止した場合※捕まり反転ジャンプ時以外
+#if DEBUG
+                            Debug.Log("417 完全に空中停止した場合 speed:" + speed);
+#endif
+                            transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
+                            doUpdate.grounded = true; // 接地
+                            doFixedUpdate.unintended = true; // 意図しない状況フラグON
+                        }
+                        if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 5.0f && !doFixedUpdate.holdBalloon) { // TODO: checkIntoWater 重くない？
+#if DEBUG
+                            Debug.Log("425 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
+#endif
+                            transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
+                            doUpdate.grounded = true; // 接地
+                            doFixedUpdate.unintended = true; // 意図しない状況フラグON
+                        }
+                        // モバイル動作時に面に正対する TODO: ジャンプ後しばらくたってから
+                        if (useVirtualController && !checkIntoWater() && !doFixedUpdate.holdBalloon) { // FIXME: checkHoldBalloon()
+                            faceToFace(5f);
+                        }
+                    }
+
+                    STEP1:
+                    // Yボタン押しっぱなし
+                    if (yButton.isPressed && !doUpdate.holding) {
+                        if (yButton.wasPressedThisFrame && checkIntoWater()) { soundSystem.PlayWaterSinkClip(); } // 水中で沈む音
+                        if (!doUpdate.climbing) { // 上り降り発動なら
+                            if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプが発動してなかったら
+                                if (downButton.isPressed) { // ハシゴを降りる
+                                    if (previousPosition[0].y - (0.1f * Time.deltaTime) > transform.position.y) {
+                                        checkToClimbDownByLadder();
+                                    }
+                                }
+                            }
+                            checkToClimb(); // よじ登り可能かチェック
+                        }
+
+                        // 上り降り中
+                        if (doUpdate.climbing) {
+                            simpleAnime.Play("ClimbUp"); // よじ登るアニメ
+                            if (l1Button.isPressed) { // 捕まり反転ジャンプ準備
+                                simpleAnime.Play("Default");
+                            }
+                            climb(); // 上り下り
+                            if (r1Button.isPressed) { // さらにRボタン押しっぱなしなら
+                                moveSide(); // 横に移動
+                            }
+                        }
+                    }
+                    // Yボタン離した
+                    else if (yButton.wasReleasedThisFrame) { // TODO: Yボタンを離したらジャンプモーションがキャンセルされる
+                        if (doUpdate.climbing) {
+                            simpleAnime.Play("Default"); // デフォルトアニメ
                             soundSystem.StopClip();
-                            doFixedUpdate.idol = true;
                         }
+                        // RayBox位置の初期化
+                        var _rayBox = transform.Find("RayBox").gameObject;
+                        _rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
+                        doUpdate.climbing = false; // 登るフラグOFF
+                        doFixedUpdate.cancelClimb = true;
                     }
 
-                    // ジャンプ(Bボタン)
-                    if (bButton.wasPressedThisFrame) {
-                        doUpdate.InitThrowBomb(); // 爆撃フラグOFF
-                        simpleAnime.Play("Jump"); // ジャンプアニメ
-                        soundSystem.PlayJumpClip();
-                        doUpdate.grounded = false;
-                        doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット
-                        doFixedUpdate.jump = true;
+                    //// 持つ(Rボタン)を離した
+                    //if (r1Button.wasReleasedThisFrame) {
+                    //    if (holded != null) {
+                    //        holded.transform.parent = null; // 子オブジェクト解除
+                    //        doUpdate.holding = false; // 持つフラグOFF
+                    //        holded = null; // 持つオブジェクト参照解除
+                    //    }
+                    //}
+
+                    // ロック(Lボタン)を押して続けている // TODO: 敵ロック
+                    if (l1Button.isPressed) {
+                        //lockOnTarget(); // TODO: 捕まり反転ジャンプの時に向いてしまう…
                     }
 
-                    // 上を押しながら、押す(Aボタン)
-                    if (aButton.wasPressedThisFrame && upButton.isPressed) {
-                        if (checkToPushBlock()) {
-                            //startFaceing(); // オブジェクトに正対する開始
-                            faceToObject(pushed); // オブジェクトに正対する
-                        }
+                    // Lボタンを離した(※捕まり反転ジャンプ準備のカメラリセット)
+                    if (l1Button.wasReleasedThisFrame) {
+                        cameraController.ResetLookAround(); // カメラ初期化
                     }
-                }
-                ///////////////////////////////////////////////////////////////////////////////////////
-                // ジャンプ中 ※水中もここに来る
-                else if (!doUpdate.grounded && !doUpdate.climbing) {
-                    doUpdate.secondsAfterJumped += Time.deltaTime; // ジャンプ後経過秒インクリメント
-                                                                   // 空中で移動
-                    var _axis = upButton.isPressed ? 1 : downButton.isPressed ? -1 : 0;
-                    if (_axis == 1) { // 前移動
-                        doFixedUpdate.jumpForward = true;
-                        if (checkIntoWater()) { soundSystem.PlayWaterForwardClip(); }
-                    } else if (_axis == -1) { // 後ろ移動
-                        doFixedUpdate.jumpBackward = true;
-                        if (checkIntoWater()) { soundSystem.StopClip(); }
-                    } else {
-                        if (checkIntoWater()) { soundSystem.StopClip(); }
-                    }
-                    if (Math.Round(previousSpeed, 4) == Math.Round(speed, 4) && !doUpdate.lookBackJumping && (doUpdate.secondsAfterJumped > 0.1f && doUpdate.secondsAfterJumped < 0.4f)) { // 完全に空中停止した場合※捕まり反転ジャンプ時以外
-#if DEBUG
-                        Debug.Log("417 完全に空中停止した場合 speed:" + speed);
-#endif
-                        transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
-                        doUpdate.grounded = true; // 接地
-                        doFixedUpdate.unintended = true; // 意図しない状況フラグON
-                    }
-                    if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 5.0f && !doFixedUpdate.holdBalloon) { // TODO: checkIntoWater 重くない？
-#if DEBUG
-                        Debug.Log("425 JUMP後に空中停止した場合 speed:" + speed); // TODO: 水面で反応
-#endif
-                        transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
-                        doUpdate.grounded = true; // 接地
-                        doFixedUpdate.unintended = true; // 意図しない状況フラグON
-                    }
-                    // モバイル動作時に面に正対する TODO: ジャンプ後しばらくたってから
-                    if (useVirtualController && !checkIntoWater() && !doFixedUpdate.holdBalloon) { // FIXME: checkHoldBalloon()
-                        faceToFace(5f);
-                    }
-                }
 
-            STEP1:
-                // Yボタン押しっぱなし
-                if (yButton.isPressed && !doUpdate.holding) {
-                    if (yButton.wasPressedThisFrame && checkIntoWater()) { soundSystem.PlayWaterSinkClip(); } // 水中で沈む音
-                    if (!doUpdate.climbing) { // 上り降り発動なら
-                        if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプが発動してなかったら
-                            if (downButton.isPressed) { // ハシゴを降りる
-                                if (previousPosition[0].y - (0.1f * Time.deltaTime) > transform.position.y) {
-                                    checkToClimbDownByLadder();
+                    // TODO: テスト
+                    //if (Input.GetButtonUp("L1")) {
+                    //    lookBack(); // TODO: 未完成
+                    //}
+
+                    // 回転 // TODO: 入力の遊びを持たせる？ // TODO: 左右2回押しで180度回転？ TODO: 左右2回押しで90度ずつ回転の実装
+                    if (!doUpdate.climbing) {
+                        var _ADJUST = 20; // 調整値
+                        var _axis = rightButton.isPressed ? 1 : leftButton.isPressed ? -1 : 0;
+                        if (aButton.isPressed && doUpdate.grounded) { // Aボタン押しながら左右でサイドステップ※接地時のみ
+                            if (_axis == -1) {
+                                if (speed < 2.0f) {
+                                    doFixedUpdate.sideStepLeft = true; // 左ステップ
+                                }
+                            } else if (_axis == 1) {
+                                if (speed < 2.0f) {
+                                    doFixedUpdate.sideStepRight = true; // 右ステップ
+                                }
+                            }
+                            faceToFace(5); // 面に正対する
+                        } else {
+                            if (Math.Round(speed, 2) == 0) { // 静止時回転は速く
+                                transform.Rotate(0, _axis * (rotationalSpeed * Time.deltaTime) * _ADJUST * 1.5f, 0);
+                            } else if (speed < 4.5f) { // 加速度制御
+                                if (doUpdate.grounded) {
+                                    transform.Rotate(0, _axis * (rotationalSpeed * Time.deltaTime) * _ADJUST, 0); // 回転は transform.rotate の方が良い
+                                } else {
+                                    transform.Rotate(0, _axis * (rotationalSpeed * Time.deltaTime) * _ADJUST / 1.2f, 0); // ジャンプ中は回転控えめに
                                 }
                             }
                         }
-                        checkToClimb(); // よじ登り可能かチェック
                     }
 
-                    // 上り降り中
-                    if (doUpdate.climbing) {
-                        simpleAnime.Play("ClimbUp"); // よじ登るアニメ
-                        if (l1Button.isPressed) { // 捕まり反転ジャンプ準備
-                            simpleAnime.Play("Default");
-                        }
-                        climb(); // 上り下り
-                        if (r1Button.isPressed) { // さらにRボタン押しっぱなしなら
-                            moveSide(); // 横に移動
-                        }
-                    }
-                }
-                // Yボタン離した
-                else if (yButton.wasReleasedThisFrame) { // TODO: Yボタンを離したらジャンプモーションがキャンセルされる
-                    if (doUpdate.climbing) {
-                        simpleAnime.Play("Default"); // デフォルトアニメ
-                        soundSystem.StopClip();
-                    }
-                    // RayBox位置の初期化
-                    var _rayBox = transform.Find("RayBox").gameObject;
-                    _rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
-                    doUpdate.climbing = false; // 登るフラグOFF
-                    doFixedUpdate.cancelClimb = true;
-                }
+                    // TODO: 砲台から弾が飛んでくる：赤-半誘導弾、青-通常弾
 
-                //// 持つ(Rボタン)を離した
-                //if (r1Button.wasReleasedThisFrame) {
-                //    if (holded != null) {
-                //        holded.transform.parent = null; // 子オブジェクト解除
-                //        doUpdate.holding = false; // 持つフラグOFF
-                //        holded = null; // 持つオブジェクト参照解除
-                //    }
-                //}
-
-                // ロック(Lボタン)を押して続けている // TODO: 敵ロック
-                if (l1Button.isPressed) {
-                    //lockOnTarget(); // TODO: 捕まり反転ジャンプの時に向いてしまう…
-                }
-
-                // Lボタンを離した(※捕まり反転ジャンプ準備のカメラリセット)
-                if (l1Button.wasReleasedThisFrame) {
-                    cameraController.ResetLookAround(); // カメラ初期化
-                }
-
-                // TODO: テスト
-                //if (Input.GetButtonUp("L1")) {
-                //    lookBack(); // TODO: 未完成
-                //}
-
-                // 回転 // TODO: 入力の遊びを持たせる？ // TODO: 左右2回押しで180度回転？ TODO: 左右2回押しで90度ずつ回転の実装
-                if (!doUpdate.climbing) {
-                    var _ADJUST = 20; // 調整値
-                    var _axis = rightButton.isPressed ? 1 : leftButton.isPressed ? -1 : 0;
-                    if (aButton.isPressed && doUpdate.grounded) { // Aボタン押しながら左右でサイドステップ※接地時のみ
-                        if (_axis == -1) {
-                            if (speed < 2.0f) {
-                                doFixedUpdate.sideStepLeft = true; // 左ステップ
-                            }
-                        } else if (_axis == 1) {
-                            if (speed < 2.0f) {
-                                doFixedUpdate.sideStepRight = true; // 右ステップ
-                            }
-                        }
-                        faceToFace(5); // 面に正対する
-                    } else {
-                        if (Math.Round(speed, 2) == 0) { // 静止時回転は速く
-                            transform.Rotate(0, _axis * (rotationalSpeed * Time.deltaTime) * _ADJUST * 1.5f, 0);
-                        } else if (speed < 4.5f) { // 加速度制御
-                            if (doUpdate.grounded) {
-                                transform.Rotate(0, _axis * (rotationalSpeed * Time.deltaTime) * _ADJUST, 0); // 回転は transform.rotate の方が良い
-                            } else {
-                                transform.Rotate(0, _axis * (rotationalSpeed * Time.deltaTime) * _ADJUST / 1.2f, 0); // ジャンプ中は回転控えめに
-                            }
+                    ///////////////////////////////////////////////////////////////////////////////////////
+                    // モバイル用モード
+                    if (useVirtualController) {
+                        if (yButton.wasReleasedThisFrame) {
+                            doFixedUpdate.virtualControllerMode = true;
+                            Observable.TimerFrame(30)
+                                .Subscribe(__ => {
+                                    doFixedUpdate.virtualControllerMode = false;
+                                });
                         }
                     }
-                }
+                });
 
-                // TODO: 砲台から弾が飛んでくる：赤-半誘導弾、青-通常弾
+                // 階段を上る ※水中は無関係
+                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairUping)
+                    .Subscribe(_ => {
+                        doStairUp();
+                    });
 
-                // 階段を上る下りる ※水中は無関係
-                if (doUpdate.stairUping) {
-                    doStairUp();
-                } else if (doUpdate.stairDowning) {
-                    doStairDown();
-                }
+                // 階段を下りる ※水中は無関係
+                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairDowning)
+                    .Subscribe(_ => {
+                        doStairDown();
+                    });
 
-                ///////////////////////////////////////////////////////////////////////////////////////
-                // モバイル用モード
-                if (useVirtualController) {
-                    if (yButton.wasReleasedThisFrame) {
-                        doFixedUpdate.virtualControllerMode = true;
-                        Observable.TimerFrame(30)
-                            .Subscribe(__ => {
-                                doFixedUpdate.virtualControllerMode = false;
-                            });
-                    }
-                }
-            });
-
-            // FixedUpdate is called just before each physics update.
-            this.FixedUpdateAsObservable().Subscribe(_ => {
+                // FixedUpdate is called just before each physics update.
+                this.FixedUpdateAsObservable().Subscribe(_ => {
                 // フラグ系の切り替えはここには書かない
                 // Time.deltaTime は一定である
 
@@ -918,6 +921,11 @@ namespace StudioMeowToon {
                 });
 
             #endregion
+        }
+
+        // Update is called once per frame
+        void Update() {
+            doUpdate.IncrementTime(Time.deltaTime); // 時間インクリメント
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
