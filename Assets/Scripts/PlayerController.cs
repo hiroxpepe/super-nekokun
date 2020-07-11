@@ -222,36 +222,6 @@ namespace StudioMeowToon {
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
-            // セリフ追従
-            this.UpdateAsObservable()
-                .Subscribe(_ => {
-                    speechImage.transform.position = RectTransformUtility.WorldToScreenPoint(
-                        Camera.main,
-                        transform.position + getSpeechOffset(transform.forward)
-                    );
-                });
-
-            // スロープ(坂)に接触した時
-            this.OnCollisionEnterAsObservable()
-                .Where(_c => _c.gameObject.name.Contains("Slope"))
-                .Subscribe(_c => {
-                    normalVector = _c.GetContact(0).normal;
-                });
-
-            // スロープ(坂)に接触し続けた
-            this.OnCollisionStayAsObservable()
-                .Where(_c => _c.gameObject.name.Contains("Slope"))
-                .Subscribe(_c => {
-                    normalVector = _c.GetContact(0).normal;
-                });
-
-            // スロープ(坂)から離脱した時
-            this.OnCollisionExitAsObservable()
-                .Where(_c => _c.gameObject.name.Contains("Slope"))
-                .Subscribe(_c => {
-                    normalVector = Vector3.up; // 法線を戻す
-                });
-
             // Update is called once per frame.
             this.UpdateAsObservable().Subscribe(_ => {
                 // ポーズ中動作停止
@@ -901,12 +871,6 @@ namespace StudioMeowToon {
                     soundSystem.PlayHitClip();
                 });
 
-            // スロープと接触したら
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeSlope())
-                .Subscribe(_ => {
-                    doUpdate.grounded = true; // 接地フラグON だけ
-                });
-
             // ブロックに接触し続けている
             this.OnCollisionStayAsObservable().Where(x => x.gameObject.LikeBlock())
                 .Subscribe(x => {
@@ -948,6 +912,42 @@ namespace StudioMeowToon {
                     }
                 });
 
+            #region Slope
+
+            // スロープに接触したら
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeSlope())
+                .Subscribe(x => {
+                    normalVector = x.GetContact(0).normal; // 法線取得
+                    doUpdate.grounded = true; // 接地フラグON
+                });
+
+            // スロープに接触し続けている
+            this.OnCollisionStayAsObservable()
+                .Where(x => x.gameObject.name.Contains("Slope"))
+                .Subscribe(x => {
+                    normalVector = x.GetContact(0).normal; // 法線取得
+                });
+
+            // スロープから離脱したら
+            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeSlope())
+                .Subscribe(_ => {
+                    normalVector = Vector3.up; // 法線を戻す
+                });
+
+            #endregion
+
+            #region Speech Bubble
+
+            // セリフ追従
+            this.UpdateAsObservable()
+                .Subscribe(_ => {
+                    speechImage.transform.position = RectTransformUtility.WorldToScreenPoint(
+                        Camera.main,
+                        transform.position + getSpeechOffset(transform.forward)
+                    );
+                });
+
+            #endregion
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -959,7 +959,7 @@ namespace StudioMeowToon {
                 var _y = string.Format("{0:F3}", Math.Round(transform.position.y, 3, MidpointRounding.AwayFromZero));
                 var _s = string.Format("{0:F3}", Math.Round(speed, 3, MidpointRounding.AwayFromZero));
                 var _aj = string.Format("{0:F3}", Math.Round(doUpdate.secondsAfterJumped, 3, MidpointRounding.AwayFromZero));
-                var _rb = transform.GetComponent<Rigidbody>(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
+                var _rb = transform.GetComponent<Rigidbody>();
                 gameSystem.TRACE("Hight: " + _y + "m \r\nSpeed: " + _s + "m/s" +
                     "\r\nGrounded: " + doUpdate.grounded +
                     "\r\nClimbing: " + doUpdate.climbing +
