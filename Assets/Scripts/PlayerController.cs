@@ -364,61 +364,6 @@ namespace StudioMeowToon {
                             goto STEP1;
                         }
                     STEP0:
-                        if (upButton.isPressed) { // 上を押した時
-                            if (l1Button.isPressed) {
-                                bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                                return;
-                            }
-                            if (yButton.isPressed) { // Yボタン押しっぱなしなら
-                                if (!doUpdate.throwing) {
-                                    simpleAnime.Play("Run"); // 走るアニメ
-                                    soundSystem.PlayRunClip();
-                                }
-                                doFixedUpdate.run = true;
-                            } else {
-                                if (!doUpdate.throwing) {
-                                    if (aButton.isPressed) { // Aボタン押しっぱなし
-                                        simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
-                                    } else {
-                                        simpleAnime.Play("Walk"); // 歩くアニメ
-                                        soundSystem.PlayWalkClip();
-                                    }
-                                }
-                                doFixedUpdate.walk = true;
-                            }
-                            // 階段を上がるかチェック
-                            checkStairUp();
-                            if (doUpdate.stairUping != true) {
-                                // 階段を下がるかチェック
-                                checkStairDown();
-                            }
-                        } else if (downButton.isPressed) { // 下を押した時
-                            if (l1Button.isPressed) {
-                                bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                                return;
-                            }
-                            if (!doUpdate.throwing) {
-                                if (aButton.isPressed) { // Aボタン押しっぱなし
-                                    simpleAnime.Play("Push"); // しゃがむアニメ代用
-                                } else {
-                                    simpleAnime.Play("Backward"); // 後ろアニメ
-                                }
-                            }
-                            soundSystem.PlayWalkClip();
-                            doFixedUpdate.backward = true;
-                        } else if (upButton.isPressed == false && downButton.isPressed == false) { // 上下を離した時
-                            if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
-                                if (!doUpdate.throwing) {
-                                    if (aButton.isPressed) { // Aボタン押しっぱなし
-                                        simpleAnime.Play("Push"); // しゃがむアニメ代用
-                                    } else {
-                                        simpleAnime.Play("Default"); // デフォルトアニメ
-                                    }
-                                }
-                                soundSystem.StopClip();
-                                doFixedUpdate.idol = true;
-                            }
-                        }
                     STEP1:
                         return;
                     });
@@ -426,20 +371,19 @@ namespace StudioMeowToon {
                 // Aボタン押しっぱなし
                 this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
                     .Subscribe(_ => {
-                        // MEMO: 追加:しゃがむ時、持ってるモノを離す ///////////////
+                        // FIXME: しゃがむ時、持ってるモノを離す
                         if (holded != null) {
                             holded.transform.parent = null; // 子オブジェクト解除
                             doUpdate.holding = false; // 持つフラグOFF
                             holded = null; // 持つオブジェクト参照解除
                         }
-                        ////////////////////////////////////////////////////////////
                         if (leftButton.isPressed) { // 左
                             if (!doUpdate.throwing) {
                                 simpleAnime.Play("Push");
                             } else if (doUpdate.throwed) {
                                 simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
                             }
-                        } else if (leftButton.isPressed) { // 右
+                        } else if (leftButton.isPressed) { // 右 FIXME: ??
                             if (!doUpdate.throwing) {
                                 simpleAnime.Play("Push");
                             } else if (doUpdate.throwed) {
@@ -448,16 +392,70 @@ namespace StudioMeowToon {
                         }
                     });
 
-                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded)
+                // 上を押した時
+                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed)
                     .Subscribe(_ => {
+                        if (l1Button.isPressed) {
+                            bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
+                            return;
+                        }
+                        if (yButton.isPressed) { // Yボタン押しっぱなしなら
+                            if (!doUpdate.throwing) {
+                                simpleAnime.Play("Run"); // 走るアニメ
+                                soundSystem.PlayRunClip();
+                            }
+                            doFixedUpdate.run = true;
+                        } else {
+                            if (!doUpdate.throwing) {
+                                if (aButton.isPressed) { // Aボタン押しっぱなし
+                                    simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
+                                } else {
+                                    simpleAnime.Play("Walk"); // 歩くアニメ
+                                    soundSystem.PlayWalkClip();
+                                }
+                            }
+                            doFixedUpdate.walk = true;
+                        }
+                        // 階段を上がるかチェック
+                        checkStairUp();
+                        if (doUpdate.stairUping != true) {
+                            // 階段を下がるかチェック
+                            checkStairDown();
+                        }
                     });
 
-                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded)
+                // 下を押した時
+                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && downButton.isPressed)
                     .Subscribe(_ => {
+                        if (l1Button.isPressed) {
+                            bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
+                            return;
+                        }
+                        if (!doUpdate.throwing) {
+                            if (aButton.isPressed) { // Aボタン押しっぱなし
+                                simpleAnime.Play("Push"); // しゃがむアニメ代用
+                            } else {
+                                simpleAnime.Play("Backward"); // 後ろアニメ
+                            }
+                        }
+                        soundSystem.PlayWalkClip();
+                        doFixedUpdate.backward = true;
                     });
 
-                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded)
+                // 上下を離した時
+                this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !upButton.isPressed && !downButton.isPressed)
                     .Subscribe(_ => {
+                        if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
+                            if (!doUpdate.throwing) {
+                                if (aButton.isPressed) { // Aボタン押しっぱなし
+                                    simpleAnime.Play("Push"); // しゃがむアニメ代用
+                                } else {
+                                    simpleAnime.Play("Default"); // デフォルトアニメ
+                                }
+                            }
+                            soundSystem.StopClip();
+                            doFixedUpdate.idol = true;
+                        }
                     });
 
                 // ジャンプ(Bボタン)
