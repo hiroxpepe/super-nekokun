@@ -222,65 +222,35 @@ namespace StudioMeowToon {
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
-            // Update is called once per frame.
-            this.UpdateAsObservable().Subscribe(_ => {
-                // ポーズ中動作停止
-                if (Time.timeScale == 0f) {
+            // ポーズ中
+            this.UpdateAsObservable().Where(_ => Time.timeScale == 0f)
+                .Subscribe(_ => {
                     beSilent();
-                    return;
-                }
+                });
 
-                // イベント中操作無効
-                if (gameSystem.eventView) {
+            // イベント中
+            this.UpdateAsObservable().Where(_ => gameSystem.eventView)
+                .Subscribe(_ => {
                     beSilent();
-                    return;
-                }
+                });
 
-                if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
-                                                                     // ステージをクリアした・GAMEオーバーした場合抜ける
-                    if (gameSystem.levelClear || gameSystem.gameOver) {
-                        beSilent();
-                        return;
-                    }
-                }
+            // ステージをクリアした・GAMEオーバーした場合
+            this.UpdateAsObservable().Where(_ => (SceneManager.GetActiveScene().name != "Start") &&
+                gameSystem.levelClear || gameSystem.gameOver)
+                .Subscribe(_ => {
+                    beSilent();
+                });
 
-                // 視点操作中(Xボタン押しっぱなし)
-                if (xButton.isPressed) {
-                    return;
-                }
-
-                if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
+            // HP・弾角度を通知 FIXME: リアクティブ
+            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name != "Start")
+                .Subscribe(_ => {
                     gameSystem.playerLife = life; // HP設定
                     gameSystem.bombAngle = bombAngle.Value; // 弾角度
-                }
+                });
 
-                ///////////////////////////////////////////////////////////////////////////////////////
-                // ダメージ受け期間
-                if (doUpdate.damaged) {
-                    return;
-                }
-
-                ///////////////////////////////////////////////////////////////////////////////////////
-                // オブジェクトに正対中キャラ操作無効
-                if (doUpdate.faceing) {
-                    if (holded != null) {
-                        faceToObject(holded);
-                    }
-                    return;
-                }
-
-                ///////////////////////////////////////////////////////////////////////////////////////
-                // ブロックを押してる時キャラ操作無効
-                if (doUpdate.pushing && transform.parent != null) {
-                    simpleAnime.Play("Push"); // 押すアニメ
-                    pushed.GetComponent<BlockController>().pushed = true; // ブロックを押すフラグON
-                    return;
-                    // 押してるブロックの子オブジェクト化が解除されたら
-                } else if (doUpdate.pushing && transform.parent == null) {
-                    doUpdate.pushing = false; // 押すフラグOFF
-                    pushed = null; // 押すブロックの参照解除
-                    simpleAnime.Play("Default"); // デフォルトアニメ
-                }
+            // Update is called once per frame.
+            this.UpdateAsObservable().Where(_ => continueUpdate())
+                .Subscribe(_ => {
 
                 doUpdate.IncrementTime(Time.deltaTime); // 時間インクリメント
 
@@ -975,6 +945,45 @@ namespace StudioMeowToon {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // private Methods [verb]
+
+        // Update 操作を続けるかどうかを返す
+        bool continueUpdate() {
+            // ポーズ中
+            if (Time.timeScale == 0f) {
+                return false;
+            }
+            // ダメージ受け期間
+            if (doUpdate.damaged) {
+                return false;
+            }
+            // ゲームイベント中・レベルクリア・ゲームオーバー
+            if (gameSystem.eventView || gameSystem.levelClear || gameSystem.gameOver) {
+                return false;
+            }
+            // 視点操作中(Xボタン押しっぱなし)
+            if (xButton.isPressed) {
+                return false;
+            }
+            // オブジェクトに正対中キャラ操作無効
+            if (doUpdate.faceing) {
+                if (holded != null) {
+                    faceToObject(holded);
+                }
+                return false;
+            }
+            // ブロックを押してる時キャラ操作無効
+            if (doUpdate.pushing && transform.parent != null) {
+                simpleAnime.Play("Push"); // 押すアニメ
+                pushed.GetComponent<BlockController>().pushed = true; // ブロックを押すフラグON
+                return false;
+                // 押してるブロックの子オブジェクト化が解除されたら
+            } else if (doUpdate.pushing && transform.parent == null) {
+                doUpdate.pushing = false; // 押すフラグOFF
+                pushed = null; // 押すブロックの参照解除
+                simpleAnime.Play("Default"); // デフォルトアニメ
+            }
+            return true;
+        }
 
         // TODO: 一時凍結
         void lookBack() { // 後ろをふりかえる

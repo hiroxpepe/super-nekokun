@@ -232,6 +232,13 @@ namespace StudioMeowToon {
                     isPausing = !isPausing;
                 });
 
+            // ステージをクリアした・GAMEオーバーした場合
+            this.UpdateAsObservable().Where(_ => (SceneManager.GetActiveScene().name != "Start") &&
+                this.levelClear || this.gameOver)
+                .Subscribe(_ => {
+                    isPausing = !isPausing;
+                });
+
             // 画面情報表示の更新
             this.UpdateAsObservable().Where(_ => !_activeSceneName.Equals("Start"))
                 .Subscribe(_ => {
