@@ -184,26 +184,11 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
-            // Scene: Start
-            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Start").Subscribe(_ => {
-                if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
-                    SceneManager.LoadScene("Level1"); // TODO: メソッド
-                }
-            });
-
-            // Scene: Level1
-            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Level1").Subscribe(_ => {
-                if (selectButton.wasPressedThisFrame) {
-                    SceneManager.LoadScene("Start"); // TODO: メソッド
-                }
-            });
-
-            // シーン名取得
-            var _activeSceneName = SceneManager.GetActiveScene().name;
+            #region mobile phone vibration.
 
             // ボタンを押したらスマホ振動
             this.UpdateAsObservable()
-                .Where(_ => virtualController && useVibration &&(aButton.wasPressedThisFrame || bButton.wasPressedThisFrame || xButton.wasPressedThisFrame || yButton.wasPressedThisFrame ||
+                .Where(_ => virtualController && useVibration && (aButton.wasPressedThisFrame || bButton.wasPressedThisFrame || xButton.wasPressedThisFrame || yButton.wasPressedThisFrame ||
                     upButton.wasPressedThisFrame || downButton.wasPressedThisFrame || leftButton.wasPressedThisFrame || rightButton.wasPressedThisFrame ||
                     l1Button.wasPressedThisFrame || r1Button.wasPressedThisFrame || selectButton.wasPressedThisFrame || startButton.wasPressedThisFrame))
                 .Subscribe(_ => {
@@ -217,28 +202,45 @@ namespace StudioMeowToon {
                     useVibration = !useVibration;
                 });
 
+            #endregion
+
+            // シーン Start での遷移操作
+            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Start")
+                .Subscribe(_ => {
+                    if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
+                        SceneManager.LoadScene("Level1"); // TODO: メソッド
+                    }
+                });
+
+            // シーン Level1 での遷移操作
+            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Level1")
+                .Subscribe(_ => {
+                    if (selectButton.wasPressedThisFrame) {
+                        SceneManager.LoadScene("Start"); // TODO: メソッド
+                    }
+                });
+
+            // シーン名取得
+            var _activeSceneName = SceneManager.GetActiveScene().name;
+
             // ポーズ(一時停止)実行・解除
             this.UpdateAsObservable()
                 .Where(_ => _activeSceneName.Contains("Level") && startButton.wasPressedThisFrame && !isLevelClear)
                 .Subscribe(_ => {
-                    if (isPausing) {
-                        Time.timeScale = 1f;
-                        message.text = "";
-                    } else {
-                        Time.timeScale = 0f;
-                        message.text = "Pause";
-                    }
+                    if (isPausing) { Time.timeScale = 1f; message.text = ""; } 
+                    else { Time.timeScale = 0f; message.text = "Pause"; }
                     isPausing = !isPausing;
                 });
 
-            // Update is called once per frame.
-            this.UpdateAsObservable()
-                .Where(_ => !_activeSceneName.Equals("Start"))
+            // 画面情報表示の更新
+            this.UpdateAsObservable().Where(_ => !_activeSceneName.Equals("Start"))
                 .Subscribe(_ => {
                     checkGameOver(); // GAMEオーバー確認
                     updateGameInfo();
                     updatePlayerStatus();
                 });
+
+            #region all cannons are destroyed, field enemies emerge.
 
             // 砲台全破壊 ⇒ フィールド敵出現
             var _cannon = GameObject.Find("Cannon");
@@ -262,6 +264,10 @@ namespace StudioMeowToon {
                         });
                 });
 
+            #endregion
+
+            #region the goal key appears.
+
             // キー出現
             this.UpdateAsObservable()
                 .First(_ => isLevelClear == false && itemTotalCount > 0 && itemRemainCount == 0)
@@ -272,30 +278,32 @@ namespace StudioMeowToon {
                     }
                     // イベントカメラ切り替え
                     Observable.Timer(TimeSpan.FromSeconds(0.5d))
-                        .Subscribe(mainCamera => {
+                        .Subscribe(__ => {
                             eventCamera.gameObject.transform.parent = GameObject.Find("KeyEventView").transform;
                             eventCamera.gameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
                             eventCamera.gameObject.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
                             changeCamera();
                             isEventView = true;
                             Observable.TimerFrame(30) // FIXME: 60fpsの時は？
-                                .Subscribe(__ => {
+                                .Subscribe(___ => {
                                     changeCamera();
                                     isEventView = false;
                                 });
                         });
                 });
 
-            // TODO: スタート画面の場合、おそらく以下でエラーが出てる
+            #endregion
 
-            // FixedUpdate is called just before each physics update.
-            this.FixedUpdateAsObservable()
-                .Subscribe(_ => {
-                    updateFpsForFixedUpdate();
-                });
+            #region debug mode message.
 
             initFpsForUpdate(); // FPS初期化
             initFpsForFixedUpdate(); // fixed FPS初期化
+
+            // FPS表示
+            this.FixedUpdateAsObservable().Where(_ => !SceneManager.GetActiveScene().name.Equals("Start"))
+                .Subscribe(_ => {
+                    updateFpsForFixedUpdate();
+                });
 
             if (SceneManager.GetActiveScene().name == "Start") { // スタート画面の場合
                 Time.timeScale = 1f; // 一時停止解除
@@ -308,6 +316,8 @@ namespace StudioMeowToon {
             updateGameInfo();
 
             message.text = ""; // メッセージ初期化、非表示
+
+            #endregion
 
             // カメラ初期化 TODO: なぜ必要？
             eventCamera.enabled = false;
@@ -335,9 +345,10 @@ namespace StudioMeowToon {
 
         void updateGameInfo() { // GAME の情報を表示
             updateFpForUpdate(); // FPS更新
-            information.text = "Item (" + itemRemainCount + "/" + itemTotalCount + ")" + 
-                               "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) + 
-                               "\r\nfps2 " + string.Format("{0:F3}", Math.Round(fpsForFixedUpdate, 3, MidpointRounding.AwayFromZero)); // 残りアイテム数表示
+            information.text = 
+                "Item (" + itemRemainCount + "/" + itemTotalCount + ")" + 
+                "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) + 
+                "\r\nfps2 " + string.Format("{0:F3}", Math.Round(fpsForFixedUpdate, 3, MidpointRounding.AwayFromZero)); // 残りアイテム数表示
         }
 
         void updateFpForUpdate() { // FPS更新
