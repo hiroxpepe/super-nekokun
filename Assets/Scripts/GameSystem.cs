@@ -184,6 +184,20 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
+            // Scene: Start
+            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Start").Subscribe(_ => {
+                if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
+                    SceneManager.LoadScene("Level1"); // TODO: メソッド
+                }
+            });
+
+            // Scene: Level1
+            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Level1").Subscribe(_ => {
+                if (selectButton.wasPressedThisFrame) {
+                    SceneManager.LoadScene("Start"); // TODO: メソッド
+                }
+            });
+
             // シーン名取得
             var _activeSceneName = SceneManager.GetActiveScene().name;
 
@@ -298,22 +312,6 @@ namespace StudioMeowToon {
             // カメラ初期化 TODO: なぜ必要？
             eventCamera.enabled = false;
             mainCamera.enabled = true;
-        }
-
-        // Update is called once per frame.
-        new void Update() {
-            base.Update();
-
-            if (SceneManager.GetActiveScene().name == "Start") { // スタート画面の場合
-                if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
-                    SceneManager.LoadScene("Level1"); // TODO: メソッド
-                }
-                return;
-            } else if (SceneManager.GetActiveScene().name == "Level1") { // Level1の場合のAボタン遷移
-                if (selectButton.wasPressedThisFrame) {
-                    SceneManager.LoadScene("Start"); // TODO: メソッド
-                }
-            }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////

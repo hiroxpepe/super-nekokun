@@ -17,6 +17,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UniRx;
+using UniRx.Triggers;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -75,11 +77,11 @@ namespace StudioMeowToon {
         // Start is called before the first frame update.
         protected void Start() {
             virtualController = GameObject.Find("VirtualController"); // バーチャルコントローラー参照取得
-        }
 
-        // Update is called once per frame.
-        protected void Update() {
-            mapGamepad(); // キー入力マッピング
+            // Update is called once per frame.
+            this.UpdateAsObservable().Subscribe(_ => {
+                mapGamepad(); // キー入力マッピング
+            });
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
