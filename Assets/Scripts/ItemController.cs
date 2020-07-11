@@ -125,26 +125,23 @@ namespace StudioMeowToon {
                         }
                     }
                 });
+
+            // 接地した
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeGround() || x.gameObject.LikeBlock())
+                .Subscribe(x => {
+                    isGrounded = true; // FIXME: 開始早々には効かない？
+                });
+
+            // 下のブロックが破壊された
+            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeBlock())
+                .Subscribe(_ => {
+                    isFloat = false;
+                    isGrounded = false; // 下のブロックが破壊された
+                });
         }
 
-        // TODO: アイテムはブロックの子にする。移動するブロックの上でアイテムもいどうする。ブロックが破壊されたらアイテムは落下する
-        // TODO: ブロックの上には一つしかアイテムが置けない
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // Event handler
-
-        void OnCollisionEnter(Collision collision) {
-            if (collision.gameObject.name.Contains("Ground") || collision.gameObject.name.Contains("Block")) {
-                isGrounded = true; // 接地した TODO: 開始早々には効かない？
-            }
-        }
-
-        //void OnCollisionExit(Collision collision) { // TODO: 一時的無効
-        //    if (collision.gameObject.name.Contains("Block")) {
-        //        isFloat = false;
-        //        isGrounded = false; // 下のブロックが破壊された
-        //    }
-        //}
+        // FIXME: アイテムはブロックの子にする。移動するブロックの上でアイテムもいどうする。ブロックが破壊されたらアイテムは落下する
+        // FIXME: ブロックの上には一つしかアイテムが置けない
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // private Methods [verb]
