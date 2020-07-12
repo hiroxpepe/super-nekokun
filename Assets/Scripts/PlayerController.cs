@@ -254,69 +254,6 @@ namespace StudioMeowToon {
 
             #endregion
 
-            #region into Water
-
-            // 水面に接触したら
-            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.LikeWater())
-                .Subscribe(_ => {
-                    if (transform.localPosition.y + 0.75f > waterLevel) { // 0.75f は調整値 ⇒ TODO:再検討
-                        soundSystem.PlayWaterInClip();
-                    }
-                });
-
-            // 水中である
-            this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater())
-                .Subscribe(_ => {
-                    if (upButton.isPressed) {
-                        simpleAnime.Play("Swim"); // 泳ぐアニメ
-                    } else {
-                        simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
-                    }
-                    if (transform.localPosition.y + 0.9f < waterLevel) { // 0.9f は調整値
-                        intoWaterFilter.GetComponent<Image>().enabled = true;
-                    } else if (transform.localPosition.y + 0.85f > waterLevel) { // 0.8f は調整値(※浮上時は速く切り替える)
-                        intoWaterFilter.GetComponent<Image>().enabled = false;
-                    }
-                    doUpdate.grounded = false;
-                });
-
-            // 水中ではない
-            this.UpdateAsObservable().Where(_ => continueUpdate() && !checkIntoWater())
-                .Subscribe(_ => {
-                    intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
-                });
-
-            // (Yボタン) 水中で押した
-            this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater() && yButton.wasPressedThisFrame)
-                .Subscribe(_ => {
-                    soundSystem.PlayWaterSinkClip(); // 水中で沈む音
-                });
-
-            // 物理挙動: 水に入ったら
-            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.intoWater)
-                .Subscribe(_ => {
-                    var _rb = transform.GetComponent<Rigidbody>();
-                    speed = _rb.velocity.magnitude;
-                    _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
-                    _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
-                    _rb.useGravity = false;
-                    _rb.AddForce(new Vector3(0, 3.8f, 0), ForceMode.Acceleration); // 3.8f は調整値
-                    _rb.mass = 2f;
-                });
-
-            // 物理挙動: 水から出たら
-            this.FixedUpdateAsObservable().Where(_ => !doFixedUpdate.intoWater && !doFixedUpdate.holdBalloon)
-                .Subscribe(_ => {
-                    var _rb = transform.GetComponent<Rigidbody>();
-                    speed = _rb.velocity.magnitude;
-                    _rb.drag = 0f;
-                    _rb.angularDrag = 0f;
-                    _rb.useGravity = true;
-                    _rb.mass = 3.5f;
-                });
-
-            #endregion
-
             #region hold Balloon
 
             // 風船につかまり浮遊中
@@ -336,7 +273,7 @@ namespace StudioMeowToon {
                     _rb.AddForce(new Vector3(0, 1.8f, 0), ForceMode.Acceleration); // 1.8f は調整値
                 });
 
-            // 物理挙動: 風船を離した
+            // 物理挙動: 風船を離した ※このコードの位置でないとなぜかNG
             this.FixedUpdateAsObservable().Where(_ => !doFixedUpdate.holdBalloon && !doFixedUpdate.intoWater)
                 .Subscribe(_ => {
                     var _rb = transform.GetComponent<Rigidbody>();
@@ -344,40 +281,6 @@ namespace StudioMeowToon {
                     _rb.drag = 0f;
                     _rb.angularDrag = 0f;
                     _rb.useGravity = true;
-                });
-
-            #endregion
-
-            #region StairUp, StairDown
-
-            // 階段を上る
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairUping)
-                .Subscribe(_ => {
-                    doStairUp();
-                });
-
-            // 階段を下りる
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairDowning)
-                .Subscribe(_ => {
-                    doStairDown();
-                });
-
-            // 物理挙動: 階段を上る
-            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.stairUp)
-                .Subscribe(_ => {
-                    var _rb = transform.GetComponent<Rigidbody>();
-                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
-                    _rb.velocity = Vector3.zero;
-                    doFixedUpdate.stairUp = false;
-                });
-
-            // 物理挙動: 階段を下りる
-            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.stairDown)
-                .Subscribe(_ => {
-                    var _rb = transform.GetComponent<Rigidbody>();
-                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
-                    _rb.velocity = Vector3.zero;
-                    doFixedUpdate.stairDown = false;
                 });
 
             #endregion
@@ -595,30 +498,6 @@ namespace StudioMeowToon {
 
             #endregion
 
-            #region push Block
-
-            // (Aボタン) しゃがむ ※アニメはここじゃない
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
-                .Subscribe(_ => {
-                    // しゃがむ時、持ってるモノを離す
-                    if (holded != null) {
-                        holded.transform.parent = null; // 子オブジェクト解除
-                        doUpdate.holding = false; // 持つフラグOFF
-                        holded = null; // 持つオブジェクト参照解除
-                    }
-                });
-
-            // (Aボタン + 上ボタン) ブロックを押す
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && aButton.wasPressedThisFrame && upButton.isPressed)
-                .Subscribe(_ => {
-                    if (checkToPushBlock()) {
-                        //startFaceing(); // オブジェクトに正対する開始
-                        faceToObject(pushed); // オブジェクトに正対する
-                    }
-                });
-
-            #endregion
-
             #region Jump
 
             // (Bボタン) ジャンプ
@@ -729,6 +608,93 @@ namespace StudioMeowToon {
 
             #endregion
 
+            #region into Water
+
+            // 水面に接触したら
+            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.LikeWater())
+                .Subscribe(_ => {
+                    if (transform.localPosition.y + 0.75f > waterLevel) { // 0.75f は調整値 ⇒ TODO:再検討
+                        soundSystem.PlayWaterInClip();
+                    }
+                });
+
+            // 水中である
+            this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater())
+                .Subscribe(_ => {
+                    if (upButton.isPressed) {
+                        simpleAnime.Play("Swim"); // 泳ぐアニメ
+                    } else {
+                        simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
+                    }
+                    if (transform.localPosition.y + 0.9f < waterLevel) { // 0.9f は調整値
+                        intoWaterFilter.GetComponent<Image>().enabled = true;
+                    } else if (transform.localPosition.y + 0.85f > waterLevel) { // 0.8f は調整値(※浮上時は速く切り替える)
+                        intoWaterFilter.GetComponent<Image>().enabled = false;
+                    }
+                    doUpdate.grounded = false;
+                });
+
+            // 水中ではない
+            this.UpdateAsObservable().Where(_ => continueUpdate() && !checkIntoWater())
+                .Subscribe(_ => {
+                    intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
+                });
+
+            // (Yボタン) 水中で押した
+            this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater() && yButton.wasPressedThisFrame)
+                .Subscribe(_ => {
+                    soundSystem.PlayWaterSinkClip(); // 水中で沈む音
+                });
+
+            // 物理挙動: 水に入ったら
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.intoWater)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
+                    _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
+                    _rb.useGravity = false;
+                    _rb.AddForce(new Vector3(0, 3.8f, 0), ForceMode.Acceleration); // 3.8f は調整値
+                    _rb.mass = 2f;
+                });
+
+            // 物理挙動: 水から出たら
+            this.FixedUpdateAsObservable().Where(_ => !doFixedUpdate.intoWater && !doFixedUpdate.holdBalloon)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.drag = 0f;
+                    _rb.angularDrag = 0f;
+                    _rb.useGravity = true;
+                    _rb.mass = 3.5f;
+                });
+
+            #endregion
+
+            #region push Block
+
+            // (Aボタン) しゃがむ ※アニメはここじゃない
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
+                .Subscribe(_ => {
+                    // しゃがむ時、持ってるモノを離す
+                    if (holded != null) {
+                        holded.transform.parent = null; // 子オブジェクト解除
+                        doUpdate.holding = false; // 持つフラグOFF
+                        holded = null; // 持つオブジェクト参照解除
+                    }
+                });
+
+            // (Aボタン + 上ボタン) ブロックを押す
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && aButton.wasPressedThisFrame && upButton.isPressed)
+                .Subscribe(_ => {
+                    if (checkToPushBlock()) {
+                        //startFaceing(); // オブジェクトに正対する開始
+                        faceToObject(pushed); // オブジェクトに正対する
+                    }
+                });
+
+            #endregion
+
             // (Yボタン) 押しっぱなし: 上り降り発動
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding && !doUpdate.climbing)
                 .Subscribe(_ => {
@@ -741,6 +707,8 @@ namespace StudioMeowToon {
                     }
                     checkToClimb(); // よじ登り可能かチェック
                 });
+
+            #region Y Button
 
             // (Yボタン) 押しっぱなし: 上り降り中
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding && doUpdate.climbing)
@@ -779,6 +747,10 @@ namespace StudioMeowToon {
                         });
                 });
 
+            #endregion
+
+            #region L1 Button
+
             // (Lボタン) 敵ロック(※敵に注目)
             this.UpdateAsObservable().Where(_ => continueUpdate() && l1Button.isPressed)
                 .Subscribe(_ => {
@@ -802,6 +774,10 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     bombAngle.Value += Time.deltaTime * 2.5f;
                 });
+
+            #endregion
+
+            #region R1, R2 Button
 
             // (Rボタン) 持つ・撃つ
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
@@ -863,6 +839,42 @@ namespace StudioMeowToon {
                         holded = null; // 持つオブジェクト参照解除
                     }
                 });
+
+            #endregion
+
+            #region StairUp, StairDown
+
+            // 階段を上る
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairUping)
+                .Subscribe(_ => {
+                    doStairUp();
+                });
+
+            // 階段を下りる
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairDowning)
+                .Subscribe(_ => {
+                    doStairDown();
+                });
+
+            // 物理挙動: 階段を上る
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.stairUp)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
+                    _rb.velocity = Vector3.zero;
+                    doFixedUpdate.stairUp = false;
+                });
+
+            // 物理挙動: 階段を下りる
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.stairDown)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
+                    _rb.velocity = Vector3.zero;
+                    doFixedUpdate.stairDown = false;
+                });
+
+            #endregion
 
             // FixedUpdate is called just before each physics update.
             this.FixedUpdateAsObservable().Subscribe(_ => {
@@ -1154,8 +1166,7 @@ namespace StudioMeowToon {
             var _target = _behind.transform;
             var _relativePos = _target.position - transform.position;
             var _rotation = Quaternion.LookRotation(_relativePos);
-            transform.rotation =
-              Quaternion.Slerp(transform.rotation, _rotation, Time.deltaTime * _SPEED);
+            transform.rotation = Quaternion.Slerp(transform.rotation, _rotation, Time.deltaTime * _SPEED);
             //cameraController.LookPlayer();
         }
 
