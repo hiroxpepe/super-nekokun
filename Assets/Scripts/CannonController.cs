@@ -25,6 +25,8 @@ namespace StudioMeowToon {
     /// </summary>
     public class CannonController : MonoBehaviour {
 
+        // TODO: 砲台から弾が飛んでくる：赤-半誘導弾、青-通常弾
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Fields
 
