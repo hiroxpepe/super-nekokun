@@ -444,6 +444,8 @@ namespace StudioMeowToon {
 
             #endregion
 
+            #region Rotate
+
             // (左右ボタン) 回転
             this.UpdateAsObservable().Where(_ => continueUpdate() && !doUpdate.climbing && !aButton.isPressed)
                 .Subscribe(_ => {
@@ -461,6 +463,10 @@ namespace StudioMeowToon {
                     }
                 });
 
+            #endregion
+
+            #region SideStep
+
             // (左右ボタン + Aボタン) 左右サイドステップ
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && aButton.isPressed)
                 .Subscribe(_ => {
@@ -476,6 +482,34 @@ namespace StudioMeowToon {
                     }
                     faceToFace(5); // 面に正対する FIXME: 斜めが有効になる
                 });
+
+            // 物理挙動: サイドステップ左
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.sideStepLeft)
+                .Subscribe(_ => {
+                    var _fps = Application.targetFrameRate;
+                    var _ADJUST2 = 0f;
+                    if (_fps == 60) _ADJUST2 = 18f;
+                    if (_fps == 30) _ADJUST2 = 36f;
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.AddRelativeFor​​ce(Vector3.left * _ADJUST2, ForceMode.Acceleration); // 左に移動させる
+                    doFixedUpdate.sideStepLeft = false;
+                });
+
+            // 物理挙動: サイドステップ右
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.sideStepRight)
+                .Subscribe(_ => {
+                    var _fps = Application.targetFrameRate;
+                    var _ADJUST2 = 0f;
+                    if (_fps == 60) _ADJUST2 = 18f;
+                    if (_fps == 30) _ADJUST2 = 36f;
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.AddRelativeFor​​ce(Vector3.right * _ADJUST2, ForceMode.Acceleration); // 右に移動させる
+                    doFixedUpdate.sideStepRight = false;
+                });
+
+            #endregion
 
             // (Aボタン) しゃがむ※アニメはここじゃない
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
@@ -758,17 +792,6 @@ namespace StudioMeowToon {
                 if (doFixedUpdate.cancelClimb) {
                     _rb.useGravity = true; // 重力再有効化
                     _rb.AddRelativeFor​​ce(Vector3.down * 3f, ForceMode.Impulse); // 落とす
-                }
-
-                // サイドステップ
-                var _fps = Application.targetFrameRate;
-                var _ADJUST2 = 0f;
-                if (_fps == 60) _ADJUST2 = 18f;
-                if (_fps == 30) _ADJUST2 = 36f;
-                if (doFixedUpdate.sideStepLeft) {
-                    _rb.AddRelativeFor​​ce(Vector3.left * _ADJUST2, ForceMode.Acceleration); // 左に移動させる
-                } else if (doFixedUpdate.sideStepRight) {
-                    _rb.AddRelativeFor​​ce(Vector3.right * _ADJUST2, ForceMode.Acceleration); // 右に移動させる
                 }
 
                 // 水中での挙動
@@ -1960,8 +1983,8 @@ namespace StudioMeowToon {
                 //_jump = false;
                 _reverseJump = false;
                 //_backward = false;
-                _sideStepLeft = false;
-                _sideStepRight = false;
+                //_sideStepLeft = false;
+                //_sideStepRight = false;
                 _climbUp = false;
                 _cancelClimb = false;
                 //_jumpForward = false;
