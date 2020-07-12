@@ -192,7 +192,6 @@ namespace StudioMeowToon {
             doUpdate = DoUpdate.GetInstance(); // 状態フラグクラス
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
             bombAngle = BombAngle.GetInstance(); // 弾道角度用クラス
-            life = 10; // HP初期化
 
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // 水面の高さを取得
@@ -216,11 +215,14 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
+            life = 10; // HP初期化
             speed = 0; // 速度初期化
 
             // TODO: 実験的
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
+
+            #region situation
 
             // ポーズ中
             this.UpdateAsObservable().Where(_ => Time.timeScale == 0f)
@@ -248,14 +250,6 @@ namespace StudioMeowToon {
                     gameSystem.bombAngle = bombAngle.Value; // 弾角度
                 });
 
-            this.UpdateAsObservable().Where(_ => continueUpdate())
-                .Subscribe(_ => {
-                });
-
-            this.UpdateAsObservable().Where(_ => continueUpdate())
-                .Subscribe(_ => {
-                });
-
             // 水中である
             this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater())
                 .Subscribe(_ => {
@@ -278,55 +272,14 @@ namespace StudioMeowToon {
                     intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
                 });
 
-            // (Yボタン) モバイル用モード
-            this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.wasReleasedThisFrame  && useVirtualController)
-                .Subscribe(_ => {
-                    doFixedUpdate.virtualControllerMode = true;
-                    Observable.TimerFrame(30) // 30フレ後に
-                        .Subscribe(__ => {
-                            doFixedUpdate.virtualControllerMode = false;
-                        });
-                });
+            #endregion
+
+            #region doUpdate state
 
             // 風船につかまり浮遊中
             this.UpdateAsObservable().Where(_ => continueUpdate() && doFixedUpdate.holdBalloon)
                 .Subscribe(_ => {
                     doUpdate.grounded = false;
-                });
-
-            // ロック(Lボタン)を押して続けている // TODO: 敵ロック
-            this.UpdateAsObservable().Where(_ => continueUpdate() && l1Button.isPressed)
-                .Subscribe(_ => {
-                    //lockOnTarget(); // TODO: 捕まり反転ジャンプの時に向いてしまう…
-                });
-
-            // Lボタンを離した(※捕まり反転ジャンプ準備のカメラリセット)
-            this.UpdateAsObservable().Where(_ => continueUpdate() && l1Button.wasReleasedThisFrame)
-                .Subscribe(_ => {
-                    cameraController.ResetLookAround(); // カメラ初期化
-                });
-
-            // 持つ(Rボタン)を離した (R2ホールド)
-            this.UpdateAsObservable().Where(_ => continueUpdate() && r2Hold && r2Button.wasPressedThisFrame)
-                .Subscribe(_ => {
-                    if (holded != null) {
-                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
-                        holded.transform.parent = null; // 子オブジェクト解除
-                        doUpdate.holding = false; // 持つフラグOFF
-                        holded = null; // 持つオブジェクト参照解除
-                        r2Hold = false; // R2ホールドフラグOFF
-                    }
-                });
-
-            // 持つ(Rボタン)を離した
-            this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !r2Hold)
-                .Subscribe(_ => {
-                    if (holded != null) {
-                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
-                        holded.transform.parent = null; // 子オブジェクト解除
-                        doUpdate.holding = false; // 持つフラグOFF
-                        holded = null; // 持つオブジェクト参照解除
-                    }
                 });
 
             // 接地フラグONの場合
@@ -346,130 +299,6 @@ namespace StudioMeowToon {
                             simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
                             doUpdate.throwing = true;
                         }
-                    }
-                });
-
-            // 持つ・撃つ(Rボタン)押した
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
-                .Subscribe(_ => {
-                    if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
-                        startFaceing(); // オブジェクトに正対する開始
-                        faceToObject(holded); // オブジェクトに正対する
-                        if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
-                        if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
-                            doUpdate.grounded = false; // 浮遊
-                            doFixedUpdate.holdBalloon = true;
-                        }
-                    }
-                });
-
-            // Aボタン押しっぱなし
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
-                .Subscribe(_ => {
-                    // FIXME: しゃがむ時、持ってるモノを離す
-                    if (holded != null) {
-                        holded.transform.parent = null; // 子オブジェクト解除
-                        doUpdate.holding = false; // 持つフラグOFF
-                        holded = null; // 持つオブジェクト参照解除
-                    }
-                    if (leftButton.isPressed) { // 左
-                        if (!doUpdate.throwing) {
-                            simpleAnime.Play("Push");
-                        } else if (doUpdate.throwed) {
-                            simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
-                        }
-                    } else if (leftButton.isPressed) { // 右 FIXME: ??
-                        if (!doUpdate.throwing) {
-                            simpleAnime.Play("Push");
-                        } else if (doUpdate.throwed) {
-                            simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
-                        }
-                    }
-                });
-
-            // 上を押した時
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed)
-                .Subscribe(_ => {
-                    if (l1Button.isPressed) {
-                        bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                        return;
-                    }
-                    if (yButton.isPressed) { // Yボタン押しっぱなしなら
-                        if (!doUpdate.throwing) {
-                            simpleAnime.Play("Run"); // 走るアニメ
-                            soundSystem.PlayRunClip();
-                        }
-                        doFixedUpdate.run = true;
-                    } else {
-                        if (!doUpdate.throwing) {
-                            if (aButton.isPressed) { // Aボタン押しっぱなし
-                                simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
-                            } else {
-                                simpleAnime.Play("Walk"); // 歩くアニメ
-                                soundSystem.PlayWalkClip();
-                            }
-                        }
-                        doFixedUpdate.walk = true;
-                    }
-                    // 階段を上がるかチェック
-                    checkStairUp();
-                    if (doUpdate.stairUping != true) {
-                        // 階段を下がるかチェック
-                        checkStairDown();
-                    }
-                });
-
-            // 下を押した時
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && downButton.isPressed)
-                .Subscribe(_ => {
-                    if (l1Button.isPressed) {
-                        bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                        return;
-                    }
-                    if (!doUpdate.throwing) {
-                        if (aButton.isPressed) { // Aボタン押しっぱなし
-                            simpleAnime.Play("Push"); // しゃがむアニメ代用
-                        } else {
-                            simpleAnime.Play("Backward"); // 後ろアニメ
-                        }
-                    }
-                    soundSystem.PlayWalkClip();
-                    doFixedUpdate.backward = true;
-                });
-
-            // 上下を離した時
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !upButton.isPressed && !downButton.isPressed)
-                .Subscribe(_ => {
-                    if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
-                        if (!doUpdate.throwing) {
-                            if (aButton.isPressed) { // Aボタン押しっぱなし
-                                simpleAnime.Play("Push"); // しゃがむアニメ代用
-                            } else {
-                                simpleAnime.Play("Default"); // デフォルトアニメ
-                            }
-                        }
-                        soundSystem.StopClip();
-                        doFixedUpdate.idol = true;
-                    }
-                });
-
-            // ジャンプ(Bボタン)
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && bButton.wasPressedThisFrame)
-                .Subscribe(_ => {
-                    doUpdate.InitThrowBomb(); // 爆撃フラグOFF
-                    simpleAnime.Play("Jump"); // ジャンプアニメ
-                    soundSystem.PlayJumpClip();
-                    doUpdate.grounded = false;
-                    doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット
-                    doFixedUpdate.jump = true;
-                });
-
-            // 上を押しながら、押す(Aボタン)
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && aButton.wasPressedThisFrame && upButton.isPressed)
-                .Subscribe(_ => {
-                    if (checkToPushBlock()) {
-                        //startFaceing(); // オブジェクトに正対する開始
-                        faceToObject(pushed); // オブジェクトに正対する
                     }
                 });
 
@@ -510,47 +339,6 @@ namespace StudioMeowToon {
                 }
             });
 
-            // Yボタン押しっぱなし
-            this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding)
-                .Subscribe(_ => {
-                    if (yButton.wasPressedThisFrame && checkIntoWater()) { soundSystem.PlayWaterSinkClip(); } // 水中で沈む音
-                    if (!doUpdate.climbing) { // 上り降り発動なら
-                        if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプが発動してなかったら
-                            if (downButton.isPressed) { // ハシゴを降りる
-                                if (previousPosition[0].y - (0.1f * Time.deltaTime) > transform.position.y) {
-                                    checkToClimbDownByLadder();
-                                }
-                            }
-                        }
-                        checkToClimb(); // よじ登り可能かチェック
-                    }
-                    // 上り降り中
-                    if (doUpdate.climbing) {
-                        simpleAnime.Play("ClimbUp"); // よじ登るアニメ
-                        if (l1Button.isPressed) { // 捕まり反転ジャンプ準備
-                            simpleAnime.Play("Default");
-                        }
-                        climb(); // 上り下り
-                        if (r1Button.isPressed) { // さらにRボタン押しっぱなしなら
-                            moveSide(); // 横に移動
-                        }
-                    }
-                });
-
-            // Yボタン離した
-            this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.wasReleasedThisFrame)
-                .Subscribe(_ => {
-                    if (doUpdate.climbing) {
-                        simpleAnime.Play("Default"); // デフォルトアニメ
-                        soundSystem.StopClip();
-                    }
-                    // RayBox位置の初期化
-                    var _rayBox = transform.Find("RayBox").gameObject;
-                    _rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
-                    doUpdate.climbing = false; // 登るフラグOFF
-                    doFixedUpdate.cancelClimb = true;
-                });
-
             // 回転 TODO: 入力の遊びを持たせる？ TODO: 左右2回押しで180度回転？ TODO: 左右2回押しで90度ずつ回転の実装
             this.UpdateAsObservable().Where(_ => continueUpdate() && !doUpdate.climbing)
                 .Subscribe(_ => {
@@ -590,6 +378,226 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairDowning)
                 .Subscribe(_ => {
                     doStairDown();
+                });
+
+            #endregion
+
+            // (上ボタン) 歩く・走る
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed)
+                .Subscribe(_ => {
+                    if (l1Button.isPressed) {
+                        bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
+                        return;
+                    }
+                    if (yButton.isPressed) { // Yボタン押しっぱなしなら
+                        if (!doUpdate.throwing) {
+                            simpleAnime.Play("Run"); // 走るアニメ
+                            soundSystem.PlayRunClip();
+                        }
+                        doFixedUpdate.run = true;
+                    } else {
+                        if (!doUpdate.throwing) {
+                            if (aButton.isPressed) { // Aボタン押しっぱなし
+                                simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
+                            } else {
+                                simpleAnime.Play("Walk"); // 歩くアニメ
+                                soundSystem.PlayWalkClip();
+                            }
+                        }
+                        doFixedUpdate.walk = true;
+                    }
+                    // 階段を上がるかチェック
+                    checkStairUp();
+                    if (doUpdate.stairUping != true) {
+                        // 階段を下がるかチェック
+                        checkStairDown();
+                    }
+                });
+
+            // (下ボタン) 後ろ歩き
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && downButton.isPressed)
+                .Subscribe(_ => {
+                    if (l1Button.isPressed) {
+                        bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
+                        return;
+                    }
+                    if (!doUpdate.throwing) {
+                        if (aButton.isPressed) { // Aボタン押しっぱなし
+                            simpleAnime.Play("Push"); // しゃがむアニメ代用
+                        } else {
+                            simpleAnime.Play("Backward"); // 後ろアニメ
+                        }
+                    }
+                    soundSystem.PlayWalkClip();
+                    doFixedUpdate.backward = true;
+                });
+
+            // (NOT 上下ボタン) アイドル状態
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !upButton.isPressed && !downButton.isPressed)
+                .Subscribe(_ => {
+                    if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
+                        if (!doUpdate.throwing) {
+                            if (aButton.isPressed) { // Aボタン押しっぱなし
+                                simpleAnime.Play("Push"); // しゃがむアニメ代用
+                            } else {
+                                simpleAnime.Play("Default"); // デフォルトアニメ
+                            }
+                        }
+                        soundSystem.StopClip();
+                        doFixedUpdate.idol = true;
+                    }
+                });
+
+            // (Aボタン) しゃがむ 
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
+                .Subscribe(_ => {
+                    // FIXME: しゃがむ時、持ってるモノを離す
+                    if (holded != null) {
+                        holded.transform.parent = null; // 子オブジェクト解除
+                        doUpdate.holding = false; // 持つフラグOFF
+                        holded = null; // 持つオブジェクト参照解除
+                    }
+                    if (leftButton.isPressed) { // 左
+                        if (!doUpdate.throwing) {
+                            simpleAnime.Play("Push");
+                        } else if (doUpdate.throwed) {
+                            simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
+                        }
+                    } else if (leftButton.isPressed) { // 右 FIXME: ??
+                        if (!doUpdate.throwing) {
+                            simpleAnime.Play("Push");
+                        } else if (doUpdate.throwed) {
+                            simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
+                        }
+                    }
+                });
+
+            // (Aボタン + 上ボタン) ブロックを押す
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && aButton.wasPressedThisFrame && upButton.isPressed)
+                .Subscribe(_ => {
+                    if (checkToPushBlock()) {
+                        //startFaceing(); // オブジェクトに正対する開始
+                        faceToObject(pushed); // オブジェクトに正対する
+                    }
+                });
+
+            // (Bボタン) ジャンプ
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && bButton.wasPressedThisFrame)
+                .Subscribe(_ => {
+                    doUpdate.InitThrowBomb(); // 爆撃フラグOFF
+                    simpleAnime.Play("Jump"); // ジャンプアニメ
+                    soundSystem.PlayJumpClip();
+                    doUpdate.grounded = false;
+                    doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット
+                    doFixedUpdate.jump = true;
+                });
+
+            // (Yボタン) 押しっぱなし
+            this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding)
+                .Subscribe(_ => {
+                    if (yButton.wasPressedThisFrame && checkIntoWater()) { soundSystem.PlayWaterSinkClip(); } // 水中で沈む音
+                    if (!doUpdate.climbing) { // 上り降り発動なら
+                        if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプが発動してなかったら
+                            if (downButton.isPressed) { // ハシゴを降りる
+                                if (previousPosition[0].y - (0.1f * Time.deltaTime) > transform.position.y) {
+                                    checkToClimbDownByLadder();
+                                }
+                            }
+                        }
+                        checkToClimb(); // よじ登り可能かチェック
+                    }
+                    // 上り降り中
+                    if (doUpdate.climbing) {
+                        simpleAnime.Play("ClimbUp"); // よじ登るアニメ
+                        if (l1Button.isPressed) { // 捕まり反転ジャンプ準備
+                            simpleAnime.Play("Default");
+                        }
+                        climb(); // 上り下り
+                        if (r1Button.isPressed) { // さらにRボタン押しっぱなしなら
+                            moveSide(); // 横に移動
+                        }
+                    }
+                });
+
+            // (Yボタン) 離した
+            this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.wasReleasedThisFrame)
+                .Subscribe(_ => {
+                    if (doUpdate.climbing) {
+                        simpleAnime.Play("Default"); // デフォルトアニメ
+                        soundSystem.StopClip();
+                    }
+                    // RayBox位置の初期化
+                    var _rayBox = transform.Find("RayBox").gameObject;
+                    _rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
+                    doUpdate.climbing = false; // 登るフラグOFF
+                    doFixedUpdate.cancelClimb = true;
+                });
+
+            // (Yボタン) モバイル用モード
+            this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.wasReleasedThisFrame  && useVirtualController)
+                .Subscribe(_ => {
+                    doFixedUpdate.virtualControllerMode = true;
+                    Observable.TimerFrame(30) // 30フレ後に
+                        .Subscribe(__ => {
+                            doFixedUpdate.virtualControllerMode = false;
+                        });
+                });
+
+            // (Lボタン) 敵ロック(※敵に注目)
+            this.UpdateAsObservable().Where(_ => continueUpdate() && l1Button.isPressed)
+                .Subscribe(_ => {
+                    //lockOnTarget(); // TODO: 捕まり反転ジャンプの時に向いてしまう…
+                });
+
+            // (Lボタン) 離した(※捕まり反転ジャンプ準備のカメラリセット)
+            this.UpdateAsObservable().Where(_ => continueUpdate() && l1Button.wasReleasedThisFrame)
+                .Subscribe(_ => {
+                    cameraController.ResetLookAround(); // カメラ初期化
+                });
+
+            // (Rボタン) 持つ・撃つ
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
+                .Subscribe(_ => {
+                    if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
+                        startFaceing(); // オブジェクトに正対する開始
+                        faceToObject(holded); // オブジェクトに正対する
+                        if (r2Button.wasPressedThisFrame) { r2Hold = true; } // R2ホールドフラグON
+                        if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
+                            doUpdate.grounded = false; // 浮遊
+                            doFixedUpdate.holdBalloon = true;
+                        }
+                    }
+                });
+
+            // (Rボタン) 離した:R2ホールド
+            this.UpdateAsObservable().Where(_ => continueUpdate() && r2Hold && r2Button.wasPressedThisFrame)
+                .Subscribe(_ => {
+                    if (holded != null) {
+                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                        holded.transform.parent = null; // 子オブジェクト解除
+                        doUpdate.holding = false; // 持つフラグOFF
+                        holded = null; // 持つオブジェクト参照解除
+                        r2Hold = false; // R2ホールドフラグOFF
+                    }
+                });
+
+            // (Rボタン) 離した
+            this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !r2Hold)
+                .Subscribe(_ => {
+                    if (holded != null) {
+                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                        holded.transform.parent = null; // 子オブジェクト解除
+                        doUpdate.holding = false; // 持つフラグOFF
+                        holded = null; // 持つオブジェクト参照解除
+                    }
+                });
+
+            this.UpdateAsObservable().Where(_ => continueUpdate())
+                .Subscribe(_ => {
+                });
+
+            this.UpdateAsObservable().Where(_ => continueUpdate())
+                .Subscribe(_ => {
                 });
 
             // FixedUpdate is called just before each physics update.
