@@ -717,6 +717,16 @@ namespace StudioMeowToon {
                     doFixedUpdate.jumpBackward = false;
                 });
 
+            // 物理挙動: 意図していない状況
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.unintended)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.useGravity = true; // 重力有効化
+                    _rb.velocity = Vector3.zero; // 速度0にする
+                    doFixedUpdate.unintended = false;
+                });
+
             #endregion
 
             // (Yボタン) 押しっぱなし: 上り降り発動
@@ -893,12 +903,6 @@ namespace StudioMeowToon {
                     _rb.useGravity = true;
                     _rb.velocity += Vector3.up * _ADJUST / 2.0f;
                     _rb.velocity += transform.forward * _ADJUST / 3.5f;
-                }
-
-                // 意図していない状況
-                if (doFixedUpdate.unintended) {
-                    _rb.useGravity = true; // 重力有効化
-                    _rb.velocity = Vector3.zero; // 速度0にする
                 }
 
                 doFixedUpdate.ResetMotion(); // 物理挙動フラグ初期化
@@ -2042,7 +2046,7 @@ namespace StudioMeowToon {
                 //_getItem = false;
                 //_stairUp = false;
                 //_stairDown = false;
-                _unintended = false;
+                //_unintended = false;
                 // _intoWater は初期化しない
                 // _holdBalloon は初期化しない
                 // _virtualControllerMode は初期化しない
