@@ -248,41 +248,44 @@ namespace StudioMeowToon {
                     gameSystem.bombAngle = bombAngle.Value; // 弾角度
                 });
 
-            // Update is called once per frame.
             this.UpdateAsObservable().Where(_ => continueUpdate())
                 .Subscribe(_ => {
-
-                    // 水中かどうかチェック
-                    if (checkIntoWater()) {
-                        if (upButton.isPressed) {
-                            simpleAnime.Play("Swim"); // 泳ぐアニメ
-                        } else {
-                            simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
-                        }
-                        if (transform.localPosition.y + 0.9f < waterLevel) { // 0.9f は調整値
-                            intoWaterFilter.GetComponent<Image>().enabled = true;
-                        } else if (transform.localPosition.y + 0.85f > waterLevel) { // 0.8f は調整値(※浮上時は速く切り替える)
-                            intoWaterFilter.GetComponent<Image>().enabled = false;
-                        }
-                        doUpdate.grounded = false;
-                    } else {
-                        intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
-                    }
-
-                    // モバイル用モード
-                    if (useVirtualController) {
-                        if (yButton.wasReleasedThisFrame) {
-                            doFixedUpdate.virtualControllerMode = true;
-                            Observable.TimerFrame(30)
-                                .Subscribe(__ => {
-                                    doFixedUpdate.virtualControllerMode = false;
-                                });
-                        }
-                    }
                 });
 
             this.UpdateAsObservable().Where(_ => continueUpdate())
                 .Subscribe(_ => {
+                });
+
+            // 水中である
+            this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater())
+                .Subscribe(_ => {
+                    if (upButton.isPressed) {
+                        simpleAnime.Play("Swim"); // 泳ぐアニメ
+                    } else {
+                        simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
+                    }
+                    if (transform.localPosition.y + 0.9f < waterLevel) { // 0.9f は調整値
+                        intoWaterFilter.GetComponent<Image>().enabled = true;
+                    } else if (transform.localPosition.y + 0.85f > waterLevel) { // 0.8f は調整値(※浮上時は速く切り替える)
+                        intoWaterFilter.GetComponent<Image>().enabled = false;
+                    }
+                    doUpdate.grounded = false;
+                });
+
+            // 水中ではない
+            this.UpdateAsObservable().Where(_ => continueUpdate() && !checkIntoWater())
+                .Subscribe(_ => {
+                    intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
+                });
+
+            // (Yボタン) モバイル用モード
+            this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.wasReleasedThisFrame  && useVirtualController)
+                .Subscribe(_ => {
+                    doFixedUpdate.virtualControllerMode = true;
+                    Observable.TimerFrame(30) // 30フレ後に
+                        .Subscribe(__ => {
+                            doFixedUpdate.virtualControllerMode = false;
+                        });
                 });
 
             // 風船につかまり浮遊中
