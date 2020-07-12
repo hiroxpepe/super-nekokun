@@ -252,6 +252,10 @@ namespace StudioMeowToon {
                     gameSystem.bombAngle = bombAngle.Value; // 弾角度
                 });
 
+            #endregion
+
+            #region into Water
+
             // 水中である
             this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater())
                 .Subscribe(_ => {
@@ -272,6 +276,35 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate() && !checkIntoWater())
                 .Subscribe(_ => {
                     intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
+                });
+
+            // (Yボタン) 水中で押した
+            this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater() && yButton.wasPressedThisFrame)
+                .Subscribe(_ => {
+                    soundSystem.PlayWaterSinkClip(); // 水中で沈む音
+                });
+
+            // 物理挙動: 水に入ったら
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.intoWater)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
+                    _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
+                    _rb.useGravity = false;
+                    _rb.AddForce(new Vector3(0, 3.8f, 0), ForceMode.Acceleration); // 3.8f は調整値
+                    _rb.mass = 2f;
+                });
+
+            // 物理挙動: 水から出たら
+            this.FixedUpdateAsObservable().Where(_ => !doFixedUpdate.intoWater && !doFixedUpdate.holdBalloon)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.drag = 0f;
+                    _rb.angularDrag = 0f;
+                    _rb.useGravity = true;
+                    _rb.mass = 3.5f;
                 });
 
             #endregion
@@ -674,12 +707,6 @@ namespace StudioMeowToon {
 
             #endregion
 
-            // (Yボタン) 水中で押した
-            this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater() && yButton.wasPressedThisFrame)
-                .Subscribe(_ => {
-                    soundSystem.PlayWaterSinkClip(); // 水中で沈む音
-                });
-
             // (Yボタン) 押しっぱなし: 上り降り発動
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding && !doUpdate.climbing)
                 .Subscribe(_ => {
@@ -832,23 +859,10 @@ namespace StudioMeowToon {
                     );
                 }
 
+                // 上がるキャンセル
                 if (doFixedUpdate.cancelClimb) {
                     _rb.useGravity = true; // 重力再有効化
                     _rb.AddRelativeFor​​ce(Vector3.down * 3f, ForceMode.Impulse); // 落とす
-                }
-
-                // 水中での挙動
-                if (doFixedUpdate.intoWater) { // 水の中に入ったら
-                    _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
-                    _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
-                    _rb.useGravity = false;
-                    _rb.AddForce(new Vector3(0, 3.8f, 0), ForceMode.Acceleration); // 3.8f は調整値
-                    _rb.mass = 2f;
-                } else if (!doFixedUpdate.intoWater && !doFixedUpdate.holdBalloon) { // 元に戻す
-                    _rb.drag = 0f;
-                    _rb.angularDrag = 0f;
-                    _rb.useGravity = true;
-                    _rb.mass = 3.5f;
                 }
 
                 // ブロック上る下りる
@@ -875,9 +889,7 @@ namespace StudioMeowToon {
                     _rb.velocity = Vector3.zero; // 速度0にする
                 }
 
-                ///////////////////////////////////////////////////////////////////////////////////////////
-                // アイテム
-
+                // アイテム取得
                 if (doFixedUpdate.getItem) {
                     _rb.velocity = Vector3.zero; // アイテム取得時停止
                 }
