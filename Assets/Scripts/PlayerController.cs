@@ -256,6 +256,14 @@ namespace StudioMeowToon {
 
             #region into Water
 
+            // 水面に接触したら
+            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.LikeWater())
+                .Subscribe(_ => {
+                    if (transform.localPosition.y + 0.75f > waterLevel) { // 0.75f は調整値 ⇒ TODO:再検討
+                        soundSystem.PlayWaterInClip();
+                    }
+                });
+
             // 水中である
             this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater())
                 .Subscribe(_ => {
@@ -587,7 +595,9 @@ namespace StudioMeowToon {
 
             #endregion
 
-            // (Aボタン) しゃがむ※アニメはここじゃない
+            #region push Block
+
+            // (Aボタン) しゃがむ ※アニメはここじゃない
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
                 .Subscribe(_ => {
                     // しゃがむ時、持ってるモノを離す
@@ -606,6 +616,8 @@ namespace StudioMeowToon {
                         faceToObject(pushed); // オブジェクトに正対する
                     }
                 });
+
+            #endregion
 
             #region Jump
 
@@ -889,11 +901,6 @@ namespace StudioMeowToon {
                     _rb.velocity = Vector3.zero; // 速度0にする
                 }
 
-                // アイテム取得
-                if (doFixedUpdate.getItem) {
-                    _rb.velocity = Vector3.zero; // アイテム取得時停止
-                }
-
                 doFixedUpdate.ResetMotion(); // 物理挙動フラグ初期化
             });
 
@@ -901,7 +908,6 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     var _rb = transform.GetComponent<Rigidbody>();
                     speed = _rb.velocity.magnitude;
-
                 });
 
             // LateUpdate is called after all Update functions have been called.
@@ -972,7 +978,7 @@ namespace StudioMeowToon {
                     holded = x.gameObject; // 持てるアイテムの参照を保持する
                 });
 
-            // 被弾したら FIXME: ここでOK？
+            // 被弾したら FIXME: 音はここでOK？
             this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBullet())
                 .Subscribe(_ => {
                     soundSystem.PlayHitClip();
@@ -1001,6 +1007,8 @@ namespace StudioMeowToon {
                     holded = null; // 持てるブロックの参照を解除する
                 });
 
+            #region get Item
+
             // アイテムと接触したら消す
             this.OnTriggerEnterAsObservable().Where(x => x.gameObject.IsItem())
                 .Subscribe(x => {
@@ -1008,16 +1016,19 @@ namespace StudioMeowToon {
                     gameSystem.DecrementItem(); // アイテム数デクリメント
                     doFixedUpdate.getItem = true;
                     Destroy(x.gameObject);
-                    say("I got\na item."); // FIXME: 種別
+                    say("I got\na item."); // FIXME: 吹き出しの種類
                 });
 
-            // 水面に接触したら
-            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.LikeWater())
+            // 物理挙動: アイテム取得
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.getItem)
                 .Subscribe(_ => {
-                    if (transform.localPosition.y + 0.75f > waterLevel) { // 0.75f は調整値 ⇒ TODO:再検討
-                        soundSystem.PlayWaterInClip();
-                    }
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.velocity = Vector3.zero; // アイテム取得時停止 FIXME: 動作してる？
+                    doFixedUpdate.getItem = false;
                 });
+
+            #endregion
 
             #region Slope
 
@@ -2028,7 +2039,7 @@ namespace StudioMeowToon {
                 //_jumpForward = false;
                 //_jumpBackward = false;
                 _grounded = false;
-                _getItem = false;
+                //_getItem = false;
                 //_stairUp = false;
                 //_stairDown = false;
                 _unintended = false;
