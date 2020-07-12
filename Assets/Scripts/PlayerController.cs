@@ -284,6 +284,27 @@ namespace StudioMeowToon {
                     doUpdate.grounded = false;
                 });
 
+            // 物理挙動: 風船につかまっている
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.holdBalloon)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
+                    _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
+                    _rb.useGravity = false;
+                    _rb.AddForce(new Vector3(0, 1.8f, 0), ForceMode.Acceleration); // 1.8f は調整値
+                });
+
+            // 物理挙動: 風船を離した
+            this.FixedUpdateAsObservable().Where(_ => !doFixedUpdate.holdBalloon && !doFixedUpdate.intoWater)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    _rb.drag = 0f;
+                    _rb.angularDrag = 0f;
+                    _rb.useGravity = true;
+                });
+
             #endregion
 
             #region StairUp, StairDown
@@ -830,18 +851,6 @@ namespace StudioMeowToon {
                     _rb.mass = 3.5f;
                 }
 
-                // 風船につかまる
-                if (doFixedUpdate.holdBalloon) {
-                    _rb.drag = 5f; // 抵抗を増やす(※大きな挙動変化をもたらす)
-                    _rb.angularDrag = 5f; // 回転抵抗を増やす(※大きな挙動変化をもたらす)
-                    _rb.useGravity = false;
-                    _rb.AddForce(new Vector3(0, 1.8f, 0), ForceMode.Acceleration); // 1.8f は調整値
-                } else if (!doFixedUpdate.holdBalloon && !doFixedUpdate.intoWater) { // 元に戻す
-                    _rb.drag = 0f;
-                    _rb.angularDrag = 0f;
-                    _rb.useGravity = true;
-                }
-
                 // ブロック上る下りる
                 if (doFixedUpdate.climbUp || doUpdate.climbing) { // Update と FixedUpdate の呼び出され差 60fps, 30fps を考慮したら
                     _rb.useGravity = false; // 重力無効化 ※重力に負けるから
@@ -880,6 +889,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     var _rb = transform.GetComponent<Rigidbody>();
                     speed = _rb.velocity.magnitude;
+
                 });
 
             // LateUpdate is called after all Update functions have been called.
