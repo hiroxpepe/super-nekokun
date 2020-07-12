@@ -299,14 +299,14 @@ namespace StudioMeowToon {
                 } else {
                     if (checkIntoWater()) { soundSystem.StopClip(); }
                 }
-                if (Math.Round(previousSpeed, 4) == Math.Round(speed, 4) && !doUpdate.lookBackJumping && (doUpdate.secondsAfterJumped > 0.1f && doUpdate.secondsAfterJumped < 0.4f)) {
-#if DEBUG
-                    Debug.Log("空中停止した場合 speed:" + speed); // 完全に空中停止した場合※捕まり反転ジャンプ時以外
-#endif
-                    transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
-                    doUpdate.grounded = true; // 接地
-                    doFixedUpdate.unintended = true; // 意図しない状況フラグON
-                }
+//                if (Math.Round(previousSpeed, 4) == Math.Round(speed, 4) && !doUpdate.lookBackJumping && (doUpdate.secondsAfterJumped > 0.1f && doUpdate.secondsAfterJumped < 0.4f)) {
+//#if DEBUG
+//                    Debug.Log("空中停止した場合 speed:" + speed); // 完全に空中停止した場合※捕まり反転ジャンプ時以外
+//#endif
+//                    transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
+//                    doUpdate.grounded = true; // 接地
+//                    doFixedUpdate.unintended = true; // 意図しない状況フラグON
+//                }
                 if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 5.0f && !doFixedUpdate.holdBalloon) { // TODO: checkIntoWater 重くない？
 #if DEBUG
                     Debug.Log("JUMP後に空中停止した場合 speed:" + speed); // FIXME: 水面で反応
@@ -446,16 +446,76 @@ namespace StudioMeowToon {
                     }
                 });
 
+            #region Jump
+
             // (Bボタン) ジャンプ
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && bButton.wasPressedThisFrame)
                 .Subscribe(_ => {
-                    doUpdate.InitThrowBomb(); // 爆撃フラグOFF
+                    doUpdate.InitThrowBomb(); // 撃つフラグOFF
                     simpleAnime.Play("Jump"); // ジャンプアニメ
                     soundSystem.PlayJumpClip();
                     doUpdate.grounded = false;
                     doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット
                     doFixedUpdate.jump = true;
                 });
+
+            // 物理挙動: ジャンプ
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.jump)
+                .Subscribe(_ => {
+                    // FIXME: ジャンプボタンを押し続けると飛距離が伸びるように
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    var _ADJUST = 0f;
+                    if (doFixedUpdate.virtualControllerMode || speed > 2.9f) { // TODO: 再検討
+                        _ADJUST = jumpPower * 1.75f; // 最高速ジャンプ
+                    } else if (speed > 1.9f) {
+                        _ADJUST = jumpPower * 1.25f; // 走りジャンプ
+                    } else if (speed > 0) {
+                        _ADJUST = jumpPower;        // 歩きジャンプ
+                    } else if (speed == 0) {
+                        _ADJUST = jumpPower * 1.5f;   // 静止ジャンプ
+                    }
+                    _rb.useGravity = true;
+                    //_rb.velocity += Vector3.up * _ADJUST;
+                    _rb.AddRelativeFor​​ce(Vector3.up * _ADJUST * 40f, ForceMode.Acceleration); // TODO: こちらの方がベター？
+                    doFixedUpdate.jump = false;
+                });
+
+            // 物理挙動: ジャンプ中前移動
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.jumpForward)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    if (!checkIntoWater()) {
+                        if (speed < 3.25f) {
+                            _rb.AddRelativeFor​​ce(Vector3.forward * 6.5f, ForceMode.Acceleration);
+                        }
+                    } else { // 水中移動
+                        if (speed < 3.25f) {
+                            _rb.AddRelativeFor​​ce(Vector3.forward * 13.0f, ForceMode.Acceleration);
+                        }
+                    }
+                    doFixedUpdate.jumpForward = false;
+                });
+
+            // 物理挙動: ジャンプ中後ろ移動
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.jumpBackward)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    speed = _rb.velocity.magnitude;
+                    if (!checkIntoWater()) {
+                        if (speed < 1.5f) {
+                            _rb.AddRelativeFor​​ce(Vector3.back * 4.5f, ForceMode.Acceleration);
+                        }
+                    } else { // 水中移動
+                        if (speed < 1.5f) {
+                            _rb.AddRelativeFor​​ce(Vector3.back * 9.0f, ForceMode.Acceleration);
+                        }
+                    }
+                    doFixedUpdate.jumpBackward = false;
+                });
+
+            #endregion
 
             // (Yボタン) 水中で押した
             this.UpdateAsObservable().Where(_ => continueUpdate() && checkIntoWater() && yButton.wasPressedThisFrame)
@@ -620,45 +680,6 @@ namespace StudioMeowToon {
                     _rb.AddRelativeFor​​ce(Vector3.down * 3f, ForceMode.Impulse); // 落とす
                 }
 
-                // ジャンプ
-                if (doFixedUpdate.jump) { // TODO: ジャンプボタンを押し続けると飛距離が伸びるように
-                    var _ADJUST = 0f;
-                    if (doFixedUpdate.virtualControllerMode || speed > 2.9f) { // TODO: 再検討
-                        _ADJUST = jumpPower * 1.75f; // 最高速ジャンプ
-                    } else if (speed > 1.9f) {
-                        _ADJUST = jumpPower * 1.25f; // 走りジャンプ
-                    } else if (speed > 0) {
-                        _ADJUST = jumpPower;        // 歩きジャンプ
-                    } else if (speed == 0) {
-                        _ADJUST = jumpPower * 1.5f;   // 静止ジャンプ
-                    }
-                    _rb.useGravity = true;
-                    //_rb.velocity += Vector3.up * _ADJUST;
-                    _rb.AddRelativeFor​​ce(Vector3.up * _ADJUST * 40f, ForceMode.Acceleration); // TODO: こちらの方がベター？
-                }
-                if (doFixedUpdate.jumpForward) { // ジャンプ中前移動 : 追加:水中移動
-                    if (!checkIntoWater()) {
-                        if (speed < 3.25f) {
-                            _rb.AddRelativeFor​​ce(Vector3.forward * 6.5f, ForceMode.Acceleration);
-                        }
-                    } else { // 水中移動
-                        if (speed < 3.25f) {
-                            _rb.AddRelativeFor​​ce(Vector3.forward * 13.0f, ForceMode.Acceleration);
-                        }
-                    }
-                }
-                if (doFixedUpdate.jumpBackward) { // ジャンプ中後ろ移動 : 追加:水中移動
-                    if (!checkIntoWater()) {
-                        if (speed < 1.5f) {
-                            _rb.AddRelativeFor​​ce(Vector3.back * 4.5f, ForceMode.Acceleration);
-                        }
-                    } else { // 水中移動
-                        if (speed < 1.5f) {
-                            _rb.AddRelativeFor​​ce(Vector3.back * 9.0f, ForceMode.Acceleration);
-                        }
-                    }
-                }
-
                 //  歩く、走る TODO: ⇒ 二段階加速：ifネスト
                 var _fps = Application.targetFrameRate;
                 var _ADJUST1 = 0f;
@@ -776,6 +797,12 @@ namespace StudioMeowToon {
 
                 doFixedUpdate.ResetMotion(); // 物理挙動フラグ初期化
             });
+
+            this.FixedUpdateAsObservable().Where(_ => true)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
+                    speed = _rb.velocity.magnitude; // 速度ベクトル取得
+                });
 
             // LateUpdate is called after all Update functions have been called.
             this.LateUpdateAsObservable().Subscribe(_ => {
@@ -1780,7 +1807,7 @@ namespace StudioMeowToon {
                 throwBomb(time);
             }
 
-            public void InitThrowBomb() {
+            public void InitThrowBomb() { // FIXME: rename
                 _throwing = false;
                 _throwed = false;
                 _throwingTime = 0f;
@@ -1891,15 +1918,15 @@ namespace StudioMeowToon {
                 _idol = false;
                 _run = false;
                 _walk = false;
-                _jump = false;
+                //_jump = false;
                 _reverseJump = false;
                 _backward = false;
                 _sideStepLeft = false;
                 _sideStepRight = false;
                 _climbUp = false;
                 _cancelClimb = false;
-                _jumpForward = false;
-                _jumpBackward = false;
+                //_jumpForward = false;
+                //_jumpBackward = false;
                 _grounded = false;
                 _getItem = false;
                 _stairUp = false;
