@@ -90,6 +90,8 @@ namespace StudioMeowToon {
 
         bool r2Hold; // R2ボタンで持っているかどうか
 
+        bool r2HoldTmp; // R2ボタンで持っているかどうか UniRx 対策
+
         Vector3 normalVector = Vector3.up; // 法線用
 
         Text speechText; // セリフ用吹き出しテキスト
@@ -285,21 +287,6 @@ namespace StudioMeowToon {
             // 接地状態
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding)
                 .Subscribe(_ => {
-                    if (doUpdate.bombing) {
-                        bomb(); // 弾を撃つ
-                        doUpdate.bombed = true;
-                    } else if (aButton.isPressed && doUpdate.throwed) { // (Aボタン) 押した時
-                        simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
-                    } else if (yButton.isPressed && doUpdate.throwed) { // (Yボタン) 押した時
-                        simpleAnime.CrossFade("Run", 0.3f); // 投げるから走るアニメ
-                    } else if (doUpdate.throwed) {
-                        simpleAnime.CrossFade("Walk", 0.5f); // 投げるから歩くアニメ
-                    } else if (r1Button.wasPressedThisFrame) { // (Rボタン) 押した時
-                        if (!doUpdate.holding || !doUpdate.faceing) { // Item を持っていなかったら、またはオブジェクトに正対中でなければ
-                            simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
-                            doUpdate.throwing = true;
-                        }
-                    }
                 });
 
             // ジャンプ中 (※水中もここに来る)
@@ -551,16 +538,36 @@ namespace StudioMeowToon {
                     cameraController.ResetLookAround(); // カメラ初期化
                 });
 
+            // 撃つ: 関連
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding)
+                .Subscribe(_ => {
+                    if (doUpdate.bombing) {
+                        bomb(); // 弾を撃つ
+                        doUpdate.bombed = true;
+                    } else if (aButton.isPressed && doUpdate.throwed) { // (Aボタン) 押した時
+                        simpleAnime.CrossFade("Push", 0.2f); // 撃つからしゃがむ(代用)アニメ
+                    } else if (yButton.isPressed && doUpdate.throwed) { // (Yボタン) 押した時
+                        simpleAnime.CrossFade("Run", 0.3f); // 撃つから走るアニメ
+                    } else if (doUpdate.throwed) {
+                        simpleAnime.CrossFade("Walk", 0.5f); // 撃つから歩くアニメ
+                    }
+                });
+
             // (Rボタン) 持つ・撃つ
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
                 .Subscribe(_ => {
                     if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
                         startFaceing(); // オブジェクトに正対する開始
                         faceToObject(holded); // オブジェクトに正対する
-                        if (r2Button.wasPressedThisFrame) { r2Hold = true; } // (R2ボタン) R2ホールドフラグON
+                        if (r2Button.wasPressedThisFrame) { r2HoldTmp = true; } // (R2ボタン) R2ホールドフラグON
                         if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
                             doUpdate.grounded = false; // 浮遊
                             doFixedUpdate.holdBalloon = true;
+                        }
+                    } else { // アイテムが持てない場合、弾を撃つフラグON
+                        if (!doUpdate.holding || !doUpdate.faceing) {
+                            simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
+                            doUpdate.throwing = true;
                         }
                     }
                 });
@@ -787,6 +794,8 @@ namespace StudioMeowToon {
                         readyForBackJump();
                     }
                 }
+
+                if (r2HoldTmp) { r2Hold = true; r2HoldTmp = false; } // R2ホールドフラグON 
 
                 cashPreviousPosition(); // 10フレ前分の位置情報保存
             });
