@@ -276,7 +276,7 @@ namespace StudioMeowToon {
 
             #endregion
 
-            #region doUpdate state
+            #region hold Balloon
 
             // 風船につかまり浮遊中
             this.UpdateAsObservable().Where(_ => continueUpdate() && doFixedUpdate.holdBalloon)
@@ -284,16 +284,38 @@ namespace StudioMeowToon {
                     doUpdate.grounded = false;
                 });
 
-            // 階段を上る ※水中は無関係
+            #endregion
+
+            #region StairUp, StairDown
+
+            // 階段を上る
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairUping)
                 .Subscribe(_ => {
                     doStairUp();
                 });
 
-            // 階段を下りる ※水中は無関係
+            // 階段を下りる
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairDowning)
                 .Subscribe(_ => {
                     doStairDown();
+                });
+
+            // 物理挙動: 階段を上る
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.stairUp)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
+                    _rb.velocity = Vector3.zero;
+                    doFixedUpdate.stairUp = false;
+                });
+
+            // 物理挙動: 階段を下りる
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.stairDown)
+                .Subscribe(_ => {
+                    var _rb = transform.GetComponent<Rigidbody>();
+                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
+                    _rb.velocity = Vector3.zero;
+                    doFixedUpdate.stairDown = false;
                 });
 
             #endregion
@@ -836,12 +858,6 @@ namespace StudioMeowToon {
                     _rb.useGravity = true;
                     _rb.velocity += Vector3.up * _ADJUST / 2.0f;
                     _rb.velocity += transform.forward * _ADJUST / 3.5f;
-                }
-
-                // 階段を上る下りる
-                if (doFixedUpdate.stairUp || doFixedUpdate.stairDown) {
-                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
-                    _rb.velocity = Vector3.zero;
                 }
 
                 // 意図していない状況
@@ -1991,8 +2007,8 @@ namespace StudioMeowToon {
                 //_jumpBackward = false;
                 _grounded = false;
                 _getItem = false;
-                _stairUp = false;
-                _stairDown = false;
+                //_stairUp = false;
+                //_stairDown = false;
                 _unintended = false;
                 // _intoWater は初期化しない
                 // _holdBalloon は初期化しない
