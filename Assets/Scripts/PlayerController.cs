@@ -708,6 +708,8 @@ namespace StudioMeowToon {
                     checkToClimb(); // よじ登り可能かチェック
                 });
 
+            #region Y Button
+
             // (Yボタン) 押しっぱなし: 上り降り中
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding && doUpdate.climbing)
                 .Subscribe(_ => {
@@ -745,6 +747,10 @@ namespace StudioMeowToon {
                         });
                 });
 
+            #endregion
+
+            #region L1 Button
+
             // (Lボタン) 敵ロック(※敵に注目)
             this.UpdateAsObservable().Where(_ => continueUpdate() && l1Button.isPressed)
                 .Subscribe(_ => {
@@ -768,6 +774,10 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     bombAngle.Value += Time.deltaTime * 2.5f;
                 });
+
+            #endregion
+
+            #region R1, R2 Button
 
             // (Rボタン) 持つ・撃つ
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
@@ -829,6 +839,8 @@ namespace StudioMeowToon {
                         holded = null; // 持つオブジェクト参照解除
                     }
                 });
+
+            #endregion
 
             #region StairUp, StairDown
 
@@ -1154,8 +1166,7 @@ namespace StudioMeowToon {
             var _target = _behind.transform;
             var _relativePos = _target.position - transform.position;
             var _rotation = Quaternion.LookRotation(_relativePos);
-            transform.rotation =
-              Quaternion.Slerp(transform.rotation, _rotation, Time.deltaTime * _SPEED);
+            transform.rotation = Quaternion.Slerp(transform.rotation, _rotation, Time.deltaTime * _SPEED);
             //cameraController.LookPlayer();
         }
 
