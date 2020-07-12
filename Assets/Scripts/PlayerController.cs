@@ -90,7 +90,7 @@ namespace StudioMeowToon {
 
         bool r2Hold; // R2ボタンで持っているかどうか
 
-        bool r2HoldTmp; // R2ボタンで持っているかどうか UniRx 対策
+        bool r2HoldTmp; // R2ボタンで持っているかどうか ※一時フラグ
 
         Vector3 normalVector = Vector3.up; // 法線用
 
@@ -284,11 +284,6 @@ namespace StudioMeowToon {
                     doUpdate.grounded = false;
                 });
 
-            // 接地状態
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding)
-                .Subscribe(_ => {
-                });
-
             // ジャンプ中 (※水中もここに来る)
             this.UpdateAsObservable().Where(_ => continueUpdate() && !doUpdate.grounded && !doUpdate.climbing)
             .Subscribe(_ => {
@@ -343,10 +338,6 @@ namespace StudioMeowToon {
             // (上ボタン) 歩く・走る
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed)
                 .Subscribe(_ => {
-                    if (l1Button.isPressed) {
-                        bombAngle.Value -= Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                        return;
-                    }
                     if (yButton.isPressed) { // (Yボタン) 押しっぱなし
                         if (!doUpdate.throwing) {
                             simpleAnime.Play("Run"); // 走るアニメ
@@ -375,10 +366,6 @@ namespace StudioMeowToon {
             // (下ボタン) 後ろ歩き
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && downButton.isPressed)
                 .Subscribe(_ => {
-                    if (l1Button.isPressed) {
-                        bombAngle.Value += Time.deltaTime * 2.5f; // 弾道角度調整※*反応速度
-                        return;
-                    }
                     if (!doUpdate.throwing) {
                         if (aButton.isPressed) { // (Aボタン) 押しっぱなし
                             simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
@@ -538,19 +525,16 @@ namespace StudioMeowToon {
                     cameraController.ResetLookAround(); // カメラ初期化
                 });
 
-            // 撃つ: 関連
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding)
+            // (Lボタン + 上ボタン) 弾道角度調整※*反応速度
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed && l1Button.isPressed)
                 .Subscribe(_ => {
-                    if (doUpdate.bombing) {
-                        bomb(); // 弾を撃つ
-                        doUpdate.bombed = true;
-                    } else if (aButton.isPressed && doUpdate.throwed) { // (Aボタン) 押した時
-                        simpleAnime.CrossFade("Push", 0.2f); // 撃つからしゃがむ(代用)アニメ
-                    } else if (yButton.isPressed && doUpdate.throwed) { // (Yボタン) 押した時
-                        simpleAnime.CrossFade("Run", 0.3f); // 撃つから走るアニメ
-                    } else if (doUpdate.throwed) {
-                        simpleAnime.CrossFade("Walk", 0.5f); // 撃つから歩くアニメ
-                    }
+                    bombAngle.Value -= Time.deltaTime * 2.5f;
+                });
+
+            // (Lボタン + 下ボタン) 弾道角度調整※*反応速度
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && downButton.isPressed && l1Button.isPressed)
+                .Subscribe(_ => {
+                    bombAngle.Value += Time.deltaTime * 2.5f;
                 });
 
             // (Rボタン) 持つ・撃つ
@@ -569,6 +553,25 @@ namespace StudioMeowToon {
                             simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
                             doUpdate.throwing = true;
                         }
+                    }
+                });
+
+            // 撃つ
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding && doUpdate.bombing)
+                .Subscribe(_ => {
+                    bomb(); // 弾を撃つ
+                    doUpdate.bombed = true;
+                });
+
+            // 撃った後のモーション
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding)
+                .Subscribe(_ => {
+                    if (aButton.isPressed && doUpdate.throwed) { // (Aボタン) 押した時
+                        simpleAnime.CrossFade("Push", 0.2f); // 撃つからしゃがむ(代用)アニメ
+                    } else if (yButton.isPressed && doUpdate.throwed) { // (Yボタン) 押した時
+                        simpleAnime.CrossFade("Run", 0.3f); // 撃つから走るアニメ
+                    } else if (doUpdate.throwed) {
+                        simpleAnime.CrossFade("Walk", 0.5f); // 撃つから歩くアニメ
                     }
                 });
 
@@ -593,14 +596,6 @@ namespace StudioMeowToon {
                         doUpdate.holding = false; // 持つフラグOFF
                         holded = null; // 持つオブジェクト参照解除
                     }
-                });
-
-            this.UpdateAsObservable().Where(_ => continueUpdate())
-                .Subscribe(_ => {
-                });
-
-            this.UpdateAsObservable().Where(_ => continueUpdate())
-                .Subscribe(_ => {
                 });
 
             // FixedUpdate is called just before each physics update.
