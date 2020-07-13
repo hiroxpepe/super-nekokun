@@ -221,6 +221,7 @@ namespace StudioMeowToon {
             speed = 0; // 速度初期化
 
             var _rb = transform.GetComponent<Rigidbody>();
+            var _fps = Application.targetFrameRate;
 
             // TODO: 実験的
             sw = new System.Diagnostics.Stopwatch();
@@ -341,13 +342,12 @@ namespace StudioMeowToon {
                 });
 
             // 物理挙動: 走る
+            var _ADJUST1 = 0f;
+            if (_fps == 60) _ADJUST1 = 8f;
+            if (_fps == 30) _ADJUST1 = 16f;
             this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.run)
                 .Subscribe(_ => {
                     // FIXME: 二段階加速
-                    var _fps = Application.targetFrameRate;
-                    var _ADJUST1 = 0f;
-                    if (_fps == 60) _ADJUST1 = 8f;
-                    if (_fps == 30) _ADJUST1 = 16f;
                     _rb.useGravity = true; // 重力再有効化 
                     if (speed < 3.25f) { // ⇒ フレームレートに依存する 60fps,8f, 30fps:16f, 20fps:24f, 15fps:32f
                         var onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
@@ -363,10 +363,6 @@ namespace StudioMeowToon {
             // 物理挙動: 歩く
             this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.walk)
                 .Subscribe(_ => {
-                    var _fps = Application.targetFrameRate;
-                    var _ADJUST1 = 0f;
-                    if (_fps == 60) _ADJUST1 = 8f;
-                    if (_fps == 30) _ADJUST1 = 16f;
                     _rb.useGravity = true; // 重力再有効化 
                     if (speed < 1.1f) {
                         var onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
@@ -400,10 +396,6 @@ namespace StudioMeowToon {
             // 物理挙動: 後ろ歩き
             this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.backward)
                 .Subscribe(_ => {
-                    var _fps = Application.targetFrameRate;
-                    var _ADJUST1 = 0f;
-                    if (_fps == 60) _ADJUST1 = 8f;
-                    if (_fps == 30) _ADJUST1 = 16f;
                     _rb.useGravity = true; // 重力再有効化 
                     if (speed < 0.75f) {
                         var onPlane = Vector3.ProjectOnPlane(-Utils.TransformForward(transform.forward, speed), normalVector);
@@ -458,12 +450,11 @@ namespace StudioMeowToon {
                 });
 
             // 物理挙動: サイドステップ左
+            var _ADJUST2 = 0f;
+            if (_fps == 60) _ADJUST2 = 18f;
+            if (_fps == 30) _ADJUST2 = 36f;
             this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.sideStepLeft)
                 .Subscribe(_ => {
-                    var _fps = Application.targetFrameRate;
-                    var _ADJUST2 = 0f;
-                    if (_fps == 60) _ADJUST2 = 18f;
-                    if (_fps == 30) _ADJUST2 = 36f;
                     _rb.AddRelativeFor​​ce(Vector3.left * _ADJUST2, ForceMode.Acceleration); // 左に移動させる
                     doFixedUpdate.sideStepLeft = false;
                 });
@@ -471,10 +462,6 @@ namespace StudioMeowToon {
             // 物理挙動: サイドステップ右
             this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.sideStepRight)
                 .Subscribe(_ => {
-                    var _fps = Application.targetFrameRate;
-                    var _ADJUST2 = 0f;
-                    if (_fps == 60) _ADJUST2 = 18f;
-                    if (_fps == 30) _ADJUST2 = 36f;
                     _rb.AddRelativeFor​​ce(Vector3.right * _ADJUST2, ForceMode.Acceleration); // 右に移動させる
                     doFixedUpdate.sideStepRight = false;
                 });
