@@ -227,6 +227,21 @@ namespace StudioMeowToon {
             sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
+            // 物理挙動: 初期化
+            this.FixedUpdateAsObservable().Subscribe(_ => {
+                // Time.deltaTime は一定である
+                previousSpeed = speed; // 速度ベクトル保存
+                speed = _rb.velocity.magnitude; // 速度ベクトル取得
+
+                if (speed > 5.0f) { // 加速度リミッター TODO: リミッター解除機能
+                    _rb.velocity = new Vector3(
+                        _rb.velocity.x - (_rb.velocity.x / 10),
+                        _rb.velocity.y - (_rb.velocity.y / 10),
+                        _rb.velocity.z - (_rb.velocity.z / 10)
+                    );
+                }
+            });
+
             #region situation
 
             // ポーズ中
@@ -256,14 +271,6 @@ namespace StudioMeowToon {
                 });
 
             #endregion
-
-            this.FixedUpdateAsObservable().Where(_ => true)
-                .Subscribe(_ => {
-                });
-
-            this.FixedUpdateAsObservable().Where(_ => true)
-                .Subscribe(_ => {
-                });
 
             #region hold Balloon
 
@@ -712,6 +719,17 @@ namespace StudioMeowToon {
                     _rb.velocity = Vector3.zero;
                 });
 
+            // 物理挙動: 捕まり反転ジャンプ
+            this.FixedUpdateAsObservable()
+                .Subscribe(_ => {
+                    if (doFixedUpdate.reverseJump) {
+                        _rb.useGravity = true;
+                        _rb.velocity += Vector3.up * jumpPower / 2.0f;
+                        _rb.velocity += transform.forward * jumpPower / 3.5f;
+                        doFixedUpdate.reverseJump = false;
+                    }
+                });
+
             // (Yボタン) 離した
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.wasReleasedThisFrame)
                 .Subscribe(_ => {
@@ -862,38 +880,6 @@ namespace StudioMeowToon {
                 });
 
             #endregion
-
-            // FixedUpdate is called just before each physics update.
-            this.FixedUpdateAsObservable().Subscribe(_ => {
-                // フラグ系の切り替えはここには書かない
-                // Time.deltaTime は一定である
-
-                previousSpeed = speed; // 速度ベクトル保存
-                speed = _rb.velocity.magnitude; // 速度ベクトル取得
-
-                if (speed > 5.0f) { // 加速度リミッター TODO: リミッター解除機能
-                    _rb.velocity = new Vector3(
-                        _rb.velocity.x - (_rb.velocity.x / 10),
-                        _rb.velocity.y - (_rb.velocity.y / 10),
-                        _rb.velocity.z - (_rb.velocity.z / 10)
-                    );
-                }
-
-                // 捕まり反転ジャンプ
-                if (doFixedUpdate.reverseJump) {
-                    var _ADJUST = 0f;
-                    _ADJUST = jumpPower;
-                    _rb.useGravity = true;
-                    _rb.velocity += Vector3.up * _ADJUST / 2.0f;
-                    _rb.velocity += transform.forward * _ADJUST / 3.5f;
-                }
-
-                doFixedUpdate.ResetMotion(); // 物理挙動フラグ初期化
-            });
-
-            this.FixedUpdateAsObservable().Where(_ => true)
-                .Subscribe(_ => {
-                });
 
             // LateUpdate is called after all Update functions have been called.
             this.LateUpdateAsObservable().Subscribe(_ => {
@@ -2004,39 +1990,9 @@ namespace StudioMeowToon {
             /// 初期化済みのインスタンスを返す。
             /// </summary>
             public static DoFixedUpdate GetInstance() {
-                var _instance = new DoFixedUpdate();
-                _instance.ResetMotion();
-                return _instance;
+                return new DoFixedUpdate();
             }
 
-            ///////////////////////////////////////////////////////////////////////////////////////////
-            // public Methods [verb]
-
-            /// <summary>
-            /// 全フィールドの初期化
-            /// </summary>
-            public void ResetMotion() {
-                    //_idol = false;
-                    //_run = false;
-                    //_walk = false;
-                    //_jump = false;
-                _reverseJump = false;
-                    //_backward = false;
-                    //_sideStepLeft = false;
-                    //_sideStepRight = false;
-                //_climbUp = false;
-                //_cancelClimb = false;
-                    //_jumpForward = false;
-                    //_jumpBackward = false;
-                //_grounded = false;
-                    //_getItem = false;
-                    //_stairUp = false;
-                    //_stairDown = false;
-                    //_unintended = false;
-                    // _intoWater は初期化しない
-                    // _holdBalloon は初期化しない
-                    // _virtualControllerMode は初期化しない
-            }
         }
 
         #endregion
