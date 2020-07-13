@@ -119,7 +119,7 @@ namespace StudioMeowToon {
         // public Methods [verb]
 
         /// <summary>
-        /// HPデクリメント
+        /// HPデクリメント。
         /// </summary>
         public void DecrementLife() {
             life--;
@@ -127,7 +127,7 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// エネミーから攻撃を受ける
+        /// エネミーから攻撃を受ける。
         /// </summary>
         public void DamagedByEnemy(Vector3 forward) {
             moveByShocked(forward);
@@ -464,7 +464,7 @@ namespace StudioMeowToon {
                     faceToFace(5); // 面に正対する FIXME: 斜めが有効になる
                 });
 
-            // 物理挙動: サイドステップ左
+            // 物理挙動: 左サイドステップ
             var _ADJUST2 = 0f;
             if (_fps == 60) _ADJUST2 = 18f;
             if (_fps == 30) _ADJUST2 = 36f;
@@ -474,7 +474,7 @@ namespace StudioMeowToon {
                     doFixedUpdate.sideStepLeft = false;
                 });
 
-            // 物理挙動: サイドステップ右
+            // 物理挙動: 右サイドステップ
             this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.sideStepRight)
                 .Subscribe(_ => {
                     _rb.AddRelativeFor​​ce(Vector3.right * _ADJUST2, ForceMode.Acceleration); // 右に移動させる
@@ -646,7 +646,7 @@ namespace StudioMeowToon {
 
             #region push Block
 
-            // (Aボタン) しゃがむ ※アニメはここじゃない
+            // (Aボタン) しゃがむ ※アニメはここではない
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && aButton.isPressed)
                 .Subscribe(_ => {
                     // しゃがむ時、持ってるモノを離す
@@ -951,16 +951,10 @@ namespace StudioMeowToon {
                     doFixedUpdate.grounded = false;
                 });
 
-            // 持てるアイテム・ブロックと接触したら
+            // 持てるアイテム、ブロック、"Holdable" と接触したら
             this.OnCollisionEnterAsObservable().Where(x => (x.gameObject.LikeItem() || x.gameObject.Holdable()) && !doUpdate.holding)
                 .Subscribe(x => {
                     holded = x.gameObject; // 持てるアイテムの参照を保持する
-                });
-
-            // 被弾したら FIXME: 音はここでOK？
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBullet())
-                .Subscribe(_ => {
-                    soundSystem.PlayHitClip();
                 });
 
             // ブロックに接触し続けている
@@ -980,21 +974,31 @@ namespace StudioMeowToon {
                     }
                 });
 
-            // アイテム or "Holdable" から離れたら
+            // 持てるアイテム、ブロック、"Holdable"  から離れたら
             this.OnCollisionExitAsObservable().Where(x => (x.gameObject.LikeItem() || x.gameObject.Holdable()) && !doUpdate.holding)
                 .Subscribe(_ => {
                     holded = null; // 持てるブロックの参照を解除する
                 });
 
+            #region get damaged
+
+            // 被弾したら FIXME: 音はここでOK？
+            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBullet())
+                .Subscribe(_ => {
+                    soundSystem.PlayHitClip();
+                });
+
+            #endregion
+
             #region get Item
 
-            // アイテムと接触したら消す
+            // アイテムと接触したら
             this.OnTriggerEnterAsObservable().Where(x => x.gameObject.IsItem())
                 .Subscribe(x => {
                     soundSystem.PlayItemClip(); // 効果音を鳴らす
                     gameSystem.DecrementItem(); // アイテム数デクリメント
                     doFixedUpdate.getItem = true;
-                    Destroy(x.gameObject);
+                    Destroy(x.gameObject); // 削除
                     say("I got\na item."); // FIXME: 吹き出しの種類
                 });
 
@@ -1076,7 +1080,9 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // private Methods [verb]
 
-        // Update 操作を続けるかどうかを返す
+        /// <summary>
+        /// Update 操作を続けるかどうかを返す。
+        /// </summary>
         bool continueUpdate() {
             // ポーズ中
             if (Time.timeScale == 0f) {
@@ -1090,7 +1096,7 @@ namespace StudioMeowToon {
             if (gameSystem.eventView || gameSystem.levelClear || gameSystem.gameOver) {
                 return false;
             }
-            // 視点操作中(Xボタン押しっぱなし)
+            // (Xボタン) 押しっぱなし: 視点操作中
             if (xButton.isPressed) {
                 return false;
             }
@@ -1106,7 +1112,7 @@ namespace StudioMeowToon {
                 simpleAnime.Play("Push"); // 押すアニメ
                 pushed.GetComponent<BlockController>().pushed = true; // ブロックを押すフラグON
                 return false;
-                // 押してるブロックの子オブジェクト化が解除されたら
+            // 押してるブロックの子オブジェクト化が解除されたら
             } else if (doUpdate.pushing && transform.parent == null) {
                 doUpdate.pushing = false; // 押すフラグOFF
                 pushed = null; // 押すブロックの参照解除
@@ -1119,7 +1125,10 @@ namespace StudioMeowToon {
         //if (Input.GetButtonUp("L1")) {
         //    lookBack(); // TODO: 未完成
         //}
-        void lookBack() { // 後ろをふりかえる
+        /// <summary>
+        /// 後ろをふりかえる。
+        /// </summary>
+        void lookBack() {
             float _SPEED = 10.01f; // 回転スピード
             var _behind = transform.Find("Behind").gameObject;
             //transform.LookAt(_behind.transform);
@@ -1148,7 +1157,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void bomb() { // 弾を撃つ TODO: fps で加える値を変化？
+        /// <summary>
+        /// 弾を撃つ。
+        /// </summary>
+        void bomb() { // TODO: fps で加える値を変化？
             // 弾の複製
             var _bullet = Instantiate(bullet) as GameObject;
 
@@ -1169,6 +1181,9 @@ namespace StudioMeowToon {
             say("Shot!", 65);
         }
 
+        /// <summary>
+        /// TBA
+        /// </summary>
         float getRendererTop(GameObject target) { // TODO: Player が測っても良いのでは？
             float _height = target.GetComponent<Renderer>().bounds.size.y; // オブジェクトの高さ取得 
             float _y = target.transform.position.y; // オブジェクトのy座標取得(※0基点)
@@ -1176,7 +1191,10 @@ namespace StudioMeowToon {
             return _top;
         }
 
-        bool isUpOrDown() { // 上下変動があったかどうか
+        /// <summary>
+        /// 上下変動があったかどうか。
+        /// </summary>
+        bool isUpOrDown() {
             var _fps = Application.targetFrameRate;
             var _ADJUST1 = 0;
             if (_fps == 60) _ADJUST1 = 9;
@@ -1192,7 +1210,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void moveSide() { // 登り降り中に横に移動する
+        /// <summary>
+        /// 登り降り中に横に移動する。
+        /// </summary>
+        void moveSide() {
             faceToFace();
             var _MOVE = 0.8f;
             var _fX = (float) Math.Round(transform.forward.x);
@@ -1221,7 +1242,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void flatToFace() { // 面に高さを合わせる // TODO:※試験中
+        /// <summary>
+        /// 面に高さを合わせる。
+        /// </summary>
+        void flatToFace() { // TODO:※試験中
             transform.localPosition = new Vector3(
                 transform.localPosition.x,
                 (float) Math.Round(transform.position.y, 2, MidpointRounding.AwayFromZero),
@@ -1229,7 +1253,10 @@ namespace StudioMeowToon {
             );
         }
 
-        void faceToFace(float speed = 20.0f) { // 面に正対する
+        /// <summary>
+        /// 面に正対する。
+        /// </summary>
+        void faceToFace(float speed = 20.0f) {
             float _SPEED = speed; // 回転スピード
             var _fX = (float) Math.Round(transform.forward.x);
             var _fZ = (float) Math.Round(transform.forward.z);
@@ -1329,7 +1356,10 @@ namespace StudioMeowToon {
         //    doUpdate.faceing = false;
         //}
 
-        void lockOnTarget() { // ロックオン対象の方向に回転
+        /// <summary>
+        /// ロックオン対象の方向に回転。
+        /// </summary>
+        void lockOnTarget() {
             var target = gameSystem.SerchNearTargetByTag(gameObject, "Block");
             if (target != null) {
                 float _SPEED = 3.0f; // 回転スピード
@@ -1339,7 +1369,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void readyForBackJump() { // 捕まり反転ジャンプの準備
+        /// <summary>
+        /// 捕まり反転ジャンプの準備。
+        /// </summary>
+        void readyForBackJump() {
             simpleAnime.Play("Default"); // デフォルトアニメ
             var _h = transform.Find("Head").gameObject;
             var _e = transform.Find("Ear").gameObject;
@@ -1370,7 +1403,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void doBackJump() { // 捕まり反転ジャンプ
+        /// <summary>
+        /// 捕まり反転ジャンプ。
+        /// </summary>
+        void doBackJump() {
             transform.Rotate(0, 180f, 0); // 180度反転
             doUpdate.climbing = false; // 登るフラグOFF
             doUpdate.lookBackJumping = true; // 反転ジャンプフラグON
@@ -1379,6 +1415,9 @@ namespace StudioMeowToon {
             doFixedUpdate.reverseJump = true;
         }
 
+        /// <summary>
+        /// TBA
+        /// </summary>
         void checkToClimb() {
             var _rayBox = transform.Find("RayBox").gameObject; // RayBoxから前方サーチする
             Ray _ray = new Ray(_rayBox.transform.position, transform.forward);
@@ -1405,7 +1444,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void checkToClimbDownByLadder() { // ハシゴを降りるとき限定
+        /// <summary>
+        /// ハシゴを降りるとき限定。
+        /// </summary>
+        void checkToClimbDownByLadder() {
             int _fps = Application.targetFrameRate;
             float _ADJUST = 0;
             if (_fps == 60) _ADJUST = 75.0f; // 調整値
@@ -1431,7 +1473,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void climb() { // ハシゴ登り降り
+        /// <summary>
+        /// ハシゴ登り降り。
+        /// </summary>
+        void climb() {
             var _rayBox = transform.Find("RayBox").gameObject; // RayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y, _rayBox.transform.position.z),
@@ -1501,7 +1546,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void checkStairUp() { // 階段を上るフラグチェック ※【注意】Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
+        /// <summary>
+        /// 階段を上るフラグチェック。
+        /// </summary>
+        void checkStairUp() { // FIXME: Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
             var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
@@ -1521,7 +1569,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void checkStairDown() { // 階段を下りるフラグチェック ※【注意】Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
+        /// <summary>
+        /// 階段を下りるフラグチェック。
+        /// </summary>
+        void checkStairDown() { // FIXME: Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
             var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
                 new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
@@ -1546,7 +1597,10 @@ namespace StudioMeowToon {
             }
         }
 
-        void doStairDown() { // 階段を下りる
+        /// <summary>
+        /// 階段を下りる。
+        /// </summary>
+        void doStairDown() {
             doFixedUpdate.stairDown = true;
             // 上下を離した時
             if (upButton.isPressed == false && downButton.isPressed == false) {
@@ -1565,7 +1619,10 @@ namespace StudioMeowToon {
             faceToFace(5f); // 面に正対する
         }
 
-        void doStairUp() { // 階段を上る
+        /// <summary>
+        /// 階段を上る。
+        /// </summary>
+        void doStairUp() {
             doFixedUpdate.stairUp = true;
             if (getRendererTop(stairUped) > transform.position.y) {
                 // 上下を離した時
@@ -1597,6 +1654,9 @@ namespace StudioMeowToon {
             faceToFace(5f); // 面に正対する
         }
 
+        /// <summary>
+        /// TBA
+        /// </summary>
         bool checkToPushBlock() {
             var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
@@ -1633,6 +1693,9 @@ namespace StudioMeowToon {
             return false;
         }
 
+        /// <summary>
+        /// TBA
+        /// </summary>
         bool checkToHoldItem() {
             if (holded != null) { // 持つオブジェクトの参照があれば
                 var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
@@ -1679,14 +1742,21 @@ namespace StudioMeowToon {
             return false;
         }
 
-        bool checkDownAsHoldableBlock() { // 足元の下が持てるブロックかどうか
+        /// <summary>
+        /// 足元の下が持てるブロックかどうか。
+        /// </summary>
+        bool checkDownAsHoldableBlock() {
             if (holded != null) {
                 return true;
             } // TODO: 修正
             return false;
         }
 
-        bool checkIntoWater() { // 水中にいるかチェック TODO: 空間が水中でなはい時は？
+        /// <summary>
+        /// 水中にいるかチェック。
+        /// </summary>
+        /// <returns></returns>
+        bool checkIntoWater() { // TODO 空間が水中でなはい時は？
             if (playerNeck.transform.position.y + 0.25f < waterLevel) { // 0.25f は体を水面に沈める為の調整値
                 //transform.GetComponent<CapsuleCollider>().enabled = false; // コライダー切り替え
                 //if (_level.transform.position.y < waterLevel) { bodyIntoWater.GetComponent<CapsuleCollider>().enabled = true; }
@@ -1699,14 +1769,18 @@ namespace StudioMeowToon {
             return doFixedUpdate.intoWater;
         }
 
-        // レイを投げた対象のtop位置を取得
+        /// <summary>
+        /// レイを投げた対象のtop位置を取得。
+        /// </summary>
         float getRaycastHitTop(RaycastHit hit) {
             float _hitHeight = hit.collider.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _hitY = hit.transform.position.y; // 対象オブジェクトの(※中心)y座標取得
             return _hitHeight + _hitY; // 対象オブジェクトのtop位置取得
         }
 
-        // 衝突したオブジェクトの側面に当たったか判定する
+        /// <summary>
+        /// 衝突したオブジェクトの側面に当たったか判定する。
+        /// </summary>
         bool isHitSide(GameObject target) {
             float _targetHeight = target.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _targetY = target.transform.position.y; // 対象オブジェクトの(※中心)y座標取得
@@ -1719,7 +1793,9 @@ namespace StudioMeowToon {
             }
         }
 
-        // 衝突したブロックの下に当たったか判定する
+        /// <summary>
+        /// 衝突したブロックの下に当たったか判定する。
+        /// </summary>
         bool isHitBlockBottom(GameObject target) {
             var _targetBottom = target.transform.position.y; // 当たったブロックの底面の高さ
             float _height = GetComponent<CapsuleCollider>().bounds.size.y; // 自分のコライダーの高さ
