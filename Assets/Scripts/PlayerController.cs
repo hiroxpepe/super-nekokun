@@ -257,6 +257,14 @@ namespace StudioMeowToon {
 
             #endregion
 
+            this.FixedUpdateAsObservable().Where(_ => true)
+                .Subscribe(_ => {
+                });
+
+            this.FixedUpdateAsObservable().Where(_ => true)
+                .Subscribe(_ => {
+                });
+
             #region hold Balloon
 
             // 風船につかまり浮遊中
@@ -653,6 +661,8 @@ namespace StudioMeowToon {
 
             #endregion
 
+            #region Y Button
+
             // (Yボタン) 押しっぱなし: 上り降り発動
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding && !doUpdate.climbing)
                 .Subscribe(_ => {
@@ -666,7 +676,13 @@ namespace StudioMeowToon {
                     checkToClimb(); // よじ登り可能かチェック
                 });
 
-            #region Y Button
+            // 物理挙動: 上り降り発動
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.climbUp)
+                .Subscribe(_ => {
+                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
+                    _rb.velocity = Vector3.zero;
+                    doFixedUpdate.climbUp = false;
+                });
 
             // (Yボタン) 押しっぱなし: 上り降り中
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.isPressed && !doUpdate.holding && doUpdate.climbing)
@@ -675,10 +691,17 @@ namespace StudioMeowToon {
                     if (l1Button.isPressed) { // (Lボタン) 押しっぱなしなら
                         simpleAnime.Play("Default"); // 捕まり反転ジャンプ準備
                     }
-                    climb(); // 上り下り
+                    climb(); // 上り降り
                     if (r1Button.isPressed) { // (Rボタン) 押しっぱなしなら
                         moveSide(); // 横に移動
                     }
+                });
+
+            // 物理挙動: 上り降り中
+            this.FixedUpdateAsObservable().Where(_ => doUpdate.climbing)
+                .Subscribe(_ => {
+                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
+                    _rb.velocity = Vector3.zero;
                 });
 
             // (Yボタン) 離した
@@ -854,15 +877,6 @@ namespace StudioMeowToon {
                     _rb.AddRelativeFor​​ce(Vector3.down * 3f, ForceMode.Impulse); // 落とす
                 }
 
-                // ブロック上る下りる
-                if (doFixedUpdate.climbUp || doUpdate.climbing) { // Update と FixedUpdate の呼び出され差 60fps, 30fps を考慮したら
-                    _rb.useGravity = false; // 重力無効化 ※重力に負けるから
-                    _rb.velocity = Vector3.zero;
-                } else if (doFixedUpdate.grounded) {
-                    _rb.useGravity = true; // 重力再有効化 
-                    _rb.velocity = Vector3.zero; // TODO: 必要？
-                }
-
                 // 捕まり反転ジャンプ
                 if (doFixedUpdate.reverseJump) {
                     var _ADJUST = 0f;
@@ -939,6 +953,14 @@ namespace StudioMeowToon {
                     cameraController.ResetLookAround(); // カメラ初期化
                     doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
                     flatToFace(); // 面に合わせる TODO:※試験的
+                });
+
+            // 物理挙動: 上に乗った状況・接地
+            this.FixedUpdateAsObservable().Where(_ => doFixedUpdate.grounded)
+                .Subscribe(_ => {
+                    _rb.useGravity = true; // 重力再有効化 
+                    _rb.velocity = Vector3.zero; // FIXME: ここで接地フリーズさせている
+                    doFixedUpdate.grounded = false;
                 });
 
             // 持てるアイテム・ブロックと接触したら
@@ -1992,26 +2014,26 @@ namespace StudioMeowToon {
             /// 全フィールドの初期化
             /// </summary>
             public void ResetMotion() {
-                //_idol = false;
-                //_run = false;
-                //_walk = false;
-                //_jump = false;
+                    //_idol = false;
+                    //_run = false;
+                    //_walk = false;
+                    //_jump = false;
                 _reverseJump = false;
-                //_backward = false;
-                //_sideStepLeft = false;
-                //_sideStepRight = false;
-                _climbUp = false;
+                    //_backward = false;
+                    //_sideStepLeft = false;
+                    //_sideStepRight = false;
+                //_climbUp = false;
                 _cancelClimb = false;
-                //_jumpForward = false;
-                //_jumpBackward = false;
-                _grounded = false;
-                //_getItem = false;
-                //_stairUp = false;
-                //_stairDown = false;
-                //_unintended = false;
-                // _intoWater は初期化しない
-                // _holdBalloon は初期化しない
-                // _virtualControllerMode は初期化しない
+                    //_jumpForward = false;
+                    //_jumpBackward = false;
+                //_grounded = false;
+                    //_getItem = false;
+                    //_stairUp = false;
+                    //_stairDown = false;
+                    //_unintended = false;
+                    // _intoWater は初期化しない
+                    // _holdBalloon は初期化しない
+                    // _virtualControllerMode は初期化しない
             }
         }
 
