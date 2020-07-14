@@ -798,9 +798,9 @@ namespace StudioMeowToon {
                             doFixedUpdate.holdBalloon = true;
                         }
                     } else { // アイテムが持てない場合、弾を撃つフラグON
-                        if (!doUpdate.holding || !doUpdate.faceing) {
+                        if (!doUpdate.throwing && !doUpdate.throwed && (!doUpdate.holding || !doUpdate.faceing)) {
                             simpleAnime.CrossFade("Throw", 0.3f); // 投げるアニメ
-                            doUpdate.throwing = true;
+                            doUpdate.throwing = true; // 投げるフラグON
                         }
                     }
                 });
@@ -812,15 +812,15 @@ namespace StudioMeowToon {
                     doUpdate.bombed = true;
                 });
 
-            // 撃った後のモーション
+            // 投げた後のモーション
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !doUpdate.climbing && !doUpdate.holding)
                 .Subscribe(_ => {
                     if (aButton.isPressed && doUpdate.throwed) { // (Aボタン) 押した時
-                        simpleAnime.CrossFade("Push", 0.2f); // 撃つからしゃがむ(代用)アニメ
+                        simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
                     } else if (yButton.isPressed && doUpdate.throwed) { // (Yボタン) 押した時
-                        simpleAnime.CrossFade("Run", 0.3f); // 撃つから走るアニメ
+                        simpleAnime.CrossFade("Run", 0.3f); // 投げるから走るアニメ
                     } else if (doUpdate.throwed) {
-                        simpleAnime.CrossFade("Walk", 0.5f); // 撃つから歩くアニメ
+                        simpleAnime.CrossFade("Walk", 0.5f); // 投げるから歩くアニメ
                     }
                 });
 
@@ -1066,6 +1066,8 @@ namespace StudioMeowToon {
                     "\r\nHolding: " + doUpdate.holding +
                     "\r\nStairUp: " + doUpdate.stairUping +
                     "\r\nStairDown: " + doUpdate.stairDowning +
+                    "\r\nThrowing: " + doUpdate.throwing +
+                    "\r\nThrowed: " + doUpdate.throwed +
                     "\r\nGravity: " + _rb.useGravity +
                     "\r\nJumped: " + _aj + "sec",
                     speed, 3.0f
@@ -1990,19 +1992,19 @@ namespace StudioMeowToon {
                 } else if (_throwing && _bombed && _throwingTime > 0.5f) {
                     _bombing = false;
                 }
-                if (_throwing && _throwingTime > 0.8f) {
-                    _throwing = false;
-                    _throwed = true;
-                    _throwingTime = 0f;
+                if (_throwing && _throwingTime > 0.8f) { // 投げるフラグONから時間が経った
+                    _throwing = false; // 投げるフラグOFF
+                    _throwed = true; // 投げたフラグON
+                    _throwingTime = 0f; // 経過時間リセット
                     _bombed = false;
                 } else if (_throwing) {
-                    _throwingTime += time;
+                    _throwingTime += time; // 経過時間加算
                 }
-                if (_throwed && _throwedTime > 0.5f) {
-                    _throwed = false;
-                    _throwedTime = 0f;
+                if (_throwed && _throwedTime > 0.5f) { // 投げたフラグから時間が経った
+                    _throwed = false; // 投げたフラグOFF
+                    _throwedTime = 0f; // 経過時間リセット
                 } else if (_throwed) {
-                    _throwedTime += time;
+                    _throwedTime += time; // 経過時間加算
                 }
             }
         }
