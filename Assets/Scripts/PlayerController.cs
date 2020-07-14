@@ -305,9 +305,9 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && !upButton.isPressed && !downButton.isPressed)
                 .Subscribe(_ => {
                     if (!doUpdate.lookBackJumping) { // 捕まり反転ジャンプ中でなければ
-                        if (!doUpdate.throwing) {
+                        if (!doUpdate.throwing && !doUpdate.throwed) {
                             if (aButton.isPressed) { // (Aボタン) 押しっぱなし
-                                simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
+                                simpleAnime.CrossFade("Push", 0.1f); // しゃがむ(代用)アニメ
                             } else {
                                 simpleAnime.Play("Default"); // デフォルトアニメ
                             }
@@ -338,9 +338,9 @@ namespace StudioMeowToon {
                         }
                         doFixedUpdate.run = true;
                     } else {
-                        if (!doUpdate.throwing) {
+                        if (!doUpdate.throwing && !doUpdate.throwed) {
                             if (aButton.isPressed) { // (Aボタン) 押しっぱなし
-                                simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
+                                simpleAnime.CrossFade("Push", 0.1f); // しゃがむ(代用)アニメ
                             } else {
                                 simpleAnime.Play("Walk"); // 歩くアニメ
                                 soundSystem.PlayWalkClip();
@@ -397,9 +397,9 @@ namespace StudioMeowToon {
             // (下ボタン) 後ろ歩き
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && downButton.isPressed)
                 .Subscribe(_ => {
-                    if (!doUpdate.throwing) {
+                    if (!doUpdate.throwing && !doUpdate.throwed) {
                         if (aButton.isPressed) { // (Aボタン) 押しっぱなし
-                            simpleAnime.Play("Push"); // しゃがむ(代用)アニメ
+                            simpleAnime.CrossFade("Push", 0.1f); // しゃがむ(代用)アニメ
                         } else {
                             simpleAnime.Play("Backward"); // 後ろアニメ
                         }
@@ -818,9 +818,9 @@ namespace StudioMeowToon {
                     if (aButton.isPressed && doUpdate.throwed) { // (Aボタン) 押した時
                         simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
                     } else if (yButton.isPressed && doUpdate.throwed) { // (Yボタン) 押した時
-                        simpleAnime.CrossFade("Run", 0.3f); // 投げるから走るアニメ
+                        simpleAnime.CrossFade("Run", 0.4f); // 投げるから走るアニメ
                     } else if (doUpdate.throwed) {
-                        simpleAnime.CrossFade("Walk", 0.5f); // 投げるから歩くアニメ
+                        simpleAnime.CrossFade("Walk", 0.2f); // 投げるから歩くアニメ
                     }
                 });
 
@@ -1066,8 +1066,8 @@ namespace StudioMeowToon {
                     "\r\nHolding: " + doUpdate.holding +
                     "\r\nStairUp: " + doUpdate.stairUping +
                     "\r\nStairDown: " + doUpdate.stairDowning +
-                    "\r\nThrowing: " + doUpdate.throwing +
-                    "\r\nThrowed: " + doUpdate.throwed +
+                    //"\r\nThrowing: " + doUpdate.throwing +
+                    //"\r\nThrowed: " + doUpdate.throwed +
                     "\r\nGravity: " + _rb.useGravity +
                     "\r\nJumped: " + _aj + "sec",
                     speed, 3.0f
