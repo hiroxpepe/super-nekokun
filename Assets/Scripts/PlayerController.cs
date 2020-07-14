@@ -1561,6 +1561,7 @@ namespace StudioMeowToon {
                 if (_distance < 0.35f) { // 距離が近くなら
                     if (_hit.transform.name.Contains("Stair")) { // 上がれるのは階段のみ
                         doUpdate.stairUping = true; // 階段を上るフラグON
+                        doUpdate.stairDowning = false; // 階段を下りるフラグOFF
                         stairUped = _hit.transform.gameObject; // 階段を上がられるオブジェクトの参照保存
                     }
                 }
@@ -1584,6 +1585,7 @@ namespace StudioMeowToon {
                 if (_distance < 0.2f) { // 距離が近くなら
                     if (_hit.transform.name.Contains("Down_Point")) { // 下がれるのは階段に付けたBOXコライダーから判定する
                         doUpdate.stairDowning = true; // 階段を下りるフラグON
+                        doUpdate.stairUping = false; // 階段を上るフラグOFF
                         stairDowned = _hit.transform.gameObject; // 階段を下がられるオブジェクトの参照保存
                         transform.position = new Vector3( // BOXコライダーの位置に移動する
                             stairDowned.transform.position.x,
