@@ -908,10 +908,8 @@ namespace StudioMeowToon {
                             simpleAnime.Play("Default"); // デフォルトアニメ
                             soundSystem.PlayGroundedClip();
                             doUpdate.grounded = true; // 接地フラグON
-                            doUpdate.lookBackJumping = false; // 捕まり反転ジャンプフラグOFF
                             doUpdate.stairUping = false; // 階段上りフラグOFF
                             doUpdate.stairDowning = false; // 階段下りフラグOFF
-                            doFixedUpdate.idol = true;
                             doFixedUpdate.grounded = true;
                             cameraController.ResetLookAround(); // カメラ初期化
                             doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
@@ -935,8 +933,6 @@ namespace StudioMeowToon {
                     simpleAnime.Play("Default"); // デフォルトアニメ
                     soundSystem.PlayGroundedClip();
                     doUpdate.grounded = true; // 接地フラグON
-                    doUpdate.lookBackJumping = false; // 振り返りジャンプフラグOFF
-                    doFixedUpdate.idol = true;
                     doFixedUpdate.grounded = true;
                     cameraController.ResetLookAround(); // カメラ初期化
                     doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
@@ -1918,7 +1914,13 @@ namespace StudioMeowToon {
             ///////////////////////////////////////////////////////////////////////////////////////////
             // Properties [noun, adjectives] 
 
-            public bool grounded { get => _grounded; set => _grounded = value; }
+            public bool grounded {
+                get => _grounded;
+                set {
+                    _grounded = value;
+                    if (_grounded) { lookBackJumping = false; }
+                }
+            }
             public bool climbing { get => _climbing; set => _climbing = value; }
             public bool pushing { get => _pushing; set => _pushing = value; }
             public bool faceing { get => _faceing; set => _faceing = value; }
