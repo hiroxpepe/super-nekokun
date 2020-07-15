@@ -332,7 +332,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed)
                 .Subscribe(_ => {
                     if (yButton.isPressed) { // (Yボタン) 押しっぱなし
-                        if (!doUpdate.throwing) {
+                        if (!doUpdate.throwing && !doUpdate.throwed) {
                             simpleAnime.Play("Run"); // 走るアニメ
                             soundSystem.PlayRunClip();
                         }
