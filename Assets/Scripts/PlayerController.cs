@@ -818,7 +818,7 @@ namespace StudioMeowToon {
                     if (aButton.isPressed && doUpdate.throwed) { // (Aボタン) 押した時
                         simpleAnime.CrossFade("Push", 0.2f); // 投げるからしゃがむ(代用)アニメ
                     } else if (yButton.isPressed && doUpdate.throwed) { // (Yボタン) 押した時
-                        simpleAnime.CrossFade("Run", 0.4f); // 投げるから走るアニメ
+                        simpleAnime.CrossFade("Run", 0.2f); // 投げるから走るアニメ
                     } else if (doUpdate.throwed) {
                         simpleAnime.CrossFade("Walk", 0.2f); // 投げるから歩くアニメ
                     }
