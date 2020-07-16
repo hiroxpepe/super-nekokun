@@ -748,7 +748,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate() && yButton.wasReleasedThisFrame && useVirtualController)
                 .Subscribe(_ => {
                     doFixedUpdate.virtualControllerMode = true;
-                    Observable.TimerFrame(30) // 30フレ後に
+                    Observable.TimerFrame(45) // 45フレ後に
                         .Subscribe(__ => {
                             doFixedUpdate.virtualControllerMode = false;
                         });
