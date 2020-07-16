@@ -47,15 +47,11 @@ namespace StudioMeowToon {
 
         DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用フラグクラス
 
+        Speech speech; // セリフ用クラス
+
         float distance; // プレイヤーとの距離
 
         GameObject plate; // 移動範囲のプレート
-
-        float speechX; // セリフ用吹き出し幅
-
-        float speechY; // セリフ用吹き出し高さ
-
-        Text speechText; // セリフ用吹き出しテキスト
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // update Methods
@@ -64,17 +60,18 @@ namespace StudioMeowToon {
         void Awake() {
             doUpdate = DoUpdate.GetInstance(); // 状態フラグクラス
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
+            speech = Speech.GetInstance(); // セリフ用クラス
 
             // SoundSystem 取得
             soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
 
             // セリフ吹き出し大きさ取得
             var _rect = speechImage.GetComponent<RectTransform>();
-            speechX = _rect.sizeDelta.x;
-            speechY = _rect.sizeDelta.y;
+            speech.X = _rect.sizeDelta.x;
+            speech.Y = _rect.sizeDelta.y;
 
             // セリフ吹き出しテキスト取得
-            speechText = speechImage.GetComponentInChildren<Text>();
+            speech.Text = speechImage.GetComponentInChildren<Text>();
         }
 
         // Start is called before the first frame update.
@@ -336,10 +333,10 @@ namespace StudioMeowToon {
             // プレイヤーとの距離で大きさ調整
             var _distance = distance > 1 ? (int) (distance / 2) : 1;
             if (_distance == 0) { _distance = 1; }
-            speechImage.GetComponent<RectTransform>().sizeDelta = new Vector2(speechX / _distance, speechY / _distance);
-            speechText.fontSize = size / (int) (_distance * 1.25f); // 調整値
+            speechImage.GetComponent<RectTransform>().sizeDelta = new Vector2(speech.X / _distance, speech.Y / _distance);
+            speech.Text.fontSize = size / (int) (_distance * 1.25f); // 調整値
             //Debug.Log("_distance: " + _distance + " x: " + speechImage.GetComponent<RectTransform>().sizeDelta.x + " y: " + speechImage.GetComponent<RectTransform>().sizeDelta.y);
-            speechText.text = text;
+            speech.Text.text = text;
             speechImage.SetActive(true);
             Observable.Timer(System.TimeSpan.FromSeconds(time))
                 .First()
@@ -524,6 +521,44 @@ namespace StudioMeowToon {
         }
 
         #endregion
+
+        #region Speech
+
+        /// <summary>
+        /// セリフ用のクラス。
+        /// </summary>
+        protected class Speech {
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            // Fields
+
+            float _x; // 吹き出し幅
+            float _y; // 吹き出し高さ
+            Text _text; // テキスト
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            // Properties [noun, adjectives] 
+
+            public float X { get => _x; set => _x = value; }
+
+            public float Y { get => _y; set => _y = value; }
+
+            public Text Text { get => _text; set => _text = value; }
+
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            // Constructor
+
+            /// <summary>
+            /// 初期化済みのインスタンスを返す。
+            /// </summary>
+            public static Speech GetInstance() {
+                return new Speech();
+            }
+        }
+
+        #endregion
+
     }
 
 }
