@@ -950,6 +950,8 @@ namespace StudioMeowToon {
             // 持てるアイテム、ブロック、"Holdable" と接触したら
             this.OnCollisionEnterAsObservable().Where(x => (x.gameObject.LikeItem() || x.gameObject.Holdable()) && !doUpdate.holding)
                 .Subscribe(x => {
+                    doUpdate.grounded = true; // 接地フラグON
+                    doFixedUpdate.grounded = true;
                     holded = x.gameObject; // 持てるアイテムの参照を保持する
                 });
 
