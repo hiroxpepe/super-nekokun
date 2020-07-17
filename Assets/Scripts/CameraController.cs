@@ -128,13 +128,13 @@ namespace StudioMeowToon {
             });
 
             // カメラ前進ポジションフラグON
-            this.OnTriggerEnterAsObservable().Where(x => x.name.Contains("Block") || x.name.Contains("Wall"))
+            this.OnTriggerEnterAsObservable().Where(x => x.LikeBlock() || x.LikeWall())
                 .Subscribe(_ => {
                     isForwardPosition = true;
                 });
 
             // カメラ前進ポジションフラグON
-            this.OnTriggerStayAsObservable().Where(x => x.name.Contains("Block") || x.name.Contains("Wall"))
+            this.OnTriggerStayAsObservable().Where(x => x.LikeBlock() || x.LikeWall())
                  .Subscribe(_ => {
                      isForwardPosition = true;
                  });
