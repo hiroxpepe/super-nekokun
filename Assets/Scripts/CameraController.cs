@@ -26,7 +26,7 @@ namespace StudioMeowToon {
     public class CameraController : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // カメラ用 GameObject への参照
+        // Fields
 
         [SerializeField]
         GameObject mainCamera;
@@ -109,7 +109,7 @@ namespace StudioMeowToon {
                             defaultLocalPosition.z + 0.05f
                         );
                         transform.localPosition = defaultLocalPosition;
-                        Debug.Log("ズームアップ");
+                        Debug.Log("zoom up");
                     }
                 }
 
@@ -122,7 +122,7 @@ namespace StudioMeowToon {
                             defaultLocalPosition.z - 0.05f
                         );
                         transform.localPosition = defaultLocalPosition;
-                        Debug.Log("ズームアウト");
+                        Debug.Log("zoom out");
                     }
                 }
             });
