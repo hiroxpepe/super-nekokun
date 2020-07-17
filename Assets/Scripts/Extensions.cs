@@ -31,8 +31,20 @@ namespace StudioMeowToon {
             return self.tag.Equals("Player");
         }
 
+        public static bool IsPlayer(this Collision self) {
+            return self.gameObject.tag.Equals("Player");
+        }
+
         public static bool LikeItem(this GameObject self) {
             return self.name.Contains("Item");
+        }
+
+        public static bool LikeItem(this Collider self) {
+            return self.name.Contains("Item");
+        }
+
+        public static bool LikeItem(this Collision self) {
+            return self.gameObject.name.Contains("Item");
         }
 
         public static bool IsItem(this GameObject self) {
@@ -43,11 +55,19 @@ namespace StudioMeowToon {
             return self.name.Contains("Block");
         }
 
+        public static bool LikeBlock(this Collider self) {
+            return self.name.Contains("Block");
+        }
+
         public static bool LikeGround(this GameObject self) {
             return self.name.Contains("Ground");
         }
 
         public static bool LikeWall(this GameObject self) {
+            return self.name.Contains("Wall");
+        }
+
+        public static bool LikeWall(this Collider self) {
             return self.name.Contains("Wall");
         }
 
