@@ -41,6 +41,15 @@ namespace StudioMeowToon {
         Text debug; // デバッグ表示用テキストUI
 
         [SerializeField]
+        Text hp; // プレイヤー HP テキストUI
+
+        [SerializeField]
+        Text speed; // プレイヤー 速度 テキストUI
+
+        [SerializeField]
+        Text alt; // プレイヤー 高度 テキストUI
+
+        [SerializeField]
         Slider playerLifeUI; // Player HPのUI
 
         [SerializeField]
@@ -66,9 +75,13 @@ namespace StudioMeowToon {
 
         bool isLevelClear = false; // ステージクリアフラグ
 
-        float playerLifeValue = 10f; // Player HP;
+        float playerLifeValue = 10f; // Player HP
 
-        float playerBombAngleValue = 0f; // Player 弾道角度;
+        float _playerSpeed = 0f; // プレイヤー 速度
+
+        float _playerAlt = 0f; // プレイヤー 高度 
+
+        float playerBombAngleValue = 0f; // Player 弾道角度
 
         GameObject lockonTarget = null; // ロックオン対象
 
@@ -110,6 +123,14 @@ namespace StudioMeowToon {
 
         public int playerLife {
             set => playerLifeValue = (float) value / 10; // UIの仕様が 0～1 なので
+        }
+
+        public float playerSpeed {
+            set => _playerSpeed = value;
+        }
+
+        public float playerAlt {
+            set => _playerAlt = value;
         }
 
         public float bombAngle {
@@ -348,6 +369,10 @@ namespace StudioMeowToon {
         void updatePlayerStatus() { // Player のステイタス表示
             playerLifeUI.value = playerLifeValue;
             playerBombAngleUI.value = playerBombAngleValue;
+            int _hp = (int) (playerLifeValue * 10);
+            hp.text = _hp.ToString();
+            speed.text = string.Format("Speed {0:000.0}km", Math.Round(_playerSpeed * 5, 1, MidpointRounding.AwayFromZero)); // * 5 は調整値
+            alt.text = string.Format("ALT {0:000.0}m", Math.Round(_playerAlt, 1, MidpointRounding.AwayFromZero));
         }
 
         void updateGameInfo() { // GAME の情報を表示
