@@ -117,7 +117,7 @@ namespace StudioMeowToon {
             get {
                 if (transform.parent == null) {
                     return false;
-                } else if (transform.parent.gameObject.tag.Equals("Player")) {
+                } else if (transform.parent.gameObject.IsPlayer()) {
                     return true;
                 } else {
                     return false;
@@ -155,14 +155,14 @@ namespace StudioMeowToon {
 
         public void DestroyWithDebris(Transform bullet, int numberOfPiece = 8) { // 破片を発生させて消去する
             if (destroyable) { // 破壊可能の場合
-                GetComponentsInChildren<Transform>().ToList().ForEach(_child => { // 全ての子を拾う
-                    _child.transform.SetParent(null); // 子オブジェクトを外す
-                    if (_child.gameObject.GetComponent<Rigidbody>() == null) {
-                        _child.gameObject.AddComponent<Rigidbody>();
-                        _child.gameObject.GetComponent<Rigidbody>().isKinematic = false;
+                gameObject.GetTransformsInChildren().ToList().ForEach(_child => { // 全ての子を拾う
+                    _child.SetParent(null); // 子オブジェクトを外す
+                    if (_child.GetRigidbody() == null) {
+                        _child.AddRigidbody();
+                        _child.GetRigidbody().isKinematic = false;
                     }
-                    if (_child != null && _child.gameObject.name.Contains("Ladder_Body")) { // ハシゴの場合
-                        _child.gameObject.GetComponent<CommonController>().autoDestroyAfter = 5.0f; // 5秒後に自動消去
+                    if (_child != null && _child.LikeLadderBody()) { // ハシゴの場合
+                        _child.GetCommonController().autoDestroyAfter = 5.0f; // 5秒後に自動消去
                     }
                 });
                 explodeParam = ExplodeParam.getDefaultInstance(); // 破片生成パラメータ作成
@@ -170,7 +170,7 @@ namespace StudioMeowToon {
             } else {
                 explodeParam = ExplodeParam.getInstance(numberOfPiece / 2, 0.2f, 15); // 破片生成パラメータ作成
                 doFixedUpdate.explode = true; // 破片生成フラグON
-                gameObject.GetComponent<CommonController>().shockedBy = bullet; // 弾で衝撃を受ける
+                shockedBy = bullet; // 弾で衝撃を受ける
             }
         }
 
@@ -178,7 +178,7 @@ namespace StudioMeowToon {
         /// Player に下から衝撃を受ける。
         /// </summary>
         public void KnockedUp() {
-            gameObject.GetComponent<CommonController>().shockedBy = player.transform;
+            shockedBy = player.transform;
         }
 
         // 持たれる実装用
@@ -240,10 +240,10 @@ namespace StudioMeowToon {
                     }
 
                     // 自動移動
-                    if (!gameObject.name.Contains("_Piece")) { // 破片ではない場合
+                    if (!gameObject.LikePiece()) { // 破片ではない場合
                         if (movementToX != 0 || movementToY != 0 || movementToZ != 0) { // TODO: canAutoMove 実装?
                             // FIXME: ブロックの上にアイテムを二つ置いて、また持ったらバグる
-                            if (item == null || item.GetComponent<ItemController>().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
+                            if (item == null || item.GetItemController().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
                                 item = null;
                                 isItemOnThis = false;
                             }
@@ -256,9 +256,9 @@ namespace StudioMeowToon {
             this.FixedUpdateAsObservable()
                 .Subscribe(_ => {
                     if (doFixedUpdate.explode) { // 破片を飛散させる
-                        GetComponent<BoxCollider>().enabled = false; // コライダー判定OFF※子に引き継がれる
+                        gameObject.GetBoxCollider().enabled = false; // コライダー判定OFF※子に引き継がれる
                         explodePiece(explodeParam.number, explodeParam.scale, explodeParam.force);
-                        GetComponent<BoxCollider>().enabled = true; // コライダー判定ON
+                        gameObject.GetBoxCollider().enabled = true; // コライダー判定ON
                         doFixedUpdate.explode = false;
                         if (destroyable) {
                             Destroy(gameObject); // 自分を削除
@@ -270,19 +270,19 @@ namespace StudioMeowToon {
                     if (!canHold) {
                         return;
                     } else {
-                        if (isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
+                        if (isGrounded && transform.parent != null && transform.parent.gameObject.IsPlayer()) {
                             // 親が Player になった時
                             isGrounded = false; // 接地フラグOFF
-                        } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
+                        } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.IsPlayer()) {
                             // 親が Player 継続なら
-                            if (!transform.parent.GetComponent<PlayerController>().Faceing) { // プレイヤーの移動・回転を待つ
-                                if (transform.parent.transform.position.y > transform.position.y + 0.2f) { // 0.2fは調整値
+                            if (!transform.parent.GetPlayerController().Faceing) { // プレイヤーの移動・回転を待つ
+                                    if (transform.parent.transform.position.y > transform.position.y + 0.2f) { // 0.2fは調整値
                                     beHolded(8.0f); // 上から持ち上げられる
                                 } else {
                                     beHolded(); // 横から持ち上げられる
                                 }
                             }
-                        } else if (!isGrounded && (transform.parent == null || !transform.parent.gameObject.tag.Equals("Player"))) {
+                        } else if (!isGrounded && (transform.parent == null || !transform.parent.gameObject.IsPlayer())) {
                             // 親が Player でなくなれば落下する
                             var _ray = new Ray(transform.position, new Vector3(0, -1f, 0)); // 下方サーチするレイ作成
                             if (Physics.Raycast(_ray, out RaycastHit _hit, 20f)) { // 下方にレイを投げて反応があった場合
@@ -377,20 +377,20 @@ namespace StudioMeowToon {
                 var _piece = Instantiate(prefabForPiece);
                 _piece.name += "_Piece"; // 破片には名前に "_Piece" を付加する
                 _piece.transform.localScale = new Vector3(scale, scale, scale);
-                if (_piece.GetComponent<Rigidbody>() == null) {
-                    _piece.AddComponent<Rigidbody>();
+                if (_piece.GetRigidbody() == null) {
+                    _piece.AddRigidbody();
                 }
-                _piece.GetComponent<Rigidbody>().isKinematic = false;
+                _piece.GetRigidbody().isKinematic = false;
                 var _v = new Vector3(_random.Next(_min, _max), _random.Next(_min, _max), _random.Next(_min, _max));
-                _piece.GetComponent<Rigidbody>().AddForce(_v, ForceMode.Impulse);
-                _piece.GetComponent<Rigidbody>().AddTorque(_v, ForceMode.Impulse);
-                _piece.GetComponentsInChildren<Transform>().ToList().ForEach(_child => {
+                _piece.GetRigidbody().AddForce(_v, ForceMode.Impulse);
+                _piece.GetRigidbody().AddTorque(_v, ForceMode.Impulse);
+                _piece.GetTransformsInChildren().ToList().ForEach(_child => {
                     if (_piece.name != _child.name) { // なぜか破片も破片の子リストにいるので除外
                         _child.parent = null;
                         Destroy(_child.gameObject); // 破片の子オブジェクトは最初に削除
                     }
                 });
-                _piece.GetComponent<BlockController>().autoDestroy = true; // 2秒後に破片を消去する
+                _piece.GetBlockController().autoDestroy = true; // 2秒後に破片を消去する
             }
         }
 
@@ -429,7 +429,7 @@ namespace StudioMeowToon {
         /// 自身のY位置を取得する。
         /// </summary>
         float getTop() {
-            float _height = GetComponent<Renderer>().bounds.size.y; // オブジェクトの高さ取得 
+            float _height = gameObject.GetRenderer().bounds.size.y; // オブジェクトの高さ取得 
             float _y = transform.position.y; // オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // オブジェクトのTOP取得
             return _top;
@@ -673,7 +673,7 @@ namespace StudioMeowToon {
 
         // 衝突したオブジェクトの側面に当たったか判定する
         float getHitTop(GameObject hit) {
-            float _height = hit.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
+            float _height = hit.GetRenderer().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _y = hit.transform.position.y; // 対象オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // 対象オブジェクトのTOP取得
             return _top;
@@ -716,21 +716,6 @@ namespace StudioMeowToon {
                 }
             }
         }
-
-        //#region PushedDirection
-
-        ///// <summary>
-        ///// 押された方向を表す列挙体。
-        ///// </summary>
-        //enum PushedDirection {
-        //    PositiveZ,
-        //    NegativeZ,
-        //    PositiveX,
-        //    NegativeX,
-        //    None
-        //};
-
-        //#endregion
 
         #region DoFixedUpdate
 
