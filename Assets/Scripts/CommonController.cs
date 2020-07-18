@@ -73,9 +73,9 @@ namespace StudioMeowToon {
                 } else if (shockParam.enable == true) { // 移動動作中に再ヒット
                     shockParam.reHits = true;
                 }
-                if (value.name.Contains("Bullet")) { // 弾の場合
+                if (value.LikeBullet()) { // 弾の場合
                     shockParam.hitsType = HitsType.Bullet;
-                } else if (value.tag == "Player") { // Player の場合
+                } else if (value.IsPlayer()) { // Player の場合
                     shockParam.hitsType = HitsType.Player;
                 }
             }
@@ -161,7 +161,7 @@ namespace StudioMeowToon {
             if (autoDestroyParam.enable) { // 自動削除有効なら
                 autoDestroyParam.second += Time.deltaTime;
                 if (autoDestroyParam.second > 0.1f) { // 0.1秒後にコライダー判定ON
-                    GetComponent<Collider>().enabled = true;
+                    gameObject.GetCollider().enabled = true;
                 }
                 fadeoutToDestroy(); // 徐々に透明化する
                 if (autoDestroyParam.second > autoDestroyParam.limit) { // 時間が来たら
@@ -175,7 +175,7 @@ namespace StudioMeowToon {
         /// </summary>
         void fadeoutToDestroy() {
             if (autoDestroyParam.second > autoDestroyParam.limit - 0.8f) { // 時間0.8秒前から
-                var _render = GetComponent<MeshRenderer>();
+                var _render = gameObject.GetMeshRenderer();
                 var _materialList = _render.materials;
                 foreach (var _material in _materialList) {
                     Utils.SetRenderingMode(_material, RenderingMode.Fade);

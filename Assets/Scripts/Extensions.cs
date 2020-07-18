@@ -39,6 +39,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Transform's tag is "Player".
+        /// </summary>
+        public static bool IsPlayer(this Transform self) {
+            return self.tag.Equals("Player");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Item".
         /// </summary>
         public static bool LikeItem(this GameObject self) {
@@ -60,6 +67,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collider's name contains "Block".
+        /// </summary>
+        public static bool LikeBlock(this Collider self) {
+            return self.name.Contains("Block");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Ground".
         /// </summary>
         public static bool LikeGround(this GameObject self) {
@@ -70,6 +84,13 @@ namespace StudioMeowToon {
         /// whether the GameObject's name contains "Wall".
         /// </summary>
         public static bool LikeWall(this GameObject self) {
+            return self.name.Contains("Wall");
+        }
+
+        /// <summary>
+        /// whether the Collider's name contains "Wall".
+        /// </summary>
+        public static bool LikeWall(this Collider self) {
             return self.name.Contains("Wall");
         }
 
@@ -91,6 +112,13 @@ namespace StudioMeowToon {
         /// whether the GameObject's name contains "Bullet".
         /// </summary>
         public static bool LikeBullet(this GameObject self) {
+            return self.name.Contains("Bullet");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "Bullet".
+        /// </summary>
+        public static bool LikeBullet(this Transform self) {
             return self.name.Contains("Bullet");
         }
 
@@ -120,6 +148,13 @@ namespace StudioMeowToon {
         /// </summary>
         public static BoxCollider GetBoxCollider(this GameObject self) {
             return self.GetComponent<BoxCollider>();
+        }
+
+        /// <summary>
+        /// get the Collider object.
+        /// </summary>
+        public static Collider GetCollider(this GameObject self) {
+            return self.GetComponent<Collider>();
         }
 
         /// <summary>
@@ -155,6 +190,13 @@ namespace StudioMeowToon {
         /// </summary>
         public static Renderer GetRenderer(this GameObject self) {
             return self.GetComponent<Renderer>();
+        }
+
+        /// <summary>
+        /// get the MeshRenderer object.
+        /// </summary>
+        public static MeshRenderer GetMeshRenderer(this GameObject self) {
+            return self.GetComponent<MeshRenderer>();
         }
 
         /// <summary>
