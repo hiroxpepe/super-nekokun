@@ -88,10 +88,6 @@ namespace StudioMeowToon {
 
         GameObject bodyIntoWater; // 水中での体
 
-        bool r2Hold; // R2ボタンで持っているかどうか
-
-        bool r2HoldTmp; // R2ボタンで持っているかどうか ※一時フラグ
-
         Vector3 normalVector = Vector3.up; // 法線用
 
         Text speechText; // セリフ用吹き出しテキスト
@@ -195,22 +191,6 @@ namespace StudioMeowToon {
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
             bombAngle = BombAngle.GetInstance(); // 弾道角度用クラス
 
-            if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
-                // 水面の高さを取得
-                waterLevel = GameObject.Find("Water").transform.position.y; // TODO: x, z 軸で水面(水中の範囲取得)
-
-                // 水中カメラエフェクト取得
-                intoWaterFilter = GameObject.Find("/Canvas");
-
-                // 水中での体取得
-                bodyIntoWater = transform.Find("Body").gameObject;
-
-                // 水面判定用
-                playerNeck = transform.Find("Bell").gameObject;
-
-                // セリフ吹き出しテキスト取得
-                speechText = speechImage.GetComponentInChildren<Text>();
-            }
         }
 
         // Start is called before the first frame update.
@@ -222,6 +202,17 @@ namespace StudioMeowToon {
 
             var _rb = transform.GetComponent<Rigidbody>();
             var _fps = Application.targetFrameRate;
+
+            bool _r2Hold = false; // R2ボタンで持っているかどうか
+            bool _r2HoldTmp = false; // R2ボタンで持っているかどうか ※一時フラグ
+
+            if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
+                waterLevel = GameObject.Find("Water").transform.position.y; // 水面の高さを取得 TODO: x, z 軸で水面(水中の範囲取得)
+                intoWaterFilter = GameObject.Find("/Canvas"); // 水中カメラエフェクト取得
+                bodyIntoWater = transform.Find("Body").gameObject; // 水中での体取得
+                playerNeck = transform.Find("Bell").gameObject; // 水面判定用
+                speechText = speechImage.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
+            }
 
             // TODO: 実験的
             sw = new System.Diagnostics.Stopwatch();
@@ -787,12 +778,12 @@ namespace StudioMeowToon {
             #region R1, R2 Button
 
             // (Rボタン) 持つ・撃つ
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !_r2Hold)))
                 .Subscribe(_ => {
                     if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
                         startFaceing(); // オブジェクトに正対する開始
                         faceToObject(holded); // オブジェクトに正対する
-                        if (r2Button.wasPressedThisFrame) { r2HoldTmp = true; } // (R2ボタン) R2ホールドフラグON
+                        if (r2Button.wasPressedThisFrame) { _r2HoldTmp = true; } // (R2ボタン) R2ホールドフラグON
                         if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
                             doUpdate.grounded = false; // 浮遊
                             doFixedUpdate.holdBalloon = true;
@@ -825,19 +816,19 @@ namespace StudioMeowToon {
                 });
 
             // (Rボタン) 離した:R2ホールド
-            this.UpdateAsObservable().Where(_ => continueUpdate() && r2Hold && r2Button.wasPressedThisFrame)
+            this.UpdateAsObservable().Where(_ => continueUpdate() && _r2Hold && r2Button.wasPressedThisFrame)
                 .Subscribe(_ => {
                     if (holded != null) {
                         if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
                         holded.transform.parent = null; // 子オブジェクト解除
                         doUpdate.holding = false; // 持つフラグOFF
                         holded = null; // 持つオブジェクト参照解除
-                        r2Hold = false; // R2ホールドフラグOFF
+                        _r2Hold = false; // R2ホールドフラグOFF
                     }
                 });
 
             // (Rボタン) 離した
-            this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !r2Hold)
+            this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !_r2Hold)
                 .Subscribe(_ => {
                     if (holded != null) {
                         if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
@@ -894,7 +885,7 @@ namespace StudioMeowToon {
                     }
                 }
 
-                if (r2HoldTmp) { r2Hold = true; r2HoldTmp = false; } // R2ホールドフラグON 
+                if (_r2HoldTmp) { _r2Hold = true; _r2HoldTmp = false; } // R2ホールドフラグON 
 
                 cashPreviousPosition(); // 10フレ前分の位置情報保存
             });

@@ -305,7 +305,7 @@ namespace StudioMeowToon {
                 });
 
             // プレイヤーが上に乗った
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.IsPlayer())
+            this.OnCollisionEnterAsObservable().Where(x => x.IsPlayer())
                 .Subscribe(x => {
                     if (isUnderBy(x)) {
                         player = x.gameObject;
@@ -314,7 +314,7 @@ namespace StudioMeowToon {
                 });
 
             // アイテムが上に乗った
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeItem())
+            this.OnCollisionEnterAsObservable().Where(x => x.LikeItem())
                 .Subscribe(x => {
                     if (isUnderBy(x)) {
                         item = x.gameObject;
@@ -323,7 +323,7 @@ namespace StudioMeowToon {
                 });
 
             // プレイヤーが上に乗っている
-            this.OnCollisionStayAsObservable().Where(x => x.gameObject.IsPlayer())
+            this.OnCollisionStayAsObservable().Where(x => x.IsPlayer())
                  .Subscribe(x => {
                      if (isUnderBy(x)) {
                          player = x.gameObject;
@@ -332,7 +332,7 @@ namespace StudioMeowToon {
                  });
 
             // アイテムが上に乗っている
-            (this).OnCollisionStayAsObservable().Where(x => x.gameObject.LikeItem())
+            (this).OnCollisionStayAsObservable().Where(x => x.LikeItem())
                  .Subscribe(x => {
                      if (isUnderBy(x)) {
                          item = x.gameObject;
@@ -341,14 +341,14 @@ namespace StudioMeowToon {
                  });
 
             // プレイヤーが上から離れた
-            this.OnCollisionExitAsObservable().Where(x => x.gameObject.IsPlayer())
+            this.OnCollisionExitAsObservable().Where(x => x.IsPlayer())
                 .Subscribe(_ => {
                     player = null;
                     isPlayerOnThis = false;
                 });
 
             // アイテムが上から離れた
-            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeItem())
+            this.OnCollisionExitAsObservable().Where(x => x.LikeItem())
                 .Subscribe(_ => {
                     item = null;
                     isItemOnThis = false;
