@@ -1055,6 +1055,8 @@ namespace StudioMeowToon {
                     "\r\nJumped: " + _aj + "sec",
                     speed, 3.0f
                 );
+                gameSystem.playerSpeed = speed;
+                gameSystem.playerAlt = transform.position.y;
             }
         }
 
