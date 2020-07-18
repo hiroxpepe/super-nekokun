@@ -80,6 +80,10 @@ namespace StudioMeowToon {
 
         int life; // ヒットポイント
 
+        Transform leftHandTransform; // IK左手位置用のTransform
+
+        Transform rightHandTransform; // IK右手位置用のTransform
+
         float waterLevel; // 水面の高さ TODO:プレイヤーのフィールドでOK?
 
         GameObject playerNeck; // プレイヤーの水面判定用
@@ -88,27 +92,15 @@ namespace StudioMeowToon {
 
         GameObject bodyIntoWater; // 水中での体
 
-        bool r2Hold; // R2ボタンで持っているかどうか
-
-        bool r2HoldTmp; // R2ボタンで持っているかどうか ※一時フラグ
-
         Vector3 normalVector = Vector3.up; // 法線用
 
         Text speechText; // セリフ用吹き出しテキスト
 
-        //////////////////////////////////////////////////////
-        // その他 TODO: ⇒ speed・position オブジェクト化する
-
-        float speed; // 速度ベクトル
+        float speed; // 速度ベクトル  TODO: speed・position オブジェクト化する
 
         float previousSpeed; // 1フレ前の速度ベクトル
 
         Vector3[] previousPosition = new Vector3[30]; // 30フレ分前のポジション保存用
-
-        ////////// TODO: 実験的
-        System.Diagnostics.Stopwatch sw;
-
-        Quaternion originalRotation;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Properties [noun, adjectives] 
@@ -148,32 +140,6 @@ namespace StudioMeowToon {
             transform.position += (forward + new Vector3(0f, 0.5f, 0)) / _ADJUST; // 0.5fは上方向調整値
         }
 
-        ///////////////////////////////////////////////////////////////////////////
-
-        // IK左手位置用のTransform
-        Transform leftHandTransform;
-
-        // IK右手位置用のTransform
-        Transform rightHandTransform;
-
-        void OnAnimatorIK() {
-            if (doUpdate.holding) { // 持つフラグON
-                var _animator = GetComponent<Animator>();
-                _animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0.5f);
-                _animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0.5f);
-                _animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.5f);
-                _animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0.5f);
-                _animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandTransform.position);
-                _animator.SetIKRotation(AvatarIKGoal.RightHand, rightHandTransform.rotation);
-                _animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTransform.position);
-                _animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTransform.rotation);
-                _animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 0.5f);
-                _animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, 0.5f);
-                _animator.SetIKHintPosition(AvatarIKHint.RightElbow, rightHandTransform.position);
-                _animator.SetIKHintPosition(AvatarIKHint.LeftElbow, leftHandTransform.position);
-            }
-        }
-
         /// <summary>
         /// 爆弾の爆発時に持ち手を強制パージ
         /// </summary>
@@ -190,27 +156,9 @@ namespace StudioMeowToon {
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
-
             doUpdate = DoUpdate.GetInstance(); // 状態フラグクラス
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
             bombAngle = BombAngle.GetInstance(); // 弾道角度用クラス
-
-            if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
-                // 水面の高さを取得
-                waterLevel = GameObject.Find("Water").transform.position.y; // TODO: x, z 軸で水面(水中の範囲取得)
-
-                // 水中カメラエフェクト取得
-                intoWaterFilter = GameObject.Find("/Canvas");
-
-                // 水中での体取得
-                bodyIntoWater = transform.Find("Body").gameObject;
-
-                // 水面判定用
-                playerNeck = transform.Find("Bell").gameObject;
-
-                // セリフ吹き出しテキスト取得
-                speechText = speechImage.GetComponentInChildren<Text>();
-            }
         }
 
         // Start is called before the first frame update.
@@ -223,9 +171,17 @@ namespace StudioMeowToon {
             var _rb = transform.GetComponent<Rigidbody>();
             var _fps = Application.targetFrameRate;
 
-            // TODO: 実験的
-            sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
+            bool _r2Hold = false; // R2ボタンで持っているかどうか
+            bool _r2HoldTmp = false; // R2ボタンで持っているかどうか ※一時フラグ
+
+            // 初期化
+            if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
+                waterLevel = GameObject.Find("Water").transform.position.y; // 水面の高さを取得 TODO: x, z 軸で水面(水中の範囲取得)
+                intoWaterFilter = GameObject.Find("/Canvas"); // 水中カメラエフェクト取得
+                bodyIntoWater = transform.Find("Body").gameObject; // 水中での体取得
+                playerNeck = transform.Find("Bell").gameObject; // 水面判定用
+                speechText = speechImage.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
+            }
 
             // 物理挙動: 初期化
             this.FixedUpdateAsObservable().Subscribe(_ => {
@@ -347,12 +303,6 @@ namespace StudioMeowToon {
                             }
                         }
                         doFixedUpdate.walk = true;
-                    }
-                    // 階段を上がるかチェック
-                    checkStairUp();
-                    if (doUpdate.stairUping != true) {
-                        // 階段を下がるかチェック
-                        checkStairDown();
                     }
                 });
 
@@ -787,12 +737,12 @@ namespace StudioMeowToon {
             #region R1, R2 Button
 
             // (Rボタン) 持つ・撃つ
-            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !r2Hold)))
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && (r1Button.wasPressedThisFrame || (r2Button.wasPressedThisFrame && !_r2Hold)))
                 .Subscribe(_ => {
                     if (checkToFace() && checkToHoldItem()) { // アイテムが持てるかチェック
                         startFaceing(); // オブジェクトに正対する開始
                         faceToObject(holded); // オブジェクトに正対する
-                        if (r2Button.wasPressedThisFrame) { r2HoldTmp = true; } // (R2ボタン) R2ホールドフラグON
+                        if (r2Button.wasPressedThisFrame) { _r2HoldTmp = true; } // (R2ボタン) R2ホールドフラグON
                         if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
                             doUpdate.grounded = false; // 浮遊
                             doFixedUpdate.holdBalloon = true;
@@ -825,19 +775,19 @@ namespace StudioMeowToon {
                 });
 
             // (Rボタン) 離した:R2ホールド
-            this.UpdateAsObservable().Where(_ => continueUpdate() && r2Hold && r2Button.wasPressedThisFrame)
+            this.UpdateAsObservable().Where(_ => continueUpdate() && _r2Hold && r2Button.wasPressedThisFrame)
                 .Subscribe(_ => {
                     if (holded != null) {
                         if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
                         holded.transform.parent = null; // 子オブジェクト解除
                         doUpdate.holding = false; // 持つフラグOFF
                         holded = null; // 持つオブジェクト参照解除
-                        r2Hold = false; // R2ホールドフラグOFF
+                        _r2Hold = false; // R2ホールドフラグOFF
                     }
                 });
 
             // (Rボタン) 離した
-            this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !r2Hold)
+            this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !_r2Hold)
                 .Subscribe(_ => {
                     if (holded != null) {
                         if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
@@ -850,6 +800,17 @@ namespace StudioMeowToon {
             #endregion
 
             #region StairUp, StairDown
+
+            // 階段チェック
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed)
+                .Subscribe(_ => {
+                    // 階段を上がるかチェック
+                    checkStairUp();
+                    if (doUpdate.stairUping != true) {
+                        // 階段を下がるかチェック
+                        checkStairDown();
+                    }
+                });
 
             // 階段を上る
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairUping)
@@ -894,7 +855,7 @@ namespace StudioMeowToon {
                     }
                 }
 
-                if (r2HoldTmp) { r2Hold = true; r2HoldTmp = false; } // R2ホールドフラグON 
+                if (_r2HoldTmp) { _r2Hold = true; _r2HoldTmp = false; } // R2ホールドフラグON 
 
                 cashPreviousPosition(); // 10フレ前分の位置情報保存
             });
@@ -1055,6 +1016,26 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Event handler
 
+        // OnAnimatorIK is called by the Animator Component immediately before it updates its internal IK system.
+        void OnAnimatorIK() {
+            if (doUpdate.holding) { // 持つフラグON
+                var _animator = GetComponent<Animator>();
+                _animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0.5f);
+                _animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0.5f);
+                _animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.5f);
+                _animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0.5f);
+                _animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandTransform.position);
+                _animator.SetIKRotation(AvatarIKGoal.RightHand, rightHandTransform.rotation);
+                _animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTransform.position);
+                _animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTransform.rotation);
+                _animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 0.5f);
+                _animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, 0.5f);
+                _animator.SetIKHintPosition(AvatarIKHint.RightElbow, rightHandTransform.position);
+                _animator.SetIKHintPosition(AvatarIKHint.LeftElbow, leftHandTransform.position);
+            }
+        }
+
+        // OnGUI is called for rendering and handling GUI events.
         void OnGUI() {
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // デバッグ表示

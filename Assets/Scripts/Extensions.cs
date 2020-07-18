@@ -48,10 +48,24 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collision's tag is "Player".
+        /// </summary>
+        public static bool IsPlayer(this Collision self) {
+            return self.gameObject.tag.Equals("Player");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Item".
         /// </summary>
         public static bool LikeItem(this GameObject self) {
             return self.name.Contains("Item");
+        }
+
+        /// <summary>
+        /// whether the Collision's name contains "Item".
+        /// </summary>
+        public static bool LikeItem(this Collision self) {
+            return self.gameObject.name.Contains("Item");
         }
 
         /// <summary>
