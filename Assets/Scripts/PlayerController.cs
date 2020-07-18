@@ -102,8 +102,6 @@ namespace StudioMeowToon {
 
         Vector3[] previousPosition = new Vector3[30]; // 30フレ分前のポジション保存用
 
-        Quaternion originalRotation;
-
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Properties [noun, adjectives] 
 
@@ -158,11 +156,9 @@ namespace StudioMeowToon {
 
         // Awake is called when the script instance is being loaded.
         void Awake() {
-
             doUpdate = DoUpdate.GetInstance(); // 状態フラグクラス
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
             bombAngle = BombAngle.GetInstance(); // 弾道角度用クラス
-
         }
 
         // Start is called before the first frame update.
@@ -178,6 +174,7 @@ namespace StudioMeowToon {
             bool _r2Hold = false; // R2ボタンで持っているかどうか
             bool _r2HoldTmp = false; // R2ボタンで持っているかどうか ※一時フラグ
 
+            // 初期化
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 waterLevel = GameObject.Find("Water").transform.position.y; // 水面の高さを取得 TODO: x, z 軸で水面(水中の範囲取得)
                 intoWaterFilter = GameObject.Find("/Canvas"); // 水中カメラエフェクト取得
@@ -306,12 +303,6 @@ namespace StudioMeowToon {
                             }
                         }
                         doFixedUpdate.walk = true;
-                    }
-                    // 階段を上がるかチェック
-                    checkStairUp();
-                    if (doUpdate.stairUping != true) {
-                        // 階段を下がるかチェック
-                        checkStairDown();
                     }
                 });
 
@@ -809,6 +800,17 @@ namespace StudioMeowToon {
             #endregion
 
             #region StairUp, StairDown
+
+            // 階段チェック
+            this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.grounded && upButton.isPressed)
+                .Subscribe(_ => {
+                    // 階段を上がるかチェック
+                    checkStairUp();
+                    if (doUpdate.stairUping != true) {
+                        // 階段を下がるかチェック
+                        checkStairDown();
+                    }
+                });
 
             // 階段を上る
             this.UpdateAsObservable().Where(_ => continueUpdate() && doUpdate.stairUping)
