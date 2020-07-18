@@ -991,7 +991,7 @@ namespace StudioMeowToon {
             #region get Item
 
             // アイテムと接触したら
-            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.IsItem())
+            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.Getable())
                 .Subscribe(x => {
                     soundSystem.PlayItemClip(); // 効果音を鳴らす
                     gameSystem.DecrementItem(); // アイテム数デクリメント
@@ -1716,25 +1716,21 @@ namespace StudioMeowToon {
                                 .Where(_ => !doUpdate.holding)
                                 .Select(_ => !doUpdate.faceing && holded != null && !doUpdate.holding) // なぜ Where だとダメ？
                                 .Subscribe(_ => {
-                                if (holded.tag.Equals("Item")) {
-                                    var _itemController = holded.GetComponent<ItemController>(); // TODO: holdable で共通化？
-                                    leftHandTransform = _itemController.GetLeftHandTransform(); // アイテムから左手のIK位置を取得
-                                    rightHandTransform = _itemController.GetRightHandTransform(); // アイテムから右手のIK位置を取得
-                                } else if (holded.tag.Equals("Block")) {
-                                    var _blockController = holded.GetComponent<BlockController>();
-                                    leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
-                                    rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
-                                } else if (holded.tag.Equals("Holdable")) {
-                                    var _blockController = holded.GetComponent<Holdable>();
-                                    leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
-                                    rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
-                                }
-                                holded.transform.parent = transform; // 自分の子オブジェクトにする
-                                doUpdate.holding = true; // 持つフラグON
-                                if (holded.name.Contains("Key") && !gameSystem.levelClear) { // TODO: なぜここがクリア時に呼ばれる？
-                                    say("Yeah~\nI got\n the Key!",60, 2d); // FIXME: 種別
-                                }
-                            });
+                                    if (holded.tag.Equals("Block")) {
+                                        var _blockController = holded.GetComponent<BlockController>();
+                                        leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
+                                        rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
+                                    } else if (holded.tag.Equals("Holdable")) {
+                                        var _holdable = holded.GetComponent<Holdable>();
+                                        leftHandTransform = _holdable.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
+                                        rightHandTransform = _holdable.GetRightHandTransform(); // ブロックから右手のIK位置を取得
+                                    }
+                                    holded.transform.parent = transform; // 自分の子オブジェクトにする
+                                    doUpdate.holding = true; // 持つフラグON
+                                    if (holded.name.Contains("Key") && !gameSystem.levelClear) { // TODO: なぜここがクリア時に呼ばれる？
+                                        say("Yeah~\nI got\n the Key!",60, 2d); // FIXME: 種別
+                                    }
+                                });
                             say("I'm going\nto have.");
                             return true;
                         }

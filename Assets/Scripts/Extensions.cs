@@ -24,6 +24,8 @@ namespace StudioMeowToon {
     /// </summary>
     public static class Extensions {
 
+        #region type of object.
+
         /// <summary>
         /// whether the GameObject's name contains "Player".
         /// </summary>
@@ -53,10 +55,10 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// whether the GameObject's tag is "Item".
+        /// whether the GameObject's tag is "Getable".
         /// </summary>
-        public static bool IsItem(this GameObject self) {
-            return self.tag.Equals("Item"); // TODO: "Getable"
+        public static bool Getable(this GameObject self) {
+            return self.tag.Equals("Getable"); // TODO: "Getable"
         }
 
         /// <summary>
@@ -142,6 +144,10 @@ namespace StudioMeowToon {
         public static bool Holdable(this GameObject self) {
             return self.tag.Equals("Holdable");
         }
+
+        #endregion
+
+        #region get the object.
 
         /// <summary>
         /// get the BoxCollider object.
@@ -240,6 +246,8 @@ namespace StudioMeowToon {
         public static IEnumerable<Transform> GetTransformsInChildren(this GameObject self) {
             return self.GetComponentsInChildren<Transform>();
         }
+
+        #endregion
 
     }
 

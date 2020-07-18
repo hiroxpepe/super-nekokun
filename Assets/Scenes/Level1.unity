@@ -2944,6 +2944,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Item3
       objectReference: {fileID: 0}
+    - target: {fileID: 5243326608442064934, guid: 88d485ee180e4be45934958881020597,
+        type: 3}
+      propertyPath: m_TagString
+      value: Getable
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 88d485ee180e4be45934958881020597, type: 3}
 --- !u!1 &441405757
@@ -5915,6 +5920,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Item2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5243326608442064934, guid: 88d485ee180e4be45934958881020597,
+        type: 3}
+      propertyPath: m_TagString
+      value: Getable
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 0}
@@ -18305,6 +18315,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Item1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5243326608442064934, guid: 88d485ee180e4be45934958881020597,
+        type: 3}
+      propertyPath: m_TagString
+      value: Getable
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 0}

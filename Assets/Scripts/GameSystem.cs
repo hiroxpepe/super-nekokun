@@ -318,7 +318,7 @@ namespace StudioMeowToon {
             }
 
             // アイテムの総数を取得 // TODO: ⇒ OnGUI に移動？
-            itemTotalCount = GameObject.FindGameObjectsWithTag("Item").Length;
+            itemTotalCount = GameObject.FindGameObjectsWithTag("Getable").Length;
             itemRemainCount = itemTotalCount;
             updateGameInfo();
 
