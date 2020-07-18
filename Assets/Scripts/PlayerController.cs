@@ -483,7 +483,7 @@ namespace StudioMeowToon {
                     }
                     if (!checkIntoWater() && !bButton.isPressed && doUpdate.secondsAfterJumped > 5.0f && !doFixedUpdate.holdBalloon) { // TODO: checkIntoWater 重くない？
 #if DEBUG
-                        Debug.Log("JUMP後に空中停止した場合 speed:" + speed); // FIXME: 水面で反応
+                        Debug.Log("JUMP後に空中停止した場合 speed:" + speed); // FIXME: 水面で反応 TODO: 何かボタンを押したら復帰させる
 #endif
                         transform.Translate(0, -5.0f * Time.deltaTime, 0); // 下げる
                         doUpdate.grounded = true; // 接地
