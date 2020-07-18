@@ -80,6 +80,10 @@ namespace StudioMeowToon {
 
         int life; // ヒットポイント
 
+        Transform leftHandTransform; // IK左手位置用のTransform
+
+        Transform rightHandTransform; // IK右手位置用のTransform
+
         float waterLevel; // 水面の高さ TODO:プレイヤーのフィールドでOK?
 
         GameObject playerNeck; // プレイヤーの水面判定用
@@ -92,17 +96,11 @@ namespace StudioMeowToon {
 
         Text speechText; // セリフ用吹き出しテキスト
 
-        //////////////////////////////////////////////////////
-        // その他 TODO: ⇒ speed・position オブジェクト化する
-
-        float speed; // 速度ベクトル
+        float speed; // 速度ベクトル  TODO: speed・position オブジェクト化する
 
         float previousSpeed; // 1フレ前の速度ベクトル
 
         Vector3[] previousPosition = new Vector3[30]; // 30フレ分前のポジション保存用
-
-        ////////// TODO: 実験的
-        System.Diagnostics.Stopwatch sw;
 
         Quaternion originalRotation;
 
@@ -142,32 +140,6 @@ namespace StudioMeowToon {
         void moveByShocked(Vector3 forward) {
             var _ADJUST = 2.5f; // 調整値
             transform.position += (forward + new Vector3(0f, 0.5f, 0)) / _ADJUST; // 0.5fは上方向調整値
-        }
-
-        ///////////////////////////////////////////////////////////////////////////
-
-        // IK左手位置用のTransform
-        Transform leftHandTransform;
-
-        // IK右手位置用のTransform
-        Transform rightHandTransform;
-
-        void OnAnimatorIK() {
-            if (doUpdate.holding) { // 持つフラグON
-                var _animator = GetComponent<Animator>();
-                _animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0.5f);
-                _animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0.5f);
-                _animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.5f);
-                _animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0.5f);
-                _animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandTransform.position);
-                _animator.SetIKRotation(AvatarIKGoal.RightHand, rightHandTransform.rotation);
-                _animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTransform.position);
-                _animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTransform.rotation);
-                _animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 0.5f);
-                _animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, 0.5f);
-                _animator.SetIKHintPosition(AvatarIKHint.RightElbow, rightHandTransform.position);
-                _animator.SetIKHintPosition(AvatarIKHint.LeftElbow, leftHandTransform.position);
-            }
         }
 
         /// <summary>
@@ -213,10 +185,6 @@ namespace StudioMeowToon {
                 playerNeck = transform.Find("Bell").gameObject; // 水面判定用
                 speechText = speechImage.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
             }
-
-            // TODO: 実験的
-            sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
 
             // 物理挙動: 初期化
             this.FixedUpdateAsObservable().Subscribe(_ => {
@@ -1046,6 +1014,26 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Event handler
 
+        // OnAnimatorIK is called by the Animator Component immediately before it updates its internal IK system.
+        void OnAnimatorIK() {
+            if (doUpdate.holding) { // 持つフラグON
+                var _animator = GetComponent<Animator>();
+                _animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0.5f);
+                _animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0.5f);
+                _animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.5f);
+                _animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0.5f);
+                _animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandTransform.position);
+                _animator.SetIKRotation(AvatarIKGoal.RightHand, rightHandTransform.rotation);
+                _animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTransform.position);
+                _animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTransform.rotation);
+                _animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 0.5f);
+                _animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, 0.5f);
+                _animator.SetIKHintPosition(AvatarIKHint.RightElbow, rightHandTransform.position);
+                _animator.SetIKHintPosition(AvatarIKHint.LeftElbow, leftHandTransform.position);
+            }
+        }
+
+        // OnGUI is called for rendering and handling GUI events.
         void OnGUI() {
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
                 // デバッグ表示
