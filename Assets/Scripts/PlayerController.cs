@@ -188,7 +188,7 @@ namespace StudioMeowToon {
                 // Time.deltaTime は一定である
                 previousSpeed = speed; // 速度ベクトル保存
                 speed = _rb.velocity.magnitude; // 速度ベクトル取得
-
+                gameSystem.playerSpeed = speed;
                 if (speed > 5.0f) { // 加速度リミッター TODO: リミッター解除機能
                     _rb.velocity = new Vector3(
                         _rb.velocity.x - (_rb.velocity.x / 10),
@@ -854,10 +854,9 @@ namespace StudioMeowToon {
                         readyForBackJump();
                     }
                 }
-
                 if (_r2HoldTmp) { _r2Hold = true; _r2HoldTmp = false; } // R2ホールドフラグON 
-
                 cashPreviousPosition(); // 10フレ前分の位置情報保存
+                gameSystem.playerAlt = transform.position.y;
             });
 
             // ブロックに接触したら
@@ -959,6 +958,7 @@ namespace StudioMeowToon {
                     doFixedUpdate.getItem = true;
                     Destroy(x.gameObject); // 削除
                     say("I got\na item."); // FIXME: 吹き出しの種類
+                    gameSystem.AddScore(50000); // FIXME: 一時的 ⇒ サウンド
                 });
 
             // 物理挙動: アイテム取得
@@ -1038,25 +1038,23 @@ namespace StudioMeowToon {
         // OnGUI is called for rendering and handling GUI events.
         void OnGUI() {
             if (SceneManager.GetActiveScene().name != "Start") { // TODO: 再検討
-                // デバッグ表示
-                var _y = string.Format("{0:F3}", Math.Round(transform.position.y, 3, MidpointRounding.AwayFromZero));
-                var _s = string.Format("{0:F3}", Math.Round(speed, 3, MidpointRounding.AwayFromZero));
-                var _aj = string.Format("{0:F3}", Math.Round(doUpdate.secondsAfterJumped, 3, MidpointRounding.AwayFromZero));
-                var _rb = transform.GetComponent<Rigidbody>();
-                gameSystem.TRACE("Hight: " + _y + "m \r\nSpeed: " + _s + "m/s" +
-                    "\r\nGrounded: " + doUpdate.grounded +
-                    "\r\nClimbing: " + doUpdate.climbing +
-                    "\r\nHolding: " + doUpdate.holding +
-                    "\r\nStairUp: " + doUpdate.stairUping +
-                    "\r\nStairDown: " + doUpdate.stairDowning +
-                    //"\r\nThrowing: " + doUpdate.throwing +
-                    //"\r\nThrowed: " + doUpdate.throwed +
-                    "\r\nGravity: " + _rb.useGravity +
-                    "\r\nJumped: " + _aj + "sec",
-                    speed, 3.0f
-                );
-                gameSystem.playerSpeed = speed;
-                gameSystem.playerAlt = transform.position.y;
+                //// デバッグ表示
+                //var _y = string.Format("{0:F3}", Math.Round(transform.position.y, 3, MidpointRounding.AwayFromZero));
+                //var _s = string.Format("{0:F3}", Math.Round(speed, 3, MidpointRounding.AwayFromZero));
+                //var _aj = string.Format("{0:F3}", Math.Round(doUpdate.secondsAfterJumped, 3, MidpointRounding.AwayFromZero));
+                //var _rb = transform.GetComponent<Rigidbody>();
+                //gameSystem.TRACE("Hight: " + _y + "m \r\nSpeed: " + _s + "m/s" +
+                //    "\r\nGrounded: " + doUpdate.grounded +
+                //    "\r\nClimbing: " + doUpdate.climbing +
+                //    "\r\nHolding: " + doUpdate.holding +
+                //    "\r\nStairUp: " + doUpdate.stairUping +
+                //    "\r\nStairDown: " + doUpdate.stairDowning +
+                //    //"\r\nThrowing: " + doUpdate.throwing +
+                //    //"\r\nThrowed: " + doUpdate.throwed +
+                //    "\r\nGravity: " + _rb.useGravity +
+                //    "\r\nJumped: " + _aj + "sec",
+                //    speed, 3.0f
+                //);
             }
         }
 

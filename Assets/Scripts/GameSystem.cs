@@ -50,6 +50,15 @@ namespace StudioMeowToon {
         Text alt; // プレイヤー 高度 テキストUI
 
         [SerializeField]
+        Text fps; // ゲーム FPS テキストUI
+
+        [SerializeField]
+        Text time; // ゲーム TIME テキストUI
+
+        [SerializeField]
+        Text score; // ゲーム スコア テキストUI
+
+        [SerializeField]
         Slider playerLifeUI; // Player HPのUI
 
         [SerializeField]
@@ -77,9 +86,11 @@ namespace StudioMeowToon {
 
         float playerLifeValue = 10f; // Player HP
 
-        float _playerSpeed = 0f; // プレイヤー 速度
+        float playerSpeedValue = 0f; // プレイヤー 速度
 
-        float _playerAlt = 0f; // プレイヤー 高度 
+        float playerAltValue = 0f; // プレイヤー 高度 
+
+        int scoreValue = 0; // ゲーム スコア
 
         float playerBombAngleValue = 0f; // Player 弾道角度
 
@@ -126,11 +137,11 @@ namespace StudioMeowToon {
         }
 
         public float playerSpeed {
-            set => _playerSpeed = value;
+            set => playerSpeedValue = value;
         }
 
         public float playerAlt {
-            set => _playerAlt = value;
+            set => playerAltValue = value;
         }
 
         public float bombAngle {
@@ -158,6 +169,10 @@ namespace StudioMeowToon {
         public void DecrementItem() {
             itemRemainCount--; // アイテム数デクリメント
             updateGameInfo(); // TODO: OnGUI ?
+        }
+
+        public void AddScore(int value) {
+            scoreValue += value;// スコア加算
         }
 
         public void ClearLevel() { // Levelクリア
@@ -205,6 +220,40 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
+            // シーン名取得
+            var _activeSceneName = SceneManager.GetActiveScene().name;
+
+            #region score.
+
+            #endregion
+
+            #region time.
+
+            // 経過時間測定
+            System.Diagnostics.Stopwatch _stopwatch = new System.Diagnostics.Stopwatch();
+            _stopwatch.Start();
+            this.UpdateAsObservable()
+                .Where(_ => _activeSceneName.Contains("Level"))
+                .Subscribe(_ => {
+                    time.text = string.Format("Time\n{0:000}", 999f - Math.Round(_stopwatch.Elapsed.TotalSeconds, 0, MidpointRounding.AwayFromZero));
+                });
+
+            // ポーズ中: 経過時間測定 一時停止
+            this.UpdateAsObservable()
+                .Where(_ => _activeSceneName.Contains("Level") && startButton.isPressed && !isLevelClear && isPausing)
+                .Subscribe(_ => {
+                    _stopwatch.Stop();
+                });
+
+            // ポーズ解除: 経過時間測定 再開
+            this.UpdateAsObservable()
+                .Where(_ => _activeSceneName.Contains("Level") && startButton.isPressed && !isLevelClear && !isPausing)
+                .Subscribe(_ => {
+                    _stopwatch.Start();
+                });
+
+            #endregion
+
             #region mobile phone vibration.
 
             // ボタンを押したらスマホ振動
@@ -240,9 +289,6 @@ namespace StudioMeowToon {
                         SceneManager.LoadScene("Start"); // TODO: メソッド
                     }
                 });
-
-            // シーン名取得
-            var _activeSceneName = SceneManager.GetActiveScene().name;
 
             // ポーズ(一時停止)実行・解除
             this.UpdateAsObservable()
@@ -371,16 +417,17 @@ namespace StudioMeowToon {
             playerBombAngleUI.value = playerBombAngleValue;
             int _hp = (int) (playerLifeValue * 10);
             hp.text = _hp.ToString();
-            speed.text = string.Format("Speed {0:000.0}km", Math.Round(_playerSpeed * 5, 1, MidpointRounding.AwayFromZero)); // * 5 は調整値
-            alt.text = string.Format("ALT {0:000.0}m", Math.Round(_playerAlt, 1, MidpointRounding.AwayFromZero));
+            speed.text = string.Format("Speed {0:000.0}km", Math.Round(playerSpeedValue * 5, 1, MidpointRounding.AwayFromZero)); // * 5 は調整値
+            alt.text = string.Format("ALT {0:000.0}m", Math.Round(playerAltValue, 1, MidpointRounding.AwayFromZero));
         }
 
         void updateGameInfo() { // GAME の情報を表示
             updateFpForUpdate(); // FPS更新
-            information.text = 
-                "Item (" + itemRemainCount + "/" + itemTotalCount + ")" + 
-                "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) + 
+            information.text =
+                "Item (" + itemRemainCount + "/" + itemTotalCount + ")" +
+                "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) +
                 "\r\nfps2 " + string.Format("{0:F3}", Math.Round(fpsForFixedUpdate, 3, MidpointRounding.AwayFromZero)); // 残りアイテム数表示
+            score.text = string.Format("Score\n{0:000000}", scoreValue);
         }
 
         void updateFpForUpdate() { // FPS更新
@@ -390,6 +437,7 @@ namespace StudioMeowToon {
                 fpsForUpdate = fpsForUpdateFrameCount / _time;
                 fpsForUpdateFrameCount = 0;
                 fpsForUpdatePreviousTime = Time.realtimeSinceStartup;
+                fps.text = string.Format("{0:00.0}fps", Math.Round(fpsForUpdate, 1, MidpointRounding.AwayFromZero));
             }
         }
 
