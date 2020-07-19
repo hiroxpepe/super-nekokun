@@ -779,6 +779,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     if (holded != null) {
                         if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                        if (holded.LikeKey()) { gameSystem.hasKey = false; } // キー保持フラグOFF
                         holded.transform.parent = null; // 子オブジェクト解除
                         doUpdate.holding = false; // 持つフラグOFF
                         holded = null; // 持つオブジェクト参照解除
@@ -791,6 +792,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     if (holded != null) {
                         if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                        if (holded.LikeKey()) { gameSystem.hasKey = false; } // キー保持フラグOFF
                         holded.transform.parent = null; // 子オブジェクト解除
                         doUpdate.holding = false; // 持つフラグOFF
                         holded = null; // 持つオブジェクト参照解除
@@ -1708,8 +1710,9 @@ namespace StudioMeowToon {
                                     }
                                     holded.transform.parent = transform; // 自分の子オブジェクトにする
                                     doUpdate.holding = true; // 持つフラグON
-                                    if (holded.name.Contains("Key") && !gameSystem.levelClear) { // TODO: なぜここがクリア時に呼ばれる？
-                                        say("Yeah~\nI got\n the Key!",60, 2d); // FIXME: 種別
+                                    if (holded.LikeKey() && !gameSystem.levelClear) { // TODO: なぜここがクリア時に呼ばれる？
+                                        gameSystem.hasKey = true; // キー保持フラグON
+                                        say("Yeah~\nI got\n the Key!", 60, 2d); // FIXME: 種別
                                     }
                                 });
                             say("I'm going\nto have.");

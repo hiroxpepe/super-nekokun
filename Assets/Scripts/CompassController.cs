@@ -16,34 +16,27 @@
 
 using UnityEngine;
 
+/// <summary>
+/// コンパスの処理
+/// @author h.adachi
+/// </summary>
 public class CompassController : MonoBehaviour {
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
+
     [SerializeField]
     Transform player;
+
     [SerializeField]
-    Texture compBg;
-    [SerializeField]
-    Texture blipTex;
-    void OnGUI() {
-        //GUI.DrawTexture(new Rect(0, 0, 120, 120), compBg);
-        //GUI.DrawTexture(new Rect(233, 110, 160, 160), compBg);
-        GUI.DrawTexture(CreateBlip(), blipTex);
-    }
+    GameObject needle;
 
-    Rect CreateBlip() {
-        float angDeg = player.eulerAngles.y - 90;
-        float angRed = angDeg * Mathf.Deg2Rad;
+    ///////////////////////////////////////////////////////////////////////////
+    // update Methods
 
-        //float blipX = 25 * Mathf.Cos(angRed);
-        //float blipY = 25 * Mathf.Sin(angRed);
-        float blipX = 65 * Mathf.Cos(angRed);
-        float blipY = 65 * Mathf.Sin(angRed);
-
-        //blipX += 55;
-        //blipY += 55;
-        blipX += 75 + 233;
-        blipY += 75 + 110;
-
-        return new Rect(blipX, blipY, 10, 10);
+    void LateUpdate() {
+        Quaternion _q = player.transform.rotation; // プレーヤーの y 軸を コンパスの z軸に設定する
+        needle.transform.rotation = Quaternion.Euler(0f, 0f, -_q.eulerAngles.y);
     }
 
 }

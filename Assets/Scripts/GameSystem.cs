@@ -59,6 +59,12 @@ namespace StudioMeowToon {
         Text score; // ゲーム スコア テキストUI
 
         [SerializeField]
+        Text item; // ゲーム アイテム テキストUI
+
+        [SerializeField]
+        Text key; // ゲーム キー テキストUI
+
+        [SerializeField]
         Slider playerLifeUI; // Player HPのUI
 
         [SerializeField]
@@ -91,6 +97,8 @@ namespace StudioMeowToon {
         float playerAltValue = 0f; // プレイヤー 高度 
 
         int scoreValue = 0; // ゲーム スコア
+
+        int hasKeyValue = 0; // キー保持
 
         float playerBombAngleValue = 0f; // Player 弾道角度
 
@@ -142,6 +150,12 @@ namespace StudioMeowToon {
 
         public float playerAlt {
             set => playerAltValue = value;
+        }
+
+        public bool hasKey {
+            set {
+                if (value) { hasKeyValue = 1; } else { hasKeyValue = 0; }
+            }
         }
 
         public float bombAngle {
@@ -428,6 +442,8 @@ namespace StudioMeowToon {
                 "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) +
                 "\r\nfps2 " + string.Format("{0:F3}", Math.Round(fpsForFixedUpdate, 3, MidpointRounding.AwayFromZero)); // 残りアイテム数表示
             score.text = string.Format("Score\n{0:000000}", scoreValue);
+            item.text = string.Format("× {0}/{1}", itemTotalCount - itemRemainCount, itemTotalCount);
+            key.text = string.Format("× {0}", hasKeyValue);
         }
 
         void updateFpForUpdate() { // FPS更新
