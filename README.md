@@ -1,6 +1,6 @@
 # Orange the Cat (super-nekokun)
 ## A 3D action game project by Unity
-![game image](https://i.imgur.com/fVyxJ8D.png)
+![game image](https://i.imgur.com/Hr8HG8X.png)
 
 ## What's this?
 - I'm aiming to make the N64 era style 3D games by myself.
