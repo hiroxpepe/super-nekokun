@@ -32,37 +32,37 @@ namespace StudioMeowToon {
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
-        Text message; // メッセージ表示用テキストUI
+        Text messageUI; // ゲーム メッセージ テキストUI
 
         [SerializeField]
-        Text debug; // デバッグ表示用テキストUI
+        Text fpsUI; // ゲーム FPS テキストUI
 
         [SerializeField]
-        Text hp; // プレイヤー HP テキストUI
+        Text timeUI; // ゲーム TIME テキストUI
 
         [SerializeField]
-        Text speed; // プレイヤー 速度 テキストUI
+        Text scoreUI; // ゲーム スコア テキストUI
 
         [SerializeField]
-        Text alt; // プレイヤー 高度 テキストUI
+        Text itemUI; // ゲーム アイテム テキストUI
 
         [SerializeField]
-        Text fps; // ゲーム FPS テキストUI
+        Text keyUI; // ゲーム キー テキストUI
 
         [SerializeField]
-        Text time; // ゲーム TIME テキストUI
+        Text hpUI; // プレイヤー HP テキストUI
 
         [SerializeField]
-        Text score; // ゲーム スコア テキストUI
+        Text speedUI; // プレイヤー 速度 テキストUI
 
         [SerializeField]
-        Text item; // ゲーム アイテム テキストUI
+        Text altUI; // プレイヤー 高度 テキストUI
 
         [SerializeField]
-        Text key; // ゲーム キー テキストUI
+        Slider bombAngleUI; // プレイヤー 弾道角度 スライダーUI
 
         [SerializeField]
-        Slider playerBombAngleUI; // Player 弾道角度のUI
+        Text debugUI; // デバッグ テキストUI
 
         [SerializeField]
         Material lockonFocusMaterial; // ロックオン用マテリアル
@@ -84,17 +84,17 @@ namespace StudioMeowToon {
 
         bool isLevelClear = false; // ステージクリアフラグ
 
-        float playerLifeValue = 10f; // Player HP
+        float lifeValue = 10f; // Player HP
 
-        float playerSpeedValue = 0f; // プレイヤー 速度
+        float speedValue = 0f; // プレイヤー 速度
 
-        float playerAltValue = 0f; // プレイヤー 高度 
+        float altValue = 0f; // プレイヤー 高度 
 
         int scoreValue = 0; // ゲーム スコア
 
         int hasKeyValue = 0; // キー保持
 
-        float playerBombAngleValue = 0f; // Player 弾道角度
+        float bombAngleValue = 0f; // Player 弾道角度
 
         GameObject lockonTarget = null; // ロックオン対象
 
@@ -106,7 +106,6 @@ namespace StudioMeowToon {
 
         bool isEventView = false; // イベント中かどうか
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////
         // FPS計測
 
         int fpsForUpdateFrameCount; // FPSフレームカウント
@@ -135,15 +134,15 @@ namespace StudioMeowToon {
         }
 
         public int playerLife {
-            set => playerLifeValue = (float) value / 10; // UIの仕様が 0～1 なので
+            set => lifeValue = (float) value / 10; // UIの仕様が 0～1 なので
         }
 
         public float playerSpeed {
-            set => playerSpeedValue = value;
+            set => speedValue = value;
         }
 
         public float playerAlt {
-            set => playerAltValue = value;
+            set => altValue = value;
         }
 
         public bool hasKey {
@@ -156,7 +155,7 @@ namespace StudioMeowToon {
             // min: -0.125
             // max: 1.25
             // ⇒ スライダーにこの値を設定する方が早い
-            set => playerBombAngleValue = value; // UIの仕様が 0～1 なので
+            set => bombAngleValue = value; // UIの仕様が 0～1 なので
         }
         
         public bool eventView { // イベント中かどうかを返す
@@ -186,7 +185,7 @@ namespace StudioMeowToon {
         public void ClearLevel() { // Levelクリア
             Time.timeScale = 0f;
             isLevelClear = true; // ステージクリアフラグON
-            message.text = "Level Clear!"; // クリアメッセージ表示
+            messageUI.text = "Level Clear!"; // クリアメッセージ表示
         }
 
         /// <summary>
@@ -243,7 +242,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Where(_ => _activeSceneName.Contains("Level"))
                 .Subscribe(_ => {
-                    time.text = string.Format("Time\n{0:000}", 999f - Math.Round(_stopwatch.Elapsed.TotalSeconds, 0, MidpointRounding.AwayFromZero));
+                    timeUI.text = string.Format("Time\n{0:000}", 999f - Math.Round(_stopwatch.Elapsed.TotalSeconds, 0, MidpointRounding.AwayFromZero));
                 });
 
             // ポーズ中: 経過時間測定 一時停止
@@ -302,8 +301,8 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Where(_ => _activeSceneName.Contains("Level") && startButton.wasPressedThisFrame && !isLevelClear)
                 .Subscribe(_ => {
-                    if (isPausing) { Time.timeScale = 1f; message.text = ""; } 
-                    else { Time.timeScale = 0f; message.text = "Pause"; }
+                    if (isPausing) { Time.timeScale = 1f; messageUI.text = ""; } 
+                    else { Time.timeScale = 0f; messageUI.text = "Pause"; }
                     isPausing = !isPausing;
                 });
 
@@ -397,7 +396,7 @@ namespace StudioMeowToon {
             itemRemainCount = itemTotalCount;
             updateGameInfo();
 
-            message.text = ""; // メッセージ初期化、非表示
+            messageUI.text = ""; // メッセージ初期化、非表示
 
             #endregion
 
@@ -410,10 +409,10 @@ namespace StudioMeowToon {
         // private Methods [verb]
 
         void checkGameOver() {
-            if (playerLifeValue == 0) {
+            if (lifeValue == 0) {
                 Time.timeScale = 0f;
                 isGameOver = true; // GAMEオーバーフラグON
-                message.text = "Game Over!"; // GAMEオーバーメッセージ表示
+                messageUI.text = "Game Over!"; // GAMEオーバーメッセージ表示
                 if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
                     SceneManager.LoadScene("Start");
                 }
@@ -421,18 +420,18 @@ namespace StudioMeowToon {
         }
 
         void updatePlayerStatus() { // Player のステイタス表示
-            playerBombAngleUI.value = playerBombAngleValue;
-            int _hp = (int) (playerLifeValue * 10);
-            hp.text = _hp.ToString();
-            speed.text = string.Format("Speed {0:000.0}km", Math.Round(playerSpeedValue * 5, 1, MidpointRounding.AwayFromZero)); // * 5 は調整値
-            alt.text = string.Format("ALT {0:000.0}m", Math.Round(playerAltValue, 1, MidpointRounding.AwayFromZero));
+            bombAngleUI.value = bombAngleValue;
+            int _hp = (int) (lifeValue * 10);
+            hpUI.text = _hp.ToString();
+            speedUI.text = string.Format("Speed {0:000.0}km", Math.Round(speedValue * 5, 1, MidpointRounding.AwayFromZero)); // * 5 は調整値
+            altUI.text = string.Format("ALT {0:000.0}m", Math.Round(altValue, 1, MidpointRounding.AwayFromZero));
         }
 
         void updateGameInfo() { // GAME の情報を表示
             updateFpForUpdate(); // FPS更新
-            score.text = string.Format("Score\n{0:000000}", scoreValue);
-            item.text = string.Format("× {0}/{1}", itemTotalCount - itemRemainCount, itemTotalCount);
-            key.text = string.Format("× {0}", hasKeyValue);
+            scoreUI.text = string.Format("Score\n{0:000000}", scoreValue);
+            itemUI.text = string.Format("× {0}/{1}", itemTotalCount - itemRemainCount, itemTotalCount);
+            keyUI.text = string.Format("× {0}", hasKeyValue);
         }
 
         void updateFpForUpdate() { // FPS更新
@@ -442,7 +441,7 @@ namespace StudioMeowToon {
                 fpsForUpdate = fpsForUpdateFrameCount / _time;
                 fpsForUpdateFrameCount = 0;
                 fpsForUpdatePreviousTime = Time.realtimeSinceStartup;
-                fps.text = string.Format("{0:00.0}fps", Math.Round(fpsForUpdate, 1, MidpointRounding.AwayFromZero));
+                fpsUI.text = string.Format("{0:00.0}fps", Math.Round(fpsForUpdate, 1, MidpointRounding.AwayFromZero));
             }
         }
 
@@ -475,18 +474,18 @@ namespace StudioMeowToon {
         // Debug
 
         public void TRACE(string value) {
-            debug.text = value;
+            debugUI.text = value;
         }
 
         public void TRACE(string value1, float value2, float limit) {
             if (value2 > limit + 2f) {
-                debug.color = Color.magenta;
+                debugUI.color = Color.magenta;
             } else if (value2 > limit) {
-                debug.color = Color.red;
+                debugUI.color = Color.red;
             } else {
-                debug.color = Color.black;
+                debugUI.color = Color.black;
             }
-            debug.text = value1;
+            debugUI.text = value1;
         }
     }
 
