@@ -32,9 +32,6 @@ namespace StudioMeowToon {
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
-        Text information; // アイテム数表示用テキストUI
-
-        [SerializeField]
         Text message; // メッセージ表示用テキストUI
 
         [SerializeField]
@@ -63,9 +60,6 @@ namespace StudioMeowToon {
 
         [SerializeField]
         Text key; // ゲーム キー テキストUI
-
-        [SerializeField]
-        Slider playerLifeUI; // Player HPのUI
 
         [SerializeField]
         Slider playerBombAngleUI; // Player 弾道角度のUI
@@ -398,7 +392,7 @@ namespace StudioMeowToon {
                 return;
             }
 
-            // アイテムの総数を取得 // TODO: ⇒ OnGUI に移動？
+            // アイテムの総数を取得
             itemTotalCount = GameObject.FindGameObjectsWithTag("Getable").Length;
             itemRemainCount = itemTotalCount;
             updateGameInfo();
@@ -427,7 +421,6 @@ namespace StudioMeowToon {
         }
 
         void updatePlayerStatus() { // Player のステイタス表示
-            playerLifeUI.value = playerLifeValue;
             playerBombAngleUI.value = playerBombAngleValue;
             int _hp = (int) (playerLifeValue * 10);
             hp.text = _hp.ToString();
@@ -437,10 +430,6 @@ namespace StudioMeowToon {
 
         void updateGameInfo() { // GAME の情報を表示
             updateFpForUpdate(); // FPS更新
-            information.text =
-                "Item (" + itemRemainCount + "/" + itemTotalCount + ")" +
-                "\r\nfps1 " + string.Format("{0:F3}", Math.Round(fpsForUpdate, 3, MidpointRounding.AwayFromZero)) +
-                "\r\nfps2 " + string.Format("{0:F3}", Math.Round(fpsForFixedUpdate, 3, MidpointRounding.AwayFromZero)); // 残りアイテム数表示
             score.text = string.Format("Score\n{0:000000}", scoreValue);
             item.text = string.Format("× {0}/{1}", itemTotalCount - itemRemainCount, itemTotalCount);
             key.text = string.Format("× {0}", hasKeyValue);
