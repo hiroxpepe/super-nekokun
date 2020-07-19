@@ -17031,17 +17031,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a908b24f13b77b648b1412ea5a0bde54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  message: {fileID: 1988690088}
-  debug: {fileID: 910832801}
-  hp: {fileID: 1272602788}
-  speed: {fileID: 1289199771}
-  alt: {fileID: 381206778}
-  fps: {fileID: 593360076}
-  time: {fileID: 1859892643}
-  score: {fileID: 1828160563}
-  item: {fileID: 1115372490}
-  key: {fileID: 1250315100}
-  playerBombAngleUI: {fileID: 2036222334}
+  messageUI: {fileID: 1988690088}
+  debugUI: {fileID: 910832801}
+  hpUI: {fileID: 1272602788}
+  speedUI: {fileID: 1289199771}
+  altUI: {fileID: 381206778}
+  fpsUI: {fileID: 593360076}
+  timeUI: {fileID: 1859892643}
+  scoreUI: {fileID: 1828160563}
+  itemUI: {fileID: 1115372490}
+  keyUI: {fileID: 1250315100}
+  bombAngleUI: {fileID: 2036222334}
   lockonFocusMaterial: {fileID: 2100000, guid: 63f5f9414b0f54f4aa2ace8501310ca2, type: 2}
   mainCamera: {fileID: 625798160}
   eventCamera: {fileID: 609979468}
@@ -18686,7 +18686,7 @@ GameObject:
   - component: {fileID: 2036222333}
   - component: {fileID: 2036222334}
   m_Layer: 5
-  m_Name: Player_Bomb_Angle
+  m_Name: BombAngle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
