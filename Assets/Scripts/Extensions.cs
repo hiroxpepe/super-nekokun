@@ -139,6 +139,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the GameObject's name contains "Key".
+        /// </summary>
+        public static bool LikeKey(this GameObject self) {
+            return self.name.Contains("Key");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "_Piece".
         /// </summary>
         public static bool LikePiece(this GameObject self) {
