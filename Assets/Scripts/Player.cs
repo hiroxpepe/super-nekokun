@@ -2098,7 +2098,7 @@ namespace StudioMeowToon {
             // private Methods [verb]
 
             void init() {
-                _value = 1f;
+                _value = 1.25f;
             }
 
         }
