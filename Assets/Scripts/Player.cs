@@ -56,7 +56,7 @@ namespace StudioMeowToon {
         float bulletSpeed = 5000.0f; // 弾の速度
 
         [SerializeField]
-        GameObject speechImage; // セリフ用吹き出し
+        GameObject speechObject; // セリフオブジェクト
 
         [SerializeField]
         Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
@@ -180,7 +180,7 @@ namespace StudioMeowToon {
                 intoWaterFilter = GameObject.Find("/Canvas"); // 水中カメラエフェクト取得
                 bodyIntoWater = transform.Find("Body").gameObject; // 水中での体取得
                 playerNeck = transform.Find("Bell").gameObject; // 水面判定用
-                speechText = speechImage.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
+                speechText = speechObject.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
             }
 
             // 物理挙動: 初期化
@@ -942,7 +942,7 @@ namespace StudioMeowToon {
 
             #region get damaged
 
-            // 被弾したら FIXME: 音はここでOK？
+            // 被弾したら FIXME: 音はここでOK？ バウンドした弾でも音が鳴る
             this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBullet())
                 .Subscribe(_ => {
                     soundSystem.PlayHitClip();
@@ -1001,7 +1001,7 @@ namespace StudioMeowToon {
             // セリフ追従
             this.UpdateAsObservable()
                 .Subscribe(_ => {
-                    speechImage.transform.position = RectTransformUtility.WorldToScreenPoint(
+                    speechObject.transform.position = RectTransformUtility.WorldToScreenPoint(
                         Camera.main,
                         transform.position + getSpeechOffset(transform.forward)
                     );
@@ -1852,11 +1852,11 @@ namespace StudioMeowToon {
         void say(string text, int size = 60, double time = 0.5d) {
             speechText.text = text;
             speechText.fontSize = size;
-            speechImage.SetActive(true);
+            speechObject.SetActive(true);
             Observable.Timer(TimeSpan.FromSeconds(time))
                 .First()
                 .Subscribe(_ => {
-                    speechImage.SetActive(false);
+                    speechObject.SetActive(false);
                 });
         }
 
@@ -1864,7 +1864,7 @@ namespace StudioMeowToon {
         /// セリフ用吹き出しを非表示にする。
         /// </summary>
         void beSilent() {
-            speechImage.SetActive(false);
+            speechObject.SetActive(false);
         }
 
         #region DoUpdate
@@ -2098,7 +2098,7 @@ namespace StudioMeowToon {
             // private Methods [verb]
 
             void init() {
-                _value = 1f;
+                _value = 1.25f;
             }
 
         }

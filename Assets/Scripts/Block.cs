@@ -43,9 +43,6 @@ namespace StudioMeowToon {
         float movementSpeed = 0.5f;
 
         [SerializeField]
-        GameObject prefabForPiece; // 破片生成用のプレハブ
-
-        [SerializeField]
         bool canPush; // 押すことが出来るかフラグ
 
         [SerializeField]
@@ -67,9 +64,9 @@ namespace StudioMeowToon {
 
         bool positiveZ = true;
 
-        GameObject player; // プレイヤーオブジェクト
+        GameObject playerObject; // プレイヤーオブジェクト
 
-        GameObject item; // アイテムオブジェクト
+        GameObject itemObject; // アイテムオブジェクト
 
         bool isItemOnThis = false; // アイテムオブジェクトが上にのっているかフラグ
 
@@ -81,16 +78,17 @@ namespace StudioMeowToon {
 
         float pushedDistance; // 押された距離
 
+        bool isGrounded; // 接地フラグ
+
         ExplodeParam explodeParam; // 破片生成用のパラメータクラス
 
         DoFixedUpdate doFixedUpdate; // FixedUpdate() メソッド用 フラグ
 
-        // 持たれる機能実装 TODO: _Item を付けなくても持てるように
-        bool isGrounded; // 接地フラグ
-
         Transform leftHandTransform; // Player 持たれる時の左手の位置 Transform
 
         Transform rightHandTransform; // Player 持たれる時の右手の位置 Transform
+
+        // FIXME: 持たれる機能実装 TODO: _Item を付けなくても持てるように
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Properties [noun, adjectives] 
@@ -178,7 +176,7 @@ namespace StudioMeowToon {
         /// Player に下から衝撃を受ける。
         /// </summary>
         public void KnockedUp() {
-            shockedBy = player.transform;
+            shockedBy = playerObject.transform;
         }
 
         // 持たれる実装用
@@ -226,7 +224,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     // 押される
                     if (canPush) { // 押されることが出来るブロックのみ
-                        player = GameObject.FindGameObjectWithTag("Player"); // MEMO:ここで設定しないと NullRef になる。なぜ？
+                        playerObject = GameObject.FindGameObjectWithTag("Player"); // MEMO:ここで設定しないと NullRef になる。なぜ？
                         if (isPushed && (pushedDistance < 1.0f)) { // 1ブロック分押すまで
                             bePushed(); // ブロックを押される
                             return;
@@ -234,7 +232,7 @@ namespace StudioMeowToon {
                             align(); // 位置微調整
                             isPushed = false; // 押されるフラグOFF
                             pushedDistance = 0; // 押される距離リセット
-                            player.transform.parent = null; // 押してるプレイヤーの子オブジェクト化を解除
+                            playerObject.transform.parent = null; // 押してるプレイヤーの子オブジェクト化を解除
                             // TODO: 押せない時のアニメ？
                         }
                     }
@@ -243,8 +241,8 @@ namespace StudioMeowToon {
                     if (!gameObject.LikePiece()) { // 破片ではない場合
                         if (movementToX != 0 || movementToY != 0 || movementToZ != 0) { // TODO: canAutoMove 実装?
                             // FIXME: ブロックの上にアイテムを二つ置いて、また持ったらバグる
-                            if (item == null || item.GetItem().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
-                                item = null;
+                            if (itemObject == null || itemObject.GetItem().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
+                                itemObject = null;
                                 isItemOnThis = false;
                             }
                             moveAuto(); // 自動的に移動する
@@ -308,7 +306,7 @@ namespace StudioMeowToon {
             this.OnCollisionEnterAsObservable().Where(x => x.IsPlayer())
                 .Subscribe(x => {
                     if (isUnderBy(x)) {
-                        player = x.gameObject;
+                        playerObject = x.gameObject;
                         isPlayerOnThis = true;
                     }
                 });
@@ -317,7 +315,7 @@ namespace StudioMeowToon {
             this.OnCollisionEnterAsObservable().Where(x => x.LikeItem())
                 .Subscribe(x => {
                     if (isUnderBy(x)) {
-                        item = x.gameObject;
+                        itemObject = x.gameObject;
                         isItemOnThis = true;
                     }
                 });
@@ -326,7 +324,7 @@ namespace StudioMeowToon {
             this.OnCollisionStayAsObservable().Where(x => x.IsPlayer())
                  .Subscribe(x => {
                      if (isUnderBy(x)) {
-                         player = x.gameObject;
+                         playerObject = x.gameObject;
                          isPlayerOnThis = true;
                      }
                  });
@@ -335,7 +333,7 @@ namespace StudioMeowToon {
             (this).OnCollisionStayAsObservable().Where(x => x.LikeItem())
                  .Subscribe(x => {
                      if (isUnderBy(x)) {
-                         item = x.gameObject;
+                         itemObject = x.gameObject;
                          isItemOnThis = true;
                      }
                  });
@@ -343,14 +341,14 @@ namespace StudioMeowToon {
             // プレイヤーが上から離れた
             this.OnCollisionExitAsObservable().Where(x => x.IsPlayer())
                 .Subscribe(_ => {
-                    player = null;
+                    playerObject = null;
                     isPlayerOnThis = false;
                 });
 
             // アイテムが上から離れた
             this.OnCollisionExitAsObservable().Where(x => x.LikeItem())
                 .Subscribe(_ => {
-                    item = null;
+                    itemObject = null;
                     isItemOnThis = false;
                 });
         }
@@ -374,7 +372,7 @@ namespace StudioMeowToon {
             var _min = -getRandomForce(force);
             var _max = getRandomForce(force);
             for (var i = 0; i < number; i++) { // 破片を生成する
-                var _piece = Instantiate(prefabForPiece);
+                var _piece = Instantiate(gameObject); // 自分を複製する
                 _piece.name += "_Piece"; // 破片には名前に "_Piece" を付加する
                 _piece.transform.localScale = new Vector3(scale, scale, scale);
                 if (_piece.GetRigidbody() == null) {
@@ -453,10 +451,10 @@ namespace StudioMeowToon {
                 } else if(transform.localPosition.x < toReach.x + (_sizeX / 2)) {
                     transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     if (isPlayerOnThis) {
-                        player.transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
+                        playerObject.transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
                     if (isItemOnThis) {
-                        item.transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
+                        itemObject.transform.localPosition += new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
                 }
             // X軸負方向
@@ -466,10 +464,10 @@ namespace StudioMeowToon {
                 } else if(transform.localPosition.x > origin.x) {
                     transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     if (isPlayerOnThis) {
-                        player.transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
+                        playerObject.transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
                     if (isItemOnThis) {
-                        item.transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
+                        itemObject.transform.localPosition -= new Vector3(movementSpeed * Time.deltaTime, 0f, 0f);
                     }
                 }
             }
@@ -480,10 +478,10 @@ namespace StudioMeowToon {
                 } else if(transform.localPosition.y < toReach.y + (_sizeY / 2)) {
                         transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     if (isPlayerOnThis) {
-                        player.transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
+                        playerObject.transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
                     if (isItemOnThis) {
-                        item.transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
+                        itemObject.transform.localPosition += new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
                 }
             // Y軸負方向
@@ -493,10 +491,10 @@ namespace StudioMeowToon {
                 } else if(transform.localPosition.y > origin.y) {
                     transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     if (isPlayerOnThis) {
-                        player.transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
+                        playerObject.transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
                     if (isItemOnThis) {
-                        item.transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
+                        itemObject.transform.localPosition -= new Vector3(0f, movementSpeed * Time.deltaTime, 0f);
                     }
                 }
             }
@@ -507,10 +505,10 @@ namespace StudioMeowToon {
                 } else if(transform.localPosition.z  < toReach.z + (_sizeZ / 2)) {
                     transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     if (isPlayerOnThis) {
-                        player.transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
+                        playerObject.transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
                     if (isItemOnThis) {
-                        item.transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
+                        itemObject.transform.localPosition += new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
                 }
             // Z軸負方向
@@ -520,10 +518,10 @@ namespace StudioMeowToon {
                 } else if(transform.localPosition.z > origin.z) {
                     transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     if (isPlayerOnThis) {
-                        player.transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
+                        playerObject.transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
                     if (isItemOnThis) {
-                        item.transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
+                        itemObject.transform.localPosition -= new Vector3(0f, 0f, movementSpeed * Time.deltaTime);
                     }
                 }
             }
@@ -533,29 +531,29 @@ namespace StudioMeowToon {
         /// ブロックが押される。
         /// </summary>
         void bePushed() {
-            if (transform.name == player.transform.parent.name) { // Player が自分の子オブジェクトなら押されている状況
-                Ray _ray1 = new Ray(getPushedOriginVector3(transform, player.transform.forward, 1), getPushedDirectionVector3(player.transform.forward));
+            if (transform.name == playerObject.transform.parent.name) { // Player が自分の子オブジェクトなら押されている状況
+                Ray _ray1 = new Ray(getPushedOriginVector3(transform, playerObject.transform.forward, 1), getPushedDirectionVector3(playerObject.transform.forward));
                 if (Physics.Raycast(_ray1, out RaycastHit _hit1, 2f)) {
 #if DEBUG
                     Debug.DrawRay(_ray1.origin, _ray1.direction * 2f, Color.cyan, 5, false);
 #endif
                 }
                 float _distance1 = _hit1.distance;
-                Ray _ray2 = new Ray(getPushedOriginVector3(transform, player.transform.forward, 2), getPushedDirectionVector3(player.transform.forward));
+                Ray _ray2 = new Ray(getPushedOriginVector3(transform, playerObject.transform.forward, 2), getPushedDirectionVector3(playerObject.transform.forward));
                 if (Physics.Raycast(_ray2, out RaycastHit _hit2, 2f)) {
 #if DEBUG
                     Debug.DrawRay(_ray2.origin, _ray2.direction * 2f, Color.cyan, 5, false);
 #endif
                 }
                 float _distance2 = _hit2.distance;
-                Ray _ray3 = new Ray(getPushedOriginVector3(transform, player.transform.forward, 3), getPushedDirectionVector3(player.transform.forward));
+                Ray _ray3 = new Ray(getPushedOriginVector3(transform, playerObject.transform.forward, 3), getPushedDirectionVector3(playerObject.transform.forward));
                 if (Physics.Raycast(_ray3, out RaycastHit _hit3, 2f)) {
 #if DEBUG
                     Debug.DrawRay(_ray3.origin, _ray3.direction * 2f, Color.cyan, 5, false);
 #endif
                 }
                 float _distance3 = _hit3.distance;
-                Ray _ray4 = new Ray(getPushedOriginVector3(transform, player.transform.forward, 4), getPushedDirectionVector3(player.transform.forward));
+                Ray _ray4 = new Ray(getPushedOriginVector3(transform, playerObject.transform.forward, 4), getPushedDirectionVector3(playerObject.transform.forward));
                 if (Physics.Raycast(_ray4, out RaycastHit _hit4, 2f)) {
 #if DEBUG
                     Debug.DrawRay(_ray4.origin, _ray4.direction * 2f, Color.cyan, 5, false);
@@ -564,9 +562,9 @@ namespace StudioMeowToon {
                 float _distance4 = _hit4.distance;
                 if ((_distance1 == 0f || _distance1 >= 0.5f) && (_distance2 == 0f || _distance2 >= 0.5f) && (_distance3 == 0f || _distance3 >= 0.5f) && (_distance4 == 0f || _distance4 >= 0.5f)) { // 距離が0か0.5以上なら
                     transform.Translate(
-                        (float) Math.Round(player.transform.forward.x) * Time.deltaTime,
+                        (float) Math.Round(playerObject.transform.forward.x) * Time.deltaTime,
                         0,
-                        (float) Math.Round(player.transform.forward.z) * Time.deltaTime
+                        (float) Math.Round(playerObject.transform.forward.z) * Time.deltaTime
                     );
                     pushedDistance += Time.deltaTime; // 押した距離を足していく
                 } else {
