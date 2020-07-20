@@ -23,7 +23,7 @@ namespace StudioMeowToon {
     /// 草など Player に触れたら透明にする処理
     /// @author h.adachi
     /// </summary>
-    public class TransparentController : MonoBehaviour {
+    public class Transparent : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // update Methods

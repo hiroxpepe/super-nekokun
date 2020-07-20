@@ -24,7 +24,7 @@ namespace StudioMeowToon {
     /// エネミーの処理
     /// @author h.adachi
     /// </summary>
-    public class EnemyController : MonoBehaviour {
+    public class Enemy : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
@@ -269,8 +269,8 @@ namespace StudioMeowToon {
                     doUpdate.ApplyAttacking();
                     soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
                     say("Punch!", 65);
-                    _player.transform.GetComponent<PlayerController>().DecrementLife();
-                    _player.transform.GetComponent<PlayerController>().DamagedByEnemy(transform.forward);
+                    _player.transform.GetComponent<Player>().DecrementLife();
+                    _player.transform.GetComponent<Player>().DamagedByEnemy(transform.forward);
                     Observable.TimerFrame(12) // FIXME: 60fpsの時は？
                         .Subscribe(__ => {
                             doUpdate.ApplyChasing();
@@ -288,8 +288,8 @@ namespace StudioMeowToon {
                         doUpdate.ApplyAttacking();
                         soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
                         say("Take this!", 60);
-                        _player.transform.GetComponent<PlayerController>().DecrementLife();
-                        _player.transform.GetComponent<PlayerController>().DamagedByEnemy(transform.forward);
+                        _player.transform.GetComponent<Player>().DecrementLife();
+                        _player.transform.GetComponent<Player>().DamagedByEnemy(transform.forward);
                         Observable.TimerFrame(12) // FIXME: 60fpsの時は？
                             .Subscribe(__ => {
                                 doUpdate.ApplyChasing();

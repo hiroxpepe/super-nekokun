@@ -215,7 +215,7 @@ namespace StudioMeowToon {
             float _near = 0;
             var _previousTarget = lockonTarget;
             foreach (GameObject _obj in GameObject.FindGameObjectsWithTag(tag)) { // タグで管理する方がシンプル
-                if (_obj.GetComponent<BlockController>().IsRenderedInMainCamera()) { // カメラに写っている場合
+                if (_obj.GetComponent<Block>().IsRenderedInMainCamera()) { // カメラに写っている場合
                     _tmp = Vector3.Distance(_obj.transform.position, player.transform.position); // 自分とオブジェクトの距離を計測
                     if (_near == 0 || _near > _tmp) { // 距離の近いオブジェクトを保存
                         _near = _tmp;
@@ -426,10 +426,6 @@ namespace StudioMeowToon {
             // レベル内の取得可能アイテムの総数を取得
             itemTotalCount = GameObject.FindGameObjectsWithTag("Getable").Length;
             itemRemainCount = itemTotalCount;
-            updateGameStatus();
-
-            // メッセージ初期化、非表示
-            //messageUI.text = "";
 
             // カメラ初期化
             eventCamera.enabled = false;

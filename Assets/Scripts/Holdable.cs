@@ -115,7 +115,7 @@ namespace StudioMeowToon {
                             isGrounded = false; // 接地フラグOFF
                         } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.tag.Equals("Player")) {
                             // 親が Player 継続なら
-                            if (!transform.parent.GetComponent<PlayerController>().Faceing) { // プレイヤーの移動・回転を待つ
+                            if (!transform.parent.GetComponent<Player>().Faceing) { // プレイヤーの移動・回転を待つ
                                 if (transform.parent.transform.position.y > transform.position.y + 0.2f) { // 0.2fは調整値
                                     beHolded(8.0f); // 上から持ち上げられる
                                 } else {
