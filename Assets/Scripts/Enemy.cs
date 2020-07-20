@@ -33,7 +33,7 @@ namespace StudioMeowToon {
         SimpleAnimation simpleAnime;
 
         [SerializeField]
-        GameObject speechImage; // セリフ用吹き出し
+        GameObject speechObject; // セリフオブジェクト
 
         [SerializeField]
         Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
@@ -51,7 +51,7 @@ namespace StudioMeowToon {
 
         float distance; // プレイヤーとの距離
 
-        GameObject plate; // 移動範囲のプレート
+        GameObject plateObject; // 移動範囲のプレート
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // update Methods
@@ -66,12 +66,12 @@ namespace StudioMeowToon {
             soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
 
             // セリフ吹き出し大きさ取得
-            var _rect = speechImage.GetComponent<RectTransform>();
+            var _rect = speechObject.GetComponent<RectTransform>();
             speech.X = _rect.sizeDelta.x;
             speech.Y = _rect.sizeDelta.y;
 
             // セリフ吹き出しテキスト取得
-            speech.Text = speechImage.GetComponentInChildren<Text>();
+            speech.Text = speechObject.GetComponentInChildren<Text>();
         }
 
         // Start is called before the first frame update.
@@ -90,7 +90,7 @@ namespace StudioMeowToon {
             // セリフ追従
             this.UpdateAsObservable()
                 .Subscribe(_ => {
-                    speechImage.transform.position = RectTransformUtility.WorldToScreenPoint(
+                    speechObject.transform.position = RectTransformUtility.WorldToScreenPoint(
                         Camera.main,
                         transform.position + speechOffset
                     );
@@ -122,7 +122,7 @@ namespace StudioMeowToon {
             this.OnCollisionEnterAsObservable()
                 .Where(t => t.gameObject.name.Contains("Plate"))
                 .Subscribe(t => {
-                    plate = t.gameObject;
+                    plateObject = t.gameObject;
                 });
 
             bool _idle = false;
@@ -174,9 +174,9 @@ namespace StudioMeowToon {
                 .Where(t => doUpdate.searching && (t.gameObject.name.Contains("EnemyWall") || t.gameObject.name.Contains("Wall")))
                 .Subscribe(_ => {
                     transform.LookAt(new Vector3( // 接地プレートの中心を向く
-                        plate.transform.position.x,
+                        plateObject.transform.position.x,
                         transform.position.y,
-                        plate.transform.position.z
+                        plateObject.transform.position.z
                     ));
                     say("I hit\nthe wall...");
                 });
@@ -333,15 +333,15 @@ namespace StudioMeowToon {
             // プレイヤーとの距離で大きさ調整
             var _distance = distance > 1 ? (int) (distance / 2) : 1;
             if (_distance == 0) { _distance = 1; }
-            speechImage.GetComponent<RectTransform>().sizeDelta = new Vector2(speech.X / _distance, speech.Y / _distance);
+            speechObject.GetComponent<RectTransform>().sizeDelta = new Vector2(speech.X / _distance, speech.Y / _distance);
             speech.Text.fontSize = size / (int) (_distance * 1.25f); // 調整値
             //Debug.Log("_distance: " + _distance + " x: " + speechImage.GetComponent<RectTransform>().sizeDelta.x + " y: " + speechImage.GetComponent<RectTransform>().sizeDelta.y);
             speech.Text.text = text;
-            speechImage.SetActive(true);
+            speechObject.SetActive(true);
             Observable.Timer(System.TimeSpan.FromSeconds(time))
                 .First()
                 .Subscribe(_ => {
-                    speechImage.SetActive(false);
+                    speechObject.SetActive(false);
                 });
         }
 
@@ -357,7 +357,7 @@ namespace StudioMeowToon {
         /// セリフ用吹き出しを非表示にする。
         /// </summary>
         void beSilent() {
-            speechImage.SetActive(false);
+            speechObject.SetActive(false);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
