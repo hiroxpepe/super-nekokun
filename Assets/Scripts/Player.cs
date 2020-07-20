@@ -61,6 +61,12 @@ namespace StudioMeowToon {
         [SerializeField]
         Vector3 speechOffset = new Vector3(0f, 0f, 0f); // セリフ位置オフセット
 
+        [SerializeField]
+        Sprite speechRightSprite;
+
+        [SerializeField]
+        Sprite speechGizaSprite;
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Fields
 
@@ -96,6 +102,8 @@ namespace StudioMeowToon {
 
         Text speechText; // セリフ用吹き出しテキスト
 
+        Image speechImage; // セリフ用吹き出し画像
+
         float speed; // 速度ベクトル  TODO: speed・position オブジェクト化する
 
         float previousSpeed; // 1フレ前の速度ベクトル
@@ -115,6 +123,7 @@ namespace StudioMeowToon {
         /// </summary>
         public void DecrementLife() {
             life--;
+            speechImage.sprite = speechGizaSprite;
             say("Ouch!", 65);
         }
 
@@ -129,6 +138,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     doUpdate.damaged = false;
                 });
+            speechImage.sprite = speechGizaSprite;
             say("Oh\nmy God!", 65);
         }
 
@@ -181,6 +191,7 @@ namespace StudioMeowToon {
                 bodyIntoWater = transform.Find("Body").gameObject; // 水中での体取得
                 playerNeck = transform.Find("Bell").gameObject; // 水面判定用
                 speechText = speechObject.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
+                speechImage = speechObject.GetComponent<Image>(); // セリフ吹き出し画像取得
             }
 
             // 物理挙動: 初期化
@@ -959,6 +970,7 @@ namespace StudioMeowToon {
                     gameSystem.DecrementItem(); // アイテム数デクリメント
                     doFixedUpdate.getItem = true;
                     Destroy(x.gameObject); // 削除
+                    speechImage.sprite = speechRightSprite;
                     say("I got\na item."); // FIXME: 吹き出しの種類
                     gameSystem.AddScore(50000); // FIXME: 一時的 ⇒ サウンド
                 });
@@ -1161,6 +1173,7 @@ namespace StudioMeowToon {
             // 弾を発射
             _bullet.GetComponent<Rigidbody>().AddForce(_force, ForceMode.Force);
             soundSystem.PlayShootClip();
+            speechImage.sprite = speechRightSprite;
             say("Shot!", 65);
         }
 
@@ -1419,6 +1432,7 @@ namespace StudioMeowToon {
                             var _myY = transform.position.y; // 自分のy位置(0基点)を取得
                             if (_myY < _hitTop) { // 自分が前方オブジェクトより低かったら
                                 doUpdate.climbing = true; // 登るフラグON
+                                speechImage.sprite = speechRightSprite;
                                 say("I grabbed\nthat."); // FIXME: 種別
                             }
                         }
@@ -1449,6 +1463,7 @@ namespace StudioMeowToon {
                         if (_myY < _hitTop) { // 自分が前方オブジェクトより低かったら
                             transform.position += transform.forward * 0.2f * Time.deltaTime * _ADJUST; // 少し前に進む
                             doUpdate.climbing = true; // 登るフラグON
+                            speechImage.sprite = speechRightSprite;
                             say("I grabbed\nthat."); // FIXME: 種別
                         }
                     }
@@ -1662,6 +1677,7 @@ namespace StudioMeowToon {
                                 doUpdate.pushing = true; // 押すフラグON
                                 pushed = _hit.transform.gameObject; // 押されるオブジェクトの参照保存
                                 transform.parent = pushed.transform; // プレイヤーを押されるオブジェクトの子にする
+                                speechImage.sprite = speechRightSprite;
                                 say("I'm going\nto push.");
                                 return true;
                             }
@@ -1712,9 +1728,11 @@ namespace StudioMeowToon {
                                     doUpdate.holding = true; // 持つフラグON
                                     if (holded.LikeKey() && !gameSystem.levelClear) { // TODO: なぜここがクリア時に呼ばれる？
                                         gameSystem.hasKey = true; // キー保持フラグON
+                                        speechImage.sprite = speechRightSprite;
                                         say("Yeah~\nI got\n the Key!", 60, 2d); // FIXME: 種別
                                     }
                                 });
+                            speechImage.sprite = speechRightSprite;
                             say("I'm going\nto have.");
                             return true;
                         }
