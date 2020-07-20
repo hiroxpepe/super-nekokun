@@ -31,7 +31,7 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Constants
 
-        const string MESSAGE_LEVEL_START = "";
+        const string MESSAGE_LEVEL_START = "Get items!";
         const string MESSAGE_LEVEL_CLEAR = "Level Clear!";
         const string MESSAGE_GAME_OVER = "Game Over!";
         const string MESSAGE_GAME_PAUSE = "Pause";
@@ -413,6 +413,15 @@ namespace StudioMeowToon {
                 Time.timeScale = 1f; // 一時停止解除
                 return;
             }
+            // レベルの場合、スタートメッセージ表示、非表示
+            else {
+                messageUI.text = MESSAGE_LEVEL_START;
+                Observable.Timer(System.TimeSpan.FromSeconds(1))
+                    .First()
+                    .Subscribe(_ => {
+                        messageUI.text = "";
+                    });
+            }
 
             // レベル内の取得可能アイテムの総数を取得
             itemTotalCount = GameObject.FindGameObjectsWithTag("Getable").Length;
@@ -420,7 +429,7 @@ namespace StudioMeowToon {
             updateGameStatus();
 
             // メッセージ初期化、非表示
-            messageUI.text = "";
+            //messageUI.text = "";
 
             // カメラ初期化
             eventCamera.enabled = false;
