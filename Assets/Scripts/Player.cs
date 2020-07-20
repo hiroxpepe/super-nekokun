@@ -26,7 +26,7 @@ namespace StudioMeowToon {
     /// プレイヤーの処理
     /// @author h.adachi
     /// </summary>
-    public class PlayerController : GamepadMaper {
+    public class Player : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
@@ -38,7 +38,7 @@ namespace StudioMeowToon {
         SoundSystem soundSystem; // サウンドシステム
 
         [SerializeField]
-        CameraController cameraController; // カメラシステム
+        CameraSystem cameraSystem; // カメラシステム
 
         [SerializeField]
         float jumpPower = 5.0f;
@@ -717,7 +717,7 @@ namespace StudioMeowToon {
             // (Lボタン) 離した(※捕まり反転ジャンプ準備のカメラリセット)
             this.UpdateAsObservable().Where(_ => continueUpdate() && l1Button.wasReleasedThisFrame)
                 .Subscribe(_ => {
-                    cameraController.ResetLookAround(); // カメラ初期化
+                    cameraSystem.ResetLookAround(); // カメラ初期化
                 });
 
             // (Lボタン + 上ボタン) 弾道角度調整※*反応速度
@@ -873,14 +873,14 @@ namespace StudioMeowToon {
                             doUpdate.stairUping = false; // 階段上りフラグOFF
                             doUpdate.stairDowning = false; // 階段下りフラグOFF
                             doFixedUpdate.grounded = true;
-                            cameraController.ResetLookAround(); // カメラ初期化
+                            cameraSystem.ResetLookAround(); // カメラ初期化
                             doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
                             flatToFace(); // 面に合わせる TODO:※試験的
                         } else if (isHitSide(x.gameObject)) {
                             // 下に当たった場合
                             if (isHitBlockBottom(x.gameObject)) {
                                 soundSystem.PlayKnockedupClip();
-                                x.gameObject.GetComponent<CommonController>().shockedBy = transform; // 下から衝撃を与える
+                                x.gameObject.GetComponent<Common>().shockedBy = transform; // 下から衝撃を与える
                             }
                             // 横に当たった場合
                             else {
@@ -896,7 +896,7 @@ namespace StudioMeowToon {
                     soundSystem.PlayGroundedClip();
                     doUpdate.grounded = true; // 接地フラグON
                     doFixedUpdate.grounded = true;
-                    cameraController.ResetLookAround(); // カメラ初期化
+                    cameraSystem.ResetLookAround(); // カメラ初期化
                     doUpdate.secondsAfterJumped = 0f; // ジャンプ後経過秒リセット TODO:※試験的
                     flatToFace(); // 面に合わせる TODO:※試験的
                 });
@@ -1093,7 +1093,7 @@ namespace StudioMeowToon {
             // ブロックを押してる時キャラ操作無効
             if (doUpdate.pushing && transform.parent != null) {
                 simpleAnime.Play("Push"); // 押すアニメ
-                pushed.GetComponent<BlockController>().pushed = true; // ブロックを押すフラグON
+                pushed.GetComponent<Block>().pushed = true; // ブロックを押すフラグON
                 return false;
             // 押してるブロックの子オブジェクト化が解除されたら
             } else if (doUpdate.pushing && transform.parent == null) {
@@ -1409,7 +1409,7 @@ namespace StudioMeowToon {
                     _hit.transform.name.Contains("Ladder") ||
                     _hit.transform.name.Contains("Wall") ||
                     _hit.transform.name.Contains("Ground")) { // ブロック、ハシゴ、壁、地面で
-                    if (_hit.transform.GetComponent<CommonController>().climbable) { // 登ることが可能なら
+                    if (_hit.transform.GetComponent<Common>().climbable) { // 登ることが可能なら
                         var _hitTop = getRaycastHitTop(_hit); // 前方オブジェクトのtop位置を取得
 #if DEBUG
                         Debug.DrawRay(_ray.origin, _ray.direction * 0.2f, Color.green, 3, false); //レイを可視化
@@ -1655,7 +1655,7 @@ namespace StudioMeowToon {
 #endif 
                 // TODO: 押し可能なブロックの判定
                 if (_hit.transform.name.Contains("Block")) { // 押せるのはブロックのみ
-                    if (_hit.transform.GetComponent<BlockController>().pushable) { // 押せるブロックの場合
+                    if (_hit.transform.GetComponent<Block>().pushable) { // 押せるブロックの場合
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                         if (_distance < 0.3) { // 距離が近くなら
                             if (!doUpdate.pushing) { // 押してない
@@ -1700,7 +1700,7 @@ namespace StudioMeowToon {
                                 .Select(_ => !doUpdate.faceing && holded != null && !doUpdate.holding) // なぜ Where だとダメ？
                                 .Subscribe(_ => {
                                     if (holded.tag.Equals("Block")) {
-                                        var _blockController = holded.GetComponent<BlockController>();
+                                        var _blockController = holded.GetComponent<Block>();
                                         leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
                                         rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
                                     } else if (holded.tag.Equals("Holdable")) {

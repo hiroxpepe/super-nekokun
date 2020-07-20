@@ -25,7 +25,7 @@ namespace StudioMeowToon {
     /// ※持てるアイテムにリジッドボディは扱いずらいので外している
     /// @author h.adachi
     /// </summary>
-    public class ItemController : MonoBehaviour {
+    public class Item : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]

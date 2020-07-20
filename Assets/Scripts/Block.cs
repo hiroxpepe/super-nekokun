@@ -25,7 +25,7 @@ namespace StudioMeowToon {
     /// ブロックの処理
     /// @author h.adachi
     /// </summary>
-    public class BlockController : CommonController {
+    public class Block : Common {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
@@ -162,7 +162,7 @@ namespace StudioMeowToon {
                         _child.GetRigidbody().isKinematic = false;
                     }
                     if (_child != null && _child.LikeLadderBody()) { // ハシゴの場合
-                        _child.GetCommonController().autoDestroyAfter = 5.0f; // 5秒後に自動消去
+                        _child.GetCommon().autoDestroyAfter = 5.0f; // 5秒後に自動消去
                     }
                 });
                 explodeParam = ExplodeParam.getDefaultInstance(); // 破片生成パラメータ作成
@@ -243,7 +243,7 @@ namespace StudioMeowToon {
                     if (!gameObject.LikePiece()) { // 破片ではない場合
                         if (movementToX != 0 || movementToY != 0 || movementToZ != 0) { // TODO: canAutoMove 実装?
                             // FIXME: ブロックの上にアイテムを二つ置いて、また持ったらバグる
-                            if (item == null || item.GetItemController().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
+                            if (item == null || item.GetItem().holdedByPlayer) { // アイテムがプレイヤーに持たれた時
                                 item = null;
                                 isItemOnThis = false;
                             }
@@ -275,7 +275,7 @@ namespace StudioMeowToon {
                             isGrounded = false; // 接地フラグOFF
                         } else if (!isGrounded && transform.parent != null && transform.parent.gameObject.IsPlayer()) {
                             // 親が Player 継続なら
-                            if (!transform.parent.GetPlayerController().Faceing) { // プレイヤーの移動・回転を待つ
+                            if (!transform.parent.GetPlayer().Faceing) { // プレイヤーの移動・回転を待つ
                                     if (transform.parent.transform.position.y > transform.position.y + 0.2f) { // 0.2fは調整値
                                     beHolded(8.0f); // 上から持ち上げられる
                                 } else {
@@ -390,7 +390,7 @@ namespace StudioMeowToon {
                         Destroy(_child.gameObject); // 破片の子オブジェクトは最初に削除
                     }
                 });
-                _piece.GetBlockController().autoDestroy = true; // 2秒後に破片を消去する
+                _piece.GetBlock().autoDestroy = true; // 2秒後に破片を消去する
             }
         }
 

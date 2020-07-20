@@ -22,7 +22,7 @@ namespace StudioMeowToon {
     /// <summary>
     /// @author h.adachi
     /// </summary>
-    public class BillBoardController : MonoBehaviour {
+    public class BillBoard : MonoBehaviour {
 
         // Awake is called when the script instance is being loaded.
         protected void Awake() {

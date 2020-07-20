@@ -20,7 +20,7 @@ using UnityEngine;
 /// コンパスの処理
 /// @author h.adachi
 /// </summary>
-public class CompassController : MonoBehaviour {
+public class Compass : MonoBehaviour {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]

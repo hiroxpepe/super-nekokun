@@ -23,7 +23,7 @@ namespace StudioMeowToon {
     /// 弾の処理
     /// @author h.adachi
     /// </summary>
-    public class BulletController : MonoBehaviour {
+    public class Bullet : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
@@ -72,15 +72,15 @@ namespace StudioMeowToon {
                     if (!hits) { // 初回ヒットのみ破壊の対象
                         // Block に接触した場合
                         if (t.transform.name.Contains("Block")) {
-                            t.transform.GetComponent<BlockController>().DestroyWithDebris(transform); // 弾の transform を渡す
-                            if (t.transform.GetComponent<BlockController>().destroyable) { // この一撃で破壊可能かどうか
+                            t.transform.GetComponent<Block>().DestroyWithDebris(transform); // 弾の transform を渡す
+                            if (t.transform.GetComponent<Block>().destroyable) { // この一撃で破壊可能かどうか
                                 soundSystem.PlayExplosionClip(); // 破壊した
                             } else {
                                 soundSystem.PlayDamageClip(); // ダメージを与えた
                             }
                             // Player に接触した場合
                         } else if (t.transform.tag.Contains("Player")) {
-                            t.transform.GetComponent<PlayerController>().DecrementLife();
+                            t.transform.GetComponent<Player>().DecrementLife();
                         }
                         // TODO: ボスの破壊
                     }

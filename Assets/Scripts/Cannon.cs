@@ -23,7 +23,7 @@ namespace StudioMeowToon {
     /// 砲台の処理
     /// @author h.adachi
     /// </summary>
-    public class CannonController : MonoBehaviour {
+    public class Cannon : MonoBehaviour {
 
         // TODO: 砲台から弾が飛んでくる：赤-半誘導弾、青-通常弾
 

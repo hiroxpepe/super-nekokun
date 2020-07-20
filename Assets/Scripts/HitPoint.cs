@@ -16,5 +16,5 @@
 
 using UnityEngine;
 
-public class HitPointController : MonoBehaviour{
+public class HitPoint : MonoBehaviour{
 }

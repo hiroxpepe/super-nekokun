@@ -23,7 +23,7 @@ namespace StudioMeowToon {
     /// オブジェクトの共通処理
     /// @author h.adachi
     /// </summary>
-    public class CommonController : MonoBehaviour {
+    public class Common : MonoBehaviour {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]

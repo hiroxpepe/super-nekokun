@@ -23,7 +23,7 @@ namespace StudioMeowToon {
     /// カメラ関連の処理
     /// @author h.adachi
     /// </summary>
-    public class CameraController : GamepadMaper {
+    public class CameraSystem : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Fields
