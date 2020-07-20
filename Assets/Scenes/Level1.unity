@@ -9305,7 +9305,7 @@ PrefabInstance:
     - target: {fileID: 9163533960024795161, guid: 0fcdb0e5c8dfc524da11870ccb465227,
         type: 3}
       propertyPath: m_Color.a
-      value: 0.6509804
+      value: 0.69803923
       objectReference: {fileID: 0}
     - target: {fileID: 9163533960024795161, guid: 0fcdb0e5c8dfc524da11870ccb465227,
         type: 3}
@@ -19766,7 +19766,7 @@ PrefabInstance:
     - target: {fileID: 9163533960024795161, guid: 0fcdb0e5c8dfc524da11870ccb465227,
         type: 3}
       propertyPath: m_Color.a
-      value: 0.6509804
+      value: 0.69803923
       objectReference: {fileID: 0}
     - target: {fileID: 9163533960024795161, guid: 0fcdb0e5c8dfc524da11870ccb465227,
         type: 3}
@@ -20222,7 +20222,7 @@ PrefabInstance:
     - target: {fileID: 7758757908334293911, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
       propertyPath: m_Color.a
-      value: 0.6509804
+      value: 0.69803923
       objectReference: {fileID: 0}
     - target: {fileID: 7758757908334293911, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
@@ -20291,6 +20291,24 @@ PrefabInstance:
       propertyPath: speechObject
       value: 
       objectReference: {fileID: 588429236}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: gizaSprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 70368155b73a94f48b84e49e984288db,
+        type: 3}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: speechRightSprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 691bc5900f2b5064382ff6f1e58b1799,
+        type: 3}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: speechGizaSprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 70368155b73a94f48b84e49e984288db,
+        type: 3}
     - target: {fileID: 7888001161674707047, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
       propertyPath: m_Mass
