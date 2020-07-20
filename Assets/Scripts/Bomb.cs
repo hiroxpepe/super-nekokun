@@ -24,7 +24,7 @@ namespace StudioMeowToon {
     /// 爆弾の処理
     /// @author h.adachi
     /// </summary>
-    public class BombController : MonoBehaviour {
+    public class Bomb : MonoBehaviour {
         // プレーヤーと、敵(エネミー、砲台)が同じように使えるように。
         // 起爆スイッチを用意する。
         // 何秒後に爆発するか設定出来る。
@@ -82,7 +82,7 @@ namespace StudioMeowToon {
                     Observable.Timer(System.TimeSpan.FromSeconds(timer))
                         .Subscribe(__ => {
                             if (transform.parent != null && transform.parent.name.Equals("Player")) { // まだプレイヤーに持たれていたら
-                                transform.parent.GetComponent<PlayerController>().PurgeFromBomb(); // 強制パージ TODO: 要る？
+                                transform.parent.GetComponent<Player>().PurgeFromBomb(); // 強制パージ TODO: 要る？
                             }
                             Destroy(gameObject); // 自分を削除して
                             explodePiece(6, 0.75f, 25); // 破片を飛ばす
@@ -118,7 +118,7 @@ namespace StudioMeowToon {
                         Destroy(_child.gameObject); // 破片の子オブジェクトは最初に削除
                     }
                 });
-                _piece.GetComponent<BlockController>().autoDestroy = true; // 2秒後に破片を消去する
+                _piece.GetComponent<Block>().autoDestroy = true; // 2秒後に破片を消去する
             }
         }
 

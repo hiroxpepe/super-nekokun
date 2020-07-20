@@ -20166,6 +20166,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1321931429531448903, guid: 477053a81932de148ab6336b179a6570,
         type: 3}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: cameraSystem
+      value: 
+      objectReference: {fileID: 715344191}
     - target: {fileID: 7888001161674707047, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
       propertyPath: m_Mass
@@ -20289,7 +20294,7 @@ PrefabInstance:
     - target: {fileID: 7888001162764289584, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
       propertyPath: m_Name
-      value: CameraController
+      value: CameraSystem
       objectReference: {fileID: 0}
     - target: {fileID: 7888001162764289591, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}

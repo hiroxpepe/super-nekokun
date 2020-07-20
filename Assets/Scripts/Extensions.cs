@@ -227,38 +227,38 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// get the CommonController object.
+        /// get the Common object.
         /// </summary>
-        public static CommonController GetCommonController(this GameObject self) {
-            return self.GetComponent<CommonController>();
+        public static Common GetCommon(this GameObject self) {
+            return self.GetComponent<Common>();
         }
 
         /// <summary>
-        /// get the CommonController object.
+        /// get the Common object.
         /// </summary>
-        public static CommonController GetCommonController(this Transform self) {
-            return self.GetComponent<CommonController>();
+        public static Common GetCommon(this Transform self) {
+            return self.GetComponent<Common>();
         }
 
         /// <summary>
-        /// get the ItemController object. 
+        /// get the Item object. 
         /// </summary>
-        public static ItemController GetItemController(this GameObject self) {
-            return self.GetComponent<ItemController>();
+        public static Item GetItem(this GameObject self) {
+            return self.GetComponent<Item>();
         }
 
         /// <summary>
-        /// get the BlockController object. 
+        /// get the Block object. 
         /// </summary>
-        public static BlockController GetBlockController(this GameObject self) {
-            return self.GetComponent<BlockController>();
+        public static Block GetBlock(this GameObject self) {
+            return self.GetComponent<Block>();
         }
 
         /// <summary>
-        /// get the PlayerController object.
+        /// get the Player object.
         /// </summary>
-        public static PlayerController GetPlayerController(this Transform self) {
-            return self.GetComponent<PlayerController>();
+        public static Player GetPlayer(this Transform self) {
+            return self.GetComponent<Player>();
         }
 
         /// <summary>

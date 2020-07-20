@@ -23,7 +23,7 @@ namespace StudioMeowToon {
     /// キーボックスの処理
     /// @author h.adachi
     /// </summary>
-    public class KeyBoxController : MonoBehaviour {
+    public class KeyBox : MonoBehaviour {
         // Start is called before the first frame update
         void Start() {
             // プレイヤーがキーを持って接触したら
