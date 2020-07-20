@@ -336,8 +336,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 372159f98f602c54f91131086b1d5479, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 824995022}
-  needle: {fileID: 1956572098}
+  playerObject: {fileID: 824995015}
+  needleObject: {fileID: 1956572098}
 --- !u!1001 &57592955
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5138,8 +5138,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0883455da93072441a81d650501e65aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 824995015}
-  bullet: {fileID: 4307486491026482141, guid: a768cc40955336e478b0c400d8da02c8, type: 3}
+  playerObject: {fileID: 824995015}
+  bulletObject: {fileID: 4307486491026482141, guid: a768cc40955336e478b0c400d8da02c8,
+    type: 3}
   bulletSpeed: 2000
 --- !u!4 &645063195 stripped
 Transform:
@@ -6695,12 +6696,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7888001162810383443}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &824995022 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7888001162522504372, guid: 3483b432c4115504a8aa6274b37454db,
-    type: 3}
-  m_PrefabInstance: {fileID: 7888001162810383443}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &835005497
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7401,8 +7396,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0883455da93072441a81d650501e65aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 824995015}
-  bullet: {fileID: 4307486491026482141, guid: a768cc40955336e478b0c400d8da02c8, type: 3}
+  playerObject: {fileID: 824995015}
+  bulletObject: {fileID: 4307486491026482141, guid: a768cc40955336e478b0c400d8da02c8,
+    type: 3}
   bulletSpeed: 2000
 --- !u!1 &910832799
 GameObject:
@@ -9121,6 +9117,11 @@ PrefabInstance:
       propertyPath: speechOffset.y
       value: 1.1
       objectReference: {fileID: 0}
+    - target: {fileID: 2400239665097747347, guid: 0fcdb0e5c8dfc524da11870ccb465227,
+        type: 3}
+      propertyPath: speechObject
+      value: 
+      objectReference: {fileID: 1745445225}
     - target: {fileID: 2610006528908762168, guid: 0fcdb0e5c8dfc524da11870ccb465227,
         type: 3}
       propertyPath: m_Enabled
@@ -10684,6 +10685,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1272602785}
   m_CullTransparentMesh: 0
+--- !u!1 &1279282553 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1260907266678818467, guid: 0fcdb0e5c8dfc524da11870ccb465227,
+    type: 3}
+  m_PrefabInstance: {fileID: 4257164216903759400}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1280367809
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13535,6 +13542,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 559616338}
     m_Modifications:
+    - target: {fileID: 4184645724284113895, guid: 4bb906fc4627f2e41a821873aca96190,
+        type: 3}
+      propertyPath: pieceObject
+      value: 
+      objectReference: {fileID: 1168716093891375299, guid: e90dd3aba2760cf44ba3b929acaee025,
+        type: 3}
     - target: {fileID: 5788140034182658947, guid: 4bb906fc4627f2e41a821873aca96190,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -14351,6 +14364,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 559616338}
     m_Modifications:
+    - target: {fileID: 4184645724284113895, guid: 4bb906fc4627f2e41a821873aca96190,
+        type: 3}
+      propertyPath: pieceObject
+      value: 
+      objectReference: {fileID: 1168716093891375299, guid: e90dd3aba2760cf44ba3b929acaee025,
+        type: 3}
     - target: {fileID: 5788140034182658947, guid: 4bb906fc4627f2e41a821873aca96190,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -14942,6 +14961,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d8dcd426a679c1841b6e48c430a0ad81, type: 3}
+--- !u!1 &1745445225 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1260907266678818467, guid: 0fcdb0e5c8dfc524da11870ccb465227,
+    type: 3}
+  m_PrefabInstance: {fileID: 1094160979}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1749300801 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7964459419958828476, guid: af6c367488fcf5349b728996a8a43801,
@@ -15849,8 +15874,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0883455da93072441a81d650501e65aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 824995015}
-  bullet: {fileID: 4307486491026482141, guid: a768cc40955336e478b0c400d8da02c8, type: 3}
+  playerObject: {fileID: 824995015}
+  bulletObject: {fileID: 4307486491026482141, guid: a768cc40955336e478b0c400d8da02c8,
+    type: 3}
   bulletSpeed: 2000
 --- !u!4 &1821530847 stripped
 Transform:
@@ -18710,7 +18736,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 303, y: 295}
+  m_AnchoredPosition: {x: 469, y: 295}
   m_SizeDelta: {x: 20, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2036222334
@@ -19302,6 +19328,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 559616338}
     m_Modifications:
+    - target: {fileID: 4184645724284113895, guid: 4bb906fc4627f2e41a821873aca96190,
+        type: 3}
+      propertyPath: pieceObject
+      value: 
+      objectReference: {fileID: 1168716093891375299, guid: e90dd3aba2760cf44ba3b929acaee025,
+        type: 3}
     - target: {fileID: 5788140034182658947, guid: 4bb906fc4627f2e41a821873aca96190,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -19535,6 +19567,11 @@ PrefabInstance:
       propertyPath: speechOffset.y
       value: 1.1
       objectReference: {fileID: 0}
+    - target: {fileID: 2400239665097747347, guid: 0fcdb0e5c8dfc524da11870ccb465227,
+        type: 3}
+      propertyPath: speechObject
+      value: 
+      objectReference: {fileID: 1279282553}
     - target: {fileID: 3301035843025261357, guid: 0fcdb0e5c8dfc524da11870ccb465227,
         type: 3}
       propertyPath: m_Layer
@@ -20171,6 +20208,11 @@ PrefabInstance:
       propertyPath: cameraSystem
       value: 
       objectReference: {fileID: 715344191}
+    - target: {fileID: 7888001161674707045, guid: 3483b432c4115504a8aa6274b37454db,
+        type: 3}
+      propertyPath: speechObject
+      value: 
+      objectReference: {fileID: 588429236}
     - target: {fileID: 7888001161674707047, guid: 3483b432c4115504a8aa6274b37454db,
         type: 3}
       propertyPath: m_Mass

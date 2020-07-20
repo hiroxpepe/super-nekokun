@@ -39,7 +39,7 @@ namespace StudioMeowToon {
         int timer = 5;
 
         [SerializeField]
-        GameObject prefabForPiece; // 破片生成用のプレハブ
+        GameObject pieceObject; // 破片生成用のプレハブ
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Fields
@@ -101,7 +101,7 @@ namespace StudioMeowToon {
             var _min = -getRandomForce(force);
             var _max = getRandomForce(force);
             for (var i = 0; i < number; i++) { // 破片を生成する // TODO: 時間差で破片を生成する？
-                var _piece = Instantiate(prefabForPiece);
+                var _piece = Instantiate(pieceObject);
                 _piece.name += "_Piece"; // 破片には名前に "_Piece" を付加する
                 _piece.transform.localScale = new Vector3(scale, scale, scale);
                 _piece.transform.position = transform.position; // MEMO:親の位置を入れる必要があった

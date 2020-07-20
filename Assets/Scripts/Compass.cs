@@ -26,17 +26,17 @@ public class Compass : MonoBehaviour {
     // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
     [SerializeField]
-    Transform player;
+    GameObject playerObject;
 
     [SerializeField]
-    GameObject needle;
+    GameObject needleObject;
 
     ///////////////////////////////////////////////////////////////////////////
     // update Methods
 
     void LateUpdate() {
-        Quaternion _q = player.transform.rotation; // プレーヤーの y 軸を コンパスの z軸に設定する
-        needle.transform.rotation = Quaternion.Euler(0f, 0f, -_q.eulerAngles.y);
+        Quaternion _q = playerObject.transform.rotation; // プレーヤーの y 軸を コンパスの z軸に設定する
+        needleObject.transform.rotation = Quaternion.Euler(0f, 0f, -_q.eulerAngles.y);
     }
 
 }

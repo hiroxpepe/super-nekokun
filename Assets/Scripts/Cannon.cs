@@ -28,16 +28,19 @@ namespace StudioMeowToon {
         // TODO: 砲台から弾が飛んでくる：赤-半誘導弾、青-通常弾
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
-        // Fields
+        // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
-        GameObject player; // プレイヤー
+        GameObject playerObject; // プレイヤー
 
         [SerializeField]
-        GameObject bullet; // 弾の元
+        GameObject bulletObject; // 弾の元
 
         [SerializeField]
         float bulletSpeed = 2000f; // 弾の速度
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // Fields
 
         SoundSystem soundSystem; // サウンドシステム
 
@@ -59,12 +62,12 @@ namespace StudioMeowToon {
                     var _random = Mathf.FloorToInt(Random.Range(0.0f, 175.0f));
                     if (_random == 3.0f) { // 3の時だけ
                         float _SPEED = 50.0f; // 回転スピード
-                        Vector3 _look = player.transform.position - transform.position; // ターゲット方向へのベクトル
+                        Vector3 _look = playerObject.transform.position - transform.position; // ターゲット方向へのベクトル
                         Quaternion _rotation = Quaternion.LookRotation(new Vector3(_look.x, _look.y + 0.5f, _look.z)); // 回転情報に変換 // TODO: 距離が遠い時に
                         transform.rotation = Quaternion.Slerp(transform.rotation, _rotation, _SPEED * Time.deltaTime); // 徐々に回転
 
                         // 弾の複製
-                        var _bullet = Instantiate(bullet) as GameObject;
+                        var _bullet = Instantiate(bulletObject) as GameObject;
 
                         // 弾の位置
                         var _pos = transform.position + transform.forward * 1.7f; // 前進させないと弾のコライダーが自分に当たる
