@@ -29,6 +29,14 @@ namespace StudioMeowToon {
     public class GameSystem : GamepadMaper {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
+        // Constants
+
+        const string MESSAGE_LEVEL_START = "";
+        const string MESSAGE_LEVEL_CLEAR = "Level Clear!";
+        const string MESSAGE_GAME_OVER = "Game Over!";
+        const string MESSAGE_GAME_PAUSE = "Pause";
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
@@ -80,11 +88,11 @@ namespace StudioMeowToon {
 
         int itemRemainCount = 0; // アイテム残数
 
-        bool isGameOver = false; // GAMEオーバーフラグ
+        bool isGameOver = false; // ゲームオーバーフラグ
 
-        bool isLevelClear = false; // ステージクリアフラグ
+        bool isLevelClear = false; // レベルクリアフラグ
 
-        float lifeValue = 10f; // Player HP
+        float lifeValue = 10f; // プレイヤー HP
 
         float speedValue = 0f; // プレイヤー 速度
 
@@ -94,7 +102,7 @@ namespace StudioMeowToon {
 
         int hasKeyValue = 0; // キー保持
 
-        float bombAngleValue = 0f; // Player 弾道角度
+        float bombAngleValue = 0f; // プレイヤー 弾道角度
 
         GameObject lockonTarget = null; // ロックオン対象
 
@@ -106,15 +114,11 @@ namespace StudioMeowToon {
 
         bool isEventView = false; // イベント中かどうか
 
-        // FPS計測
-
         int fpsForUpdateFrameCount; // FPSフレームカウント
 
         float fpsForUpdatePreviousTime; // FPS前フレーム秒
 
         float fpsForUpdate = 0f; // FPS
-
-        // FPS計測 Fixed
 
         int fpsForFixedUpdateFrameCount; // FixedUpdate() FPSフレームカウント
 
@@ -129,7 +133,7 @@ namespace StudioMeowToon {
             get => isGameOver;
         }
 
-        public bool levelClear { // ステージをクリアしたかどうかを返す
+        public bool levelClear { // レベルをクリアしたかどうかを返す
             get => isLevelClear;
         }
 
@@ -199,8 +203,8 @@ namespace StudioMeowToon {
         /// </summary>
         public void ClearLevel() {
             Time.timeScale = 0f;
-            isLevelClear = true; // ステージクリアフラグON
-            messageUI.text = "Level Clear!"; // クリアメッセージ表示
+            isLevelClear = true;
+            messageUI.text = MESSAGE_LEVEL_CLEAR;
         }
 
         /// <summary>
@@ -242,7 +246,7 @@ namespace StudioMeowToon {
         new void Start() {
             base.Start();
 
-            // シーン名取得
+            // レベル名取得
             var _activeSceneName = SceneManager.GetActiveScene().name;
 
             #region time.
@@ -256,14 +260,22 @@ namespace StudioMeowToon {
                     timeUI.text = string.Format("Time\n{0:000}", 999f - Math.Round(_stopwatch.Elapsed.TotalSeconds, 0, MidpointRounding.AwayFromZero));
                 });
 
-            // ポーズ中: 経過時間測定 一時停止
+            // ポーズ: 実行・解除
+            this.UpdateAsObservable()
+                .Where(_ => _activeSceneName.Contains("Level") && startButton.wasPressedThisFrame && !isLevelClear)
+                .Subscribe(_ => {
+                    if (isPausing) { Time.timeScale = 1f; messageUI.text = ""; } else { Time.timeScale = 0f; messageUI.text = MESSAGE_GAME_PAUSE; }
+                    isPausing = !isPausing;
+                });
+
+            // ポーズ: 実行中、経過時間測定 一時停止
             this.UpdateAsObservable()
                 .Where(_ => _activeSceneName.Contains("Level") && startButton.isPressed && !isLevelClear && isPausing)
                 .Subscribe(_ => {
                     _stopwatch.Stop();
                 });
 
-            // ポーズ解除: 経過時間測定 再開
+            // ポーズ: 解除、経過時間測定 再開
             this.UpdateAsObservable()
                 .Where(_ => _activeSceneName.Contains("Level") && startButton.isPressed && !isLevelClear && !isPausing)
                 .Subscribe(_ => {
@@ -272,27 +284,19 @@ namespace StudioMeowToon {
 
             #endregion
 
-            #region mobile phone vibration.
+            #region update screen.
 
-            // ボタンを押したらスマホ振動
-            this.UpdateAsObservable()
-                .Where(_ => virtualController && useVibration && (aButton.wasPressedThisFrame || bButton.wasPressedThisFrame || xButton.wasPressedThisFrame || yButton.wasPressedThisFrame ||
-                    upButton.wasPressedThisFrame || downButton.wasPressedThisFrame || leftButton.wasPressedThisFrame || rightButton.wasPressedThisFrame ||
-                    l1Button.wasPressedThisFrame || r1Button.wasPressedThisFrame || selectButton.wasPressedThisFrame || startButton.wasPressedThisFrame))
+            // 画面情報表示の更新
+            this.UpdateAsObservable().Where(_ => !_activeSceneName.Equals("Start"))
                 .Subscribe(_ => {
-                    AndroidVibrator.Vibrate(50L);
-                });
-
-            // スタート、Xボタン同時押しでスマホの振動なし
-            this.UpdateAsObservable()
-                .Where(_ => (xButton.isPressed && startButton.wasPressedThisFrame) || (xButton.wasPressedThisFrame && startButton.isPressed))
-                .Subscribe(_ => {
-                    useVibration = !useVibration;
+                    checkGameStatus(); // ゲーム ステイタス確認
+                    updateGameStatus(); // ゲーム ステイタス更新
+                    updatePlayerStatus(); // プレイヤー ステイタス更新
                 });
 
             #endregion
 
-            // シーン Start での遷移操作
+            // レベル Start での遷移操作
             this.UpdateAsObservable().Where(_ => _activeSceneName == "Start")
                 .Subscribe(_ => {
                     if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
@@ -300,7 +304,7 @@ namespace StudioMeowToon {
                     }
                 });
 
-            // シーン Level1 での遷移操作
+            // レベル Level1 での遷移操作
             this.UpdateAsObservable().Where(_ => _activeSceneName == "Level1")
                 .Subscribe(_ => {
                     if (selectButton.wasPressedThisFrame) {
@@ -308,33 +312,16 @@ namespace StudioMeowToon {
                     }
                 });
 
-            // ポーズ(一時停止)実行・解除
-            this.UpdateAsObservable()
-                .Where(_ => _activeSceneName.Contains("Level") && startButton.wasPressedThisFrame && !isLevelClear)
-                .Subscribe(_ => {
-                    if (isPausing) { Time.timeScale = 1f; messageUI.text = ""; } 
-                    else { Time.timeScale = 0f; messageUI.text = "Pause"; }
-                    isPausing = !isPausing;
-                });
-
-            // ステージをクリアした・GAMEオーバーした場合
+            // レベルをクリアした・ゲームオーバーした場合
             this.UpdateAsObservable().Where(_ => (_activeSceneName != "Start") &&
                 this.levelClear || this.gameOver)
                 .Subscribe(_ => {
                     isPausing = !isPausing;
                 });
 
-            // 画面情報表示の更新
-            this.UpdateAsObservable().Where(_ => !_activeSceneName.Equals("Start"))
-                .Subscribe(_ => {
-                    checkGameStatus(); // GAMEオーバー確認
-                    updateGameStatus();
-                    updatePlayerStatus();
-                });
-
             #region all cannons are destroyed, field enemies emerge.
 
-            // 砲台全破壊 ⇒ フィールド敵出現
+            // 砲台全破壊したら、フィールド敵出現
             var _cannon = GameObject.Find("Cannon");
             this.UpdateAsObservable()
                 .First(_ => _activeSceneName.Contains("Level") && _cannon.transform.childCount == 0)
@@ -386,6 +373,26 @@ namespace StudioMeowToon {
 
             #endregion
 
+            #region mobile phone vibration.
+
+            // ボタンを押したらスマホ振動
+            this.UpdateAsObservable()
+                .Where(_ => virtualController && useVibration && (aButton.wasPressedThisFrame || bButton.wasPressedThisFrame || xButton.wasPressedThisFrame || yButton.wasPressedThisFrame ||
+                    upButton.wasPressedThisFrame || downButton.wasPressedThisFrame || leftButton.wasPressedThisFrame || rightButton.wasPressedThisFrame ||
+                    l1Button.wasPressedThisFrame || r1Button.wasPressedThisFrame || selectButton.wasPressedThisFrame || startButton.wasPressedThisFrame))
+                .Subscribe(_ => {
+                    AndroidVibrator.Vibrate(50L);
+                });
+
+            // スタート、Xボタン同時押しでスマホの振動なし
+            this.UpdateAsObservable()
+                .Where(_ => (xButton.isPressed && startButton.wasPressedThisFrame) || (xButton.wasPressedThisFrame && startButton.isPressed))
+                .Subscribe(_ => {
+                    useVibration = !useVibration;
+                });
+
+            #endregion
+
             #region debug mode message.
 
             initFpsForUpdate(); // FPS初期化
@@ -432,8 +439,8 @@ namespace StudioMeowToon {
         void checkGameStatus() {
             if (lifeValue == 0) {
                 Time.timeScale = 0f;
-                isGameOver = true; // GAMEオーバーフラグON
-                messageUI.text = "Game Over!"; // GAMEオーバーメッセージ表示
+                isGameOver = true; // ゲームオーバーフラグON
+                messageUI.text = MESSAGE_GAME_OVER;
                 if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
                     SceneManager.LoadScene("Start");
                 }
