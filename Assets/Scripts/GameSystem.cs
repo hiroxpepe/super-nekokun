@@ -165,24 +165,39 @@ namespace StudioMeowToon {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // public Methods [verb]
 
-        public void GameStart() {
-            SceneManager.LoadScene("Level1"); // Level1に遷移
+        /// <summary>
+        /// Level スタート
+        /// </summary>
+        public void StartLevel() {
+            SceneManager.LoadScene("Level1");
         }
 
-        public void Return() {
-            SceneManager.LoadScene("Start"); // スタート画面に戻る
+        /// <summary>
+        /// スタート画面に戻る
+        /// </summary>
+        public void ReturnStart() {
+            SceneManager.LoadScene("Start");
         }
 
+        /// <summary>
+        /// アイテム数デクリメント
+        /// </summary>
         public void DecrementItem() {
-            itemRemainCount--; // アイテム数デクリメント
-            updateGameInfo(); // TODO: OnGUI ?
+            itemRemainCount--;
+            updateGameStatus();
         }
 
+        /// <summary>
+        /// スコア加算
+        /// </summary>
         public void AddScore(int value) {
-            scoreValue += value;// スコア加算
+            scoreValue += value;
         }
 
-        public void ClearLevel() { // Levelクリア
+        /// <summary>
+        /// Level クリア
+        /// </summary>
+        public void ClearLevel() {
             Time.timeScale = 0f;
             isLevelClear = true; // ステージクリアフラグON
             messageUI.text = "Level Clear!"; // クリアメッセージ表示
@@ -229,10 +244,6 @@ namespace StudioMeowToon {
 
             // シーン名取得
             var _activeSceneName = SceneManager.GetActiveScene().name;
-
-            #region score.
-
-            #endregion
 
             #region time.
 
@@ -282,7 +293,7 @@ namespace StudioMeowToon {
             #endregion
 
             // シーン Start での遷移操作
-            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Start")
+            this.UpdateAsObservable().Where(_ => _activeSceneName == "Start")
                 .Subscribe(_ => {
                     if (startButton.wasPressedThisFrame || aButton.wasPressedThisFrame) {
                         SceneManager.LoadScene("Level1"); // TODO: メソッド
@@ -290,7 +301,7 @@ namespace StudioMeowToon {
                 });
 
             // シーン Level1 での遷移操作
-            this.UpdateAsObservable().Where(_ => SceneManager.GetActiveScene().name == "Level1")
+            this.UpdateAsObservable().Where(_ => _activeSceneName == "Level1")
                 .Subscribe(_ => {
                     if (selectButton.wasPressedThisFrame) {
                         SceneManager.LoadScene("Start"); // TODO: メソッド
@@ -307,7 +318,7 @@ namespace StudioMeowToon {
                 });
 
             // ステージをクリアした・GAMEオーバーした場合
-            this.UpdateAsObservable().Where(_ => (SceneManager.GetActiveScene().name != "Start") &&
+            this.UpdateAsObservable().Where(_ => (_activeSceneName != "Start") &&
                 this.levelClear || this.gameOver)
                 .Subscribe(_ => {
                     isPausing = !isPausing;
@@ -316,8 +327,8 @@ namespace StudioMeowToon {
             // 画面情報表示の更新
             this.UpdateAsObservable().Where(_ => !_activeSceneName.Equals("Start"))
                 .Subscribe(_ => {
-                    checkGameOver(); // GAMEオーバー確認
-                    updateGameInfo();
+                    checkGameStatus(); // GAMEオーバー確認
+                    updateGameStatus();
                     updatePlayerStatus();
                 });
 
@@ -378,37 +389,47 @@ namespace StudioMeowToon {
             #region debug mode message.
 
             initFpsForUpdate(); // FPS初期化
-            initFpsForFixedUpdate(); // fixed FPS初期化
+            initFpsForFixedUpdate(); // FPS初期化 (fixed)
 
-            // FPS表示
-            this.FixedUpdateAsObservable().Where(_ => !SceneManager.GetActiveScene().name.Equals("Start"))
+            // FPS 更新処理 (fixed)
+            this.FixedUpdateAsObservable().Where(_ => !_activeSceneName.Equals("Start"))
                 .Subscribe(_ => {
                     updateFpsForFixedUpdate();
                 });
 
-            if (SceneManager.GetActiveScene().name == "Start") { // スタート画面の場合
+            #endregion
+
+            #region init.
+
+            // スタート画面の場合
+            if (_activeSceneName == "Start") {
                 Time.timeScale = 1f; // 一時停止解除
                 return;
             }
 
-            // アイテムの総数を取得
+            // レベル内の取得可能アイテムの総数を取得
             itemTotalCount = GameObject.FindGameObjectsWithTag("Getable").Length;
             itemRemainCount = itemTotalCount;
-            updateGameInfo();
+            updateGameStatus();
 
-            messageUI.text = ""; // メッセージ初期化、非表示
+            // メッセージ初期化、非表示
+            messageUI.text = "";
+
+            // カメラ初期化
+            eventCamera.enabled = false;
+            mainCamera.enabled = true;
 
             #endregion
 
-            // カメラ初期化 TODO: なぜ必要？
-            eventCamera.enabled = false;
-            mainCamera.enabled = true;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // private Methods [verb]
 
-        void checkGameOver() {
+        /// <summary>
+        /// ゲーム ステイタスの確認
+        /// </summary>
+        void checkGameStatus() {
             if (lifeValue == 0) {
                 Time.timeScale = 0f;
                 isGameOver = true; // GAMEオーバーフラグON
@@ -419,7 +440,20 @@ namespace StudioMeowToon {
             }
         }
 
-        void updatePlayerStatus() { // Player のステイタス表示
+        /// <summary>
+        /// ゲーム ステイタスの表示
+        /// </summary>
+        void updateGameStatus() {
+            updateFpsForUpdate(); // FPS 表示更新
+            scoreUI.text = string.Format("Score\n{0:000000}", scoreValue);
+            itemUI.text = string.Format("× {0}/{1}", itemTotalCount - itemRemainCount, itemTotalCount);
+            keyUI.text = string.Format("× {0}", hasKeyValue);
+        }
+
+        /// <summary>
+        /// プレイヤー ステイタス表示
+        /// </summary>
+        void updatePlayerStatus() {
             bombAngleUI.value = bombAngleValue;
             int _hp = (int) (lifeValue * 10);
             hpUI.text = _hp.ToString();
@@ -427,15 +461,11 @@ namespace StudioMeowToon {
             altUI.text = string.Format("ALT {0:000.0}m", Math.Round(altValue, 1, MidpointRounding.AwayFromZero));
         }
 
-        void updateGameInfo() { // GAME の情報を表示
-            updateFpForUpdate(); // FPS更新
-            scoreUI.text = string.Format("Score\n{0:000000}", scoreValue);
-            itemUI.text = string.Format("× {0}/{1}", itemTotalCount - itemRemainCount, itemTotalCount);
-            keyUI.text = string.Format("× {0}", hasKeyValue);
-        }
-
-        void updateFpForUpdate() { // FPS更新
-            ++fpsForUpdateFrameCount; // FPS取得
+        /// <summary>
+        /// FPS 表示更新
+        /// </summary>
+        void updateFpsForUpdate() {
+            ++fpsForUpdateFrameCount;
             float _time = Time.realtimeSinceStartup - fpsForUpdatePreviousTime;
             if (_time >= 0.5f) {
                 fpsForUpdate = fpsForUpdateFrameCount / _time;
@@ -445,13 +475,19 @@ namespace StudioMeowToon {
             }
         }
 
-        void initFpsForUpdate() { // FPS初期化
+        /// <summary>
+        /// FPS 初期化
+        /// </summary>
+        void initFpsForUpdate() {
             fpsForUpdateFrameCount = 0;
             fpsForUpdatePreviousTime = 0.0f;
         }
 
-        void updateFpsForFixedUpdate() { // fixed FPS更新
-            ++fpsForFixedUpdateFrameCount; // fixed FPS取得
+        /// <summary>
+        /// FPS 表示更新 (fixed)
+        /// </summary>
+        void updateFpsForFixedUpdate() {
+            ++fpsForFixedUpdateFrameCount;
             float _time = Time.realtimeSinceStartup - fpsForFixedUpdatePreviousTime;
             if (_time >= 0.5f) {
                 fpsForFixedUpdate = fpsForFixedUpdateFrameCount / _time;
@@ -460,12 +496,18 @@ namespace StudioMeowToon {
             }
         }
 
-        void initFpsForFixedUpdate() { // fixed FPS初期化
+        /// <summary>
+        /// FPS 初期化 (fixed)
+        /// </summary>
+        void initFpsForFixedUpdate() {
             fpsForFixedUpdateFrameCount = 0;
             fpsForFixedUpdatePreviousTime = 0.0f;
         }
 
-        void changeCamera() { // カメラ切り替え
+        /// <summary>
+        /// カメラ切り替え
+        /// </summary>
+        void changeCamera() {
             eventCamera.enabled = !eventCamera.enabled;
             mainCamera.enabled = !mainCamera.enabled;
         }
