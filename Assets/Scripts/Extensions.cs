@@ -268,6 +268,27 @@ namespace StudioMeowToon {
             return self.GetComponentsInChildren<Transform>();
         }
 
+        /// <summary>
+        /// get GameSystem objects.
+        /// </summary>
+        public static GameSystem GetGameSystem(this GameObject self) {
+            return GameObject.Find("GameSystem").GetComponent<GameSystem>();
+        }
+
+        /// <summary>
+        /// get SoundSystem objects.
+        /// </summary>
+        public static SoundSystem GetSoundSystem(this GameObject self) {
+            return GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
+        }
+
+        /// <summary>
+        /// get CameraSystem objects.
+        /// </summary>
+        public static CameraSystem GetCameraSystem(this GameObject self) {
+            return GameObject.Find("CameraSystem").GetComponent<CameraSystem>();
+        }
+
         #endregion
 
     }

@@ -32,15 +32,6 @@ namespace StudioMeowToon {
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
-        GameSystem gameSystem; // ゲームシステム
-
-        [SerializeField]
-        SoundSystem soundSystem; // サウンドシステム
-
-        [SerializeField]
-        CameraSystem cameraSystem; // カメラシステム
-
-        [SerializeField]
         float jumpPower = 5.0f;
 
         [SerializeField]
@@ -69,6 +60,12 @@ namespace StudioMeowToon {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Fields
+
+        GameSystem gameSystem; // ゲームシステム
+
+        SoundSystem soundSystem; // サウンドシステム
+
+        CameraSystem cameraSystem; // カメラシステム
 
         BombAngle bombAngle; // 弾道角度
 
@@ -169,6 +166,10 @@ namespace StudioMeowToon {
             doUpdate = DoUpdate.GetInstance(); // 状態フラグクラス
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
             bombAngle = BombAngle.GetInstance(); // 弾道角度用クラス
+
+            gameSystem = gameObject.GetGameSystem(); // GameSystem 取得
+            soundSystem = gameObject.GetSoundSystem(); // SoundSystem 取得
+            cameraSystem = gameObject.GetCameraSystem(); // CameraSystem 取得
         }
 
         // Start is called before the first frame update.
