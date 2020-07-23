@@ -67,6 +67,12 @@ namespace StudioMeowToon {
 
         CameraSystem cameraSystem; // カメラシステム
 
+        GameObject rayBox; // ブロック、ハシゴ、壁 つかまり判定オブジェクト
+
+        GameObject stepRayBox; // ブロック押し、階段上り下り判定オブジェクト
+
+        GameObject behind; // 振り返り用オブジェクト
+
         BombAngle bombAngle; // 弾道角度
 
         GameObject pushed; // 押されるオブジェクト
@@ -193,6 +199,10 @@ namespace StudioMeowToon {
                 playerNeck = transform.Find("Bell").gameObject; // 水面判定用
                 speechText = speechObject.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
                 speechImage = speechObject.GetComponent<Image>(); // セリフ吹き出し画像取得
+
+                rayBox = GameObject.Find("RayBox").gameObject;
+                stepRayBox = GameObject.Find("StepRayBox").gameObject;
+                behind = GameObject.Find("Behind").gameObject;
             }
 
             // 物理挙動: 初期化
@@ -700,8 +710,7 @@ namespace StudioMeowToon {
                         soundSystem.StopClip();
                     }
                     // RayBox位置の初期化
-                    var _rayBox = transform.Find("RayBox").gameObject;
-                    _rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
+                    rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
                     doUpdate.climbing = false; // 登るフラグOFF
                     doFixedUpdate.cancelClimb = true;
                 });
@@ -1126,10 +1135,9 @@ namespace StudioMeowToon {
         /// </summary>
         void lookBack() {
             float _SPEED = 10.01f; // 回転スピード
-            var _behind = transform.Find("Behind").gameObject;
             //transform.LookAt(_behind.transform);
             // TODO: gameobject を new ?
-            var _target = _behind.transform;
+            var _target = behind.transform;
             var _relativePos = _target.position - transform.position;
             var _rotation = Quaternion.LookRotation(_relativePos);
             transform.rotation = Quaternion.Slerp(transform.rotation, _rotation, Time.deltaTime * _SPEED);
@@ -1373,7 +1381,7 @@ namespace StudioMeowToon {
             simpleAnime.Play("Default"); // デフォルトアニメ
             var _h = transform.Find("Head").gameObject;
             var _e = transform.Find("Ear").gameObject;
-            var _cs = transform.Find("CameraController").gameObject;
+            var _cs = transform.Find("CameraSystem").gameObject;
             float _SPEED = 100; // 回転スピード※ゆっくり回転は効かない
             var _fX = (float) Math.Round(transform.forward.x);
             var _fZ = (float) Math.Round(transform.forward.z);
@@ -1416,8 +1424,7 @@ namespace StudioMeowToon {
         /// TBA
         /// </summary>
         void checkToClimb() {
-            var _rayBox = transform.Find("RayBox").gameObject; // RayBoxから前方サーチする
-            Ray _ray = new Ray(_rayBox.transform.position, transform.forward);
+            Ray _ray = new Ray(rayBox.transform.position, transform.forward); // RayBoxから前方サーチする
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.2f)) { // 前方にレイを投げて反応があった場合
                 if (_hit.transform.name.Contains("Block") ||
                     _hit.transform.name.Contains("Ladder") ||
@@ -1450,8 +1457,7 @@ namespace StudioMeowToon {
             float _ADJUST = 0;
             if (_fps == 60) _ADJUST = 75.0f; // 調整値
             if (_fps == 30) _ADJUST = 37.5f; // 調整値
-            var _rayBox = transform.Find("RayBox").gameObject; // RayBoxから前方サーチする
-            Ray _ray = new Ray(_rayBox.transform.position, transform.forward);
+            Ray _ray = new Ray(rayBox.transform.position, transform.forward); // RayBoxから前方サーチする
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.3f)) { // 前方にレイを投げて反応があった場合
                 if (_hit.transform.name.Contains("Ladder")) { // ハシゴなら
                     var _hitTop = getRaycastHitTop(_hit); // 前方オブジェクトのtop位置を取得
@@ -1476,9 +1482,8 @@ namespace StudioMeowToon {
         /// ハシゴ登り降り。
         /// </summary>
         void climb() {
-            var _rayBox = transform.Find("RayBox").gameObject; // RayBoxから前方サーチする
             Ray _ray = new Ray(
-                new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y, _rayBox.transform.position.z),
+                new Vector3(rayBox.transform.position.x, rayBox.transform.position.y, rayBox.transform.position.z), // RayBoxから前方サーチする
                 transform.forward
             );
             float _hitTop = 0f;
@@ -1498,15 +1503,15 @@ namespace StudioMeowToon {
                     if (upButton.isPressed) { // (上ボタン) を押した時
                         transform.Translate(0, 1f * Time.deltaTime, 0); // 登る
                         doUpdate.grounded = false; // 接地フラグOFF
-                        if (_rayBox.transform.position.y > transform.position.y) { // キャラ高さの範囲で
-                            _rayBox.transform.localPosition = new Vector3(0, _rayBox.transform.localPosition.y - (1f * 1.5f * Time.deltaTime), 0.1f); // RayBoxは逆に動かす
+                        if (rayBox.transform.position.y > transform.position.y) { // キャラ高さの範囲で
+                            rayBox.transform.localPosition = new Vector3(0, rayBox.transform.localPosition.y - (1f * 1.5f * Time.deltaTime), 0.1f); // RayBoxは逆に動かす
                         }
                         soundSystem.PlayClimbClip();
                     } else if (downButton.isPressed) { // (下ボタン) を押した時
                         transform.Translate(0, -1f * Time.deltaTime, 0); // 降りる
                         doUpdate.grounded = false; // 接地フラグOFF
-                        if (_rayBox.transform.position.y < transform.position.y + 0.4f) { // キャラ高さの範囲で 0.4 は_rayBoxの元の位置
-                            _rayBox.transform.localPosition = new Vector3(0, _rayBox.transform.localPosition.y + (1f * 1.5f * Time.deltaTime), 0.1f); // RayBoxは逆に動かす
+                        if (rayBox.transform.position.y < transform.position.y + 0.4f) { // キャラ高さの範囲で 0.4 は_rayBoxの元の位置
+                            rayBox.transform.localPosition = new Vector3(0, rayBox.transform.localPosition.y + (1f * 1.5f * Time.deltaTime), 0.1f); // RayBoxは逆に動かす
                         }
                         soundSystem.PlayClimbClip();
                     } else { // 一時停止
@@ -1517,7 +1522,7 @@ namespace StudioMeowToon {
                     }
                 } else { // 自分が対象オブジェクトのtop位置より高くなったら
                     Ray _ray2 = new Ray( // 少し上を確認する
-                        new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.2f, _rayBox.transform.position.z),
+                        new Vector3(rayBox.transform.position.x, rayBox.transform.position.y + 0.2f, rayBox.transform.position.z),
                         transform.forward
                     );
                     if (Physics.Raycast(_ray2, out RaycastHit _hit2, 0.3f)) { // 前方にレイを投げて反応があった場合
@@ -1527,7 +1532,7 @@ namespace StudioMeowToon {
                         transform.position += transform.up * 1f * Time.deltaTime; // まだ続くので少し上に上げる
                     } else {
                         ///////////////////////////////////////////////////////////////////////////////////////////
-                        _rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
+                        rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
                         doUpdate.climbing = false; // 登るフラグOFF
                         doUpdate.grounded = true; // 接地フラグON
                         transform.position += transform.up * 8f * Time.deltaTime; // 少し上に上げる
@@ -1538,7 +1543,7 @@ namespace StudioMeowToon {
                     }
                 }
             } else if (_distance == 0) { // 下にハシゴがなくなった時
-                _rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
+                rayBox.transform.localPosition = new Vector3(0, 0.4f, 0.1f); // RayBoxローカルポジション
                 doUpdate.climbing = false; // 登るフラグOFF
                 transform.position += transform.forward * 0.2f * Time.deltaTime; // 少し前に進む
                 doFixedUpdate.cancelClimb = true; // 登り降りキャンセル
@@ -1549,9 +1554,8 @@ namespace StudioMeowToon {
         /// 階段を上るフラグチェック。
         /// </summary>
         void checkStairUp() { // FIXME: Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
-            var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
-                new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
+                new Vector3(stepRayBox.transform.position.x, stepRayBox.transform.position.y + 0.1f, stepRayBox.transform.position.z), // StepRayBoxから前方サーチする
                 transform.forward
             );
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.35f)) { // 前方にレイを投げて反応があった場合
@@ -1573,9 +1577,8 @@ namespace StudioMeowToon {
         /// 階段を下りるフラグチェック。
         /// </summary>
         void checkStairDown() { // FIXME: Rayが捜査するオブジェクトが増えるだけでタイミングが破綻する
-            var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
-                new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
+                new Vector3(stepRayBox.transform.position.x, stepRayBox.transform.position.y + 0.1f, stepRayBox.transform.position.z), // StepRayBoxから前方サーチする
                 transform.forward
             );
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.2f)) { // 前方にレイを投げて反応があった場合
@@ -1659,9 +1662,8 @@ namespace StudioMeowToon {
         /// TBA
         /// </summary>
         bool checkToPushBlock() {
-            var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
             Ray _ray = new Ray(
-                new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.1f, _rayBox.transform.position.z),
+                new Vector3(stepRayBox.transform.position.x, stepRayBox.transform.position.y + 0.1f, stepRayBox.transform.position.z), // StepRayBoxから前方サーチする
                 transform.forward
             );
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.35f)) { // 前方にレイを投げて反応があった場合
@@ -1700,9 +1702,8 @@ namespace StudioMeowToon {
         /// </summary>
         bool checkToHoldItem() {
             if (holded != null) { // 持つオブジェクトの参照があれば
-                var _rayBox = transform.Find("StepRayBox").gameObject; // StepRayBoxから前方サーチする
                 Ray _ray = new Ray(
-                    new Vector3(_rayBox.transform.position.x, _rayBox.transform.position.y + 0.3f, _rayBox.transform.position.z),
+                    new Vector3(stepRayBox.transform.position.x, stepRayBox.transform.position.y + 0.3f, stepRayBox.transform.position.z), // StepRayBoxから前方サーチする
                     transform.forward
                 );
                 if (Physics.Raycast(_ray, out RaycastHit _hit, 0.35f) || checkDownAsHoldableBlock()) { // 前方にレイを投げて反応があった場合
