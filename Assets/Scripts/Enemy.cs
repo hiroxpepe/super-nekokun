@@ -62,8 +62,7 @@ namespace StudioMeowToon {
             doFixedUpdate = DoFixedUpdate.GetInstance(); // 物理挙動フラグクラス
             speech = Speech.GetInstance(); // セリフ用クラス
 
-            // SoundSystem 取得
-            soundSystem = GameObject.Find("SoundSystem").GetComponent<SoundSystem>();
+            soundSystem = gameObject.GetSoundSystem(); // SoundSystem 取得
 
             // セリフ吹き出し大きさ取得
             var _rect = speechObject.GetComponent<RectTransform>();

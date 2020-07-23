@@ -28,12 +28,11 @@ namespace StudioMeowToon {
         void Start() {
             // プレイヤーがキーを持って接触したら
             this.OnCollisionEnterAsObservable()
-                .Where(t => t.gameObject.name.Equals("Player"))
-                .Subscribe(t => {
-                    foreach (Transform _child in t.gameObject.transform) {
+                .Where(x => x.gameObject.name.Equals("Player"))
+                .Subscribe(x => {
+                    foreach (Transform _child in x.gameObject.transform) {
                         if (_child.name.Contains("Key")) {
-                            var _gameSystem = GameObject.Find("GameSystem"); // レベルクリア
-                            _gameSystem.GetComponent<GameSystem>().ClearLevel();
+                            gameObject.GetGameSystem().ClearLevel(); // レベルクリア
                         }
                     }
                 });
