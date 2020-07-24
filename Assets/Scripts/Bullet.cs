@@ -67,30 +67,25 @@ namespace StudioMeowToon {
 
             // 接触した対象の削除フラグを立てる、Player のHPを削る。
             this.OnCollisionEnterAsObservable()
-                .Subscribe(t => {
+                .Subscribe(x => {
                     if (!hits) { // 初回ヒットのみ破壊の対象
-                        // Block に接触した場合
-                        if (t.transform.name.Contains("Block")) {
-                            t.transform.GetComponent<Block>().DestroyWithDebris(transform); // 弾の transform を渡す
-                            if (t.transform.GetComponent<Block>().destroyable) { // この一撃で破壊可能かどうか
+                        // Block に接触した場合 FIXME: "Block" と名前が付いているのに Block スクリプトが付いてない場合。
+                        if (x.LikeBlock()) {
+                            x.gameObject.GetBlock().DestroyWithDebris(transform); // 弾の transform を渡す
+                            if (x.gameObject.GetBlock().destroyable) { // この一撃で破壊可能かどうか
                                 soundSystem.PlayExplosionClip(); // 破壊した
                             } else {
                                 soundSystem.PlayDamageClip(); // ダメージを与えた
                             }
-                            // Player に接触した場合
-                        } else if (t.transform.tag.Contains("Player")) {
-                            t.transform.GetComponent<Player>().DecrementLife();
+                        // Player に接触した場合
+                        } else if (x.IsPlayer()) {
+                            x.gameObject.GetPlayer().DecrementLife();
                         }
                         // TODO: ボスの破壊
                     }
-                    if (!t.gameObject.name.Contains("Clone")) {
+                    if (!x.gameObject.LikeClone()) {
                         hits = true; // ヒットフラグON
                     }
-                });
-
-            // LateUpdate is called after all Update functions have been called.
-            this.LateUpdateAsObservable()
-                .Subscribe(_ => {
                 });
         }
 

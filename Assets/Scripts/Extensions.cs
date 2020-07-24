@@ -90,6 +90,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collision's name contains "Block".
+        /// </summary>
+        public static bool LikeBlock(this Collision self) {
+            return self.gameObject.name.Contains("Block");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Ground".
         /// </summary>
         public static bool LikeGround(this GameObject self) {
@@ -164,6 +171,13 @@ namespace StudioMeowToon {
         /// </summary>
         public static bool Holdable(this GameObject self) {
             return self.tag.Equals("Holdable");
+        }
+
+        /// <summary>
+        /// whether the GameObject's name contains "Clone".
+        /// </summary>
+        public static bool LikeClone(this GameObject self) {
+            return self.name.Contains("Clone");
         }
 
         #endregion
@@ -252,6 +266,13 @@ namespace StudioMeowToon {
         /// </summary>
         public static Block GetBlock(this GameObject self) {
             return self.GetComponent<Block>();
+        }
+
+        /// <summary>
+        /// get the Player object.
+        /// </summary>
+        public static Player GetPlayer(this GameObject self) {
+            return self.GetComponent<Player>();
         }
 
         /// <summary>
