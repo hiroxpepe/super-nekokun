@@ -200,9 +200,9 @@ namespace StudioMeowToon {
                 speechText = speechObject.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
                 speechImage = speechObject.GetComponent<Image>(); // セリフ吹き出し画像取得
 
-                rayBox = GameObject.Find("RayBox").gameObject;
-                stepRayBox = GameObject.Find("StepRayBox").gameObject;
-                behind = GameObject.Find("Behind").gameObject;
+                rayBox = GameObject.Find("RayBox");
+                stepRayBox = GameObject.Find("StepRayBox");
+                behind = GameObject.Find("Behind");
             }
 
             // 物理挙動: 初期化
