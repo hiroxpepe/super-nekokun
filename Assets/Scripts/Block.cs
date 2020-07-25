@@ -224,7 +224,7 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     // 押される
                     if (canPush) { // 押されることが出来るブロックのみ
-                        playerObject = GameObject.FindGameObjectWithTag("Player"); // MEMO:ここで設定しないと NullRef になる。なぜ？
+                        playerObject = gameObject.GetPlayerGameObject(); // MEMO:ここで設定しないと NullRef になる。なぜ？
                         if (isPushed && (pushedDistance < 1.0f)) { // 1ブロック分押すまで
                             bePushed(); // ブロックを押される
                             return;

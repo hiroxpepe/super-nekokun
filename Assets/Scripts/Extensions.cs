@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -25,13 +26,6 @@ namespace StudioMeowToon {
     public static class Extensions {
 
         #region type of object.
-
-        /// <summary>
-        /// whether the GameObject's name contains "Player".
-        /// </summary>
-        public static bool LikePlayer(this GameObject self) {
-            return self.name.Contains("Player");
-        }
 
         /// <summary>
         /// whether the GameObject's tag is "Player".
@@ -48,10 +42,31 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collider's tag is "Player".
+        /// </summary>
+        public static bool IsPlayer(this Collider self) {
+            return self.gameObject.tag.Equals("Player");
+        }
+
+        /// <summary>
         /// whether the Collision's tag is "Player".
         /// </summary>
         public static bool IsPlayer(this Collision self) {
             return self.gameObject.tag.Equals("Player");
+        }
+
+        /// <summary>
+        /// whether the GameObject's tag is "Holdable".
+        /// </summary>
+        public static bool Holdable(this GameObject self) {
+            return self.tag.Equals("Holdable");
+        }
+
+        /// <summary>
+        /// whether the GameObject's tag is "Getable".
+        /// </summary>
+        public static bool Getable(this GameObject self) {
+            return self.tag.Equals("Getable");
         }
 
         /// <summary>
@@ -69,16 +84,23 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// whether the GameObject's tag is "Getable".
+        /// whether the Transform's name contains "Item".
         /// </summary>
-        public static bool Getable(this GameObject self) {
-            return self.tag.Equals("Getable"); // TODO: "Getable"
+        public static bool LikeItem(this Transform self) {
+            return self.name.Contains("Item");
         }
 
         /// <summary>
         /// whether the GameObject's name contains "Block".
         /// </summary>
         public static bool LikeBlock(this GameObject self) {
+            return self.name.Contains("Block");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "Block".
+        /// </summary>
+        public static bool LikeBlock(this Transform self) {
             return self.name.Contains("Block");
         }
 
@@ -104,9 +126,23 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Transform's name contains "Ground".
+        /// </summary>
+        public static bool LikeGround(this Transform self) {
+            return self.name.Contains("Ground");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Wall".
         /// </summary>
         public static bool LikeWall(this GameObject self) {
+            return self.name.Contains("Wall");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "Wall".
+        /// </summary>
+        public static bool LikeWall(this Transform self) {
             return self.name.Contains("Wall");
         }
 
@@ -118,10 +154,31 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collision's name contains "Wall".
+        /// </summary>
+        public static bool LikeWall(this Collision self) {
+            return self.gameObject.name.Contains("Wall");
+        }
+
+        /// <summary>
+        /// whether the Collision's name contains "EnemyWall".
+        /// </summary>
+        public static bool LikeEnemyWall(this Collision self) {
+            return self.gameObject.name.Contains("EnemyWall");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Slope".
         /// </summary>
         public static bool LikeSlope(this GameObject self) {
             return self.name.Contains("Slope");
+        }
+
+        /// <summary>
+        /// whether the Collision's name contains "Plate".
+        /// </summary>
+        public static bool LikePlate(this Collision self) {
+            return self.gameObject.name.Contains("Plate");
         }
 
         /// <summary>
@@ -160,6 +217,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Transform's name contains "Ladder".
+        /// </summary>
+        public static bool LikeLadder(this Transform self) {
+            return self.name.Contains("Ladder");
+        }
+
+        /// <summary>
         /// whether the Transform's name contains "Ladder_Body".
         /// </summary>
         public static bool LikeLadderBody(this Transform self) {
@@ -167,10 +231,17 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// whether the GameObject's tag is "Holdable".
+        /// whether the Transform's name contains "Stair".
         /// </summary>
-        public static bool Holdable(this GameObject self) {
-            return self.tag.Equals("Holdable");
+        public static bool LikeStair(this Transform self) {
+            return self.name.Contains("Stair");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "Down_Point".
+        /// </summary>
+        public static bool LikeDownPoint(this Transform self) {
+            return self.name.Contains("Down_Point");
         }
 
         /// <summary>
@@ -180,9 +251,37 @@ namespace StudioMeowToon {
             return self.name.Contains("Clone");
         }
 
+        /// <summary>
+        /// whether the GameObject's name contains "Balloon".
+        /// </summary>
+        public static bool LikeBalloon(this GameObject self) {
+            return self.name.Contains("Balloon");
+        }
+
+        /// <summary>
+        /// whether the GameObject's name contains "Bomb".
+        /// </summary>
+        public static bool LikeBomb(this GameObject self) {
+            return self.name.Contains("Bomb");
+        }
+
+        /// <summary>
+        /// whether the Collision's name contains "debris".
+        /// </summary>
+        public static bool LikeDebris(this Collision self) {
+            return self.gameObject.name.Contains("debris");
+        }
+
         #endregion
 
         #region get the object.
+
+        /// <summary>
+        /// get the Collider object.
+        /// </summary>
+        public static Collider GetCollider(this GameObject self) {
+            return self.GetComponent<Collider>();
+        }
 
         /// <summary>
         /// get the BoxCollider object.
@@ -192,10 +291,10 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// get the Collider object.
+        /// get the CapsuleCollider object.
         /// </summary>
-        public static Collider GetCollider(this GameObject self) {
-            return self.GetComponent<Collider>();
+        public static CapsuleCollider GetCapsuleCollider(this GameObject self) {
+            return self.GetComponent<CapsuleCollider>();
         }
 
         /// <summary>
@@ -241,6 +340,34 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// get the RectTransform object.
+        /// </summary>
+        public static RectTransform GetRectTransform(this GameObject self) {
+            return self.GetComponent<RectTransform>();
+        }
+
+        /// <summary>
+        /// get the Image object.
+        /// </summary>
+        public static Image GetImage(this GameObject self) {
+            return self.GetComponent<Image>();
+        }
+
+        /// <summary>
+        /// get the Animator object.
+        /// </summary>
+        public static Animator GetAnimator(this GameObject self) {
+            return self.GetComponent<Animator>();
+        }
+
+        /// <summary>
+        /// get Transform objects.
+        /// </summary>
+        public static IEnumerable<Transform> GetTransformsInChildren(this GameObject self) {
+            return self.GetComponentsInChildren<Transform>();
+        }
+
+        /// <summary>
         /// get the Common object.
         /// </summary>
         public static Common GetCommon(this GameObject self) {
@@ -276,17 +403,17 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// get the Holdable object.
+        /// </summary>
+        public static Holdable GetHoldable(this GameObject self) {
+            return self.GetComponent<Holdable>();
+        }
+
+        /// <summary>
         /// get the Player object.
         /// </summary>
         public static Player GetPlayer(this Transform self) {
             return self.GetComponent<Player>();
-        }
-
-        /// <summary>
-        /// get Transform objects.
-        /// </summary>
-        public static IEnumerable<Transform> GetTransformsInChildren(this GameObject self) {
-            return self.GetComponentsInChildren<Transform>();
         }
 
         /// <summary>
@@ -308,6 +435,17 @@ namespace StudioMeowToon {
         /// </summary>
         public static CameraSystem GetCameraSystem(this GameObject self) {
             return GameObject.Find("CameraSystem").GetComponent<CameraSystem>();
+        }
+
+        #endregion
+
+        #region get the GameObject.
+
+        /// <summary>
+        /// get the "Player" GameObject.
+        /// </summary>
+        public static GameObject GetPlayerGameObject(this GameObject self) {
+            return GameObject.FindGameObjectWithTag("Player");
         }
 
         #endregion
