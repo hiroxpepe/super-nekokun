@@ -60,7 +60,7 @@ namespace StudioMeowToon {
         void Start() {
             // 爆弾は
             this.UpdateAsObservable()
-                .Where(_ => transform.parent != null && transform.parent.name.Equals("Player")) // プレイヤーに持たれたら
+                .Where(_ => transform.parent != null && transform.parent.IsPlayer()) // プレイヤーに持たれたら
                 .Subscribe(_ => {
                     have = true; // 持たれたフラグON
                 });

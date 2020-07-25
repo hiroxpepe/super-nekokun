@@ -417,6 +417,17 @@ namespace StudioMeowToon {
 
         #endregion
 
+        #region get the GameObject.
+
+        /// <summary>
+        /// get the "Player" GameObject.
+        /// </summary>
+        public static GameObject GetPlayerGameObject(this GameObject self) {
+            return GameObject.FindGameObjectWithTag("Player");
+        }
+
+        #endregion
+
     }
 
 }
