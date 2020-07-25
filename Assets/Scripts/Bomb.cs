@@ -36,7 +36,7 @@ namespace StudioMeowToon {
         // References [bool => is+adjective, has+past participle, can+verb prototype, triad verb]
 
         [SerializeField]
-        int timer = 5;
+        int timer = 5; // 点火されて爆発までの時間
 
         [SerializeField]
         GameObject pieceObject; // 破片生成用のプレハブ
@@ -81,8 +81,8 @@ namespace StudioMeowToon {
                     // [timer]秒後に
                     Observable.Timer(System.TimeSpan.FromSeconds(timer))
                         .Subscribe(__ => {
-                            if (transform.parent != null && transform.parent.name.Equals("Player")) { // まだプレイヤーに持たれていたら
-                                transform.parent.GetComponent<Player>().PurgeFromBomb(); // 強制パージ TODO: 要る？
+                            if (transform.parent != null && transform.parent.IsPlayer()) { // まだプレイヤーに持たれていたら
+                                transform.parent.gameObject.GetPlayer().PurgeFromBomb(); // 強制パージ TODO: 要る？
                             }
                             Destroy(gameObject); // 自分を削除して
                             explodePiece(6, 0.75f, 25); // 破片を飛ばす
@@ -105,20 +105,20 @@ namespace StudioMeowToon {
                 _piece.name += "_Piece"; // 破片には名前に "_Piece" を付加する
                 _piece.transform.localScale = new Vector3(scale, scale, scale);
                 _piece.transform.position = transform.position; // MEMO:親の位置を入れる必要があった
-                if (_piece.GetComponent<Rigidbody>() == null) {
-                    _piece.AddComponent<Rigidbody>();
+                if (_piece.GetRigidbody() == null) {
+                    _piece.AddRigidbody();
                 }
                 _piece.GetComponent<Rigidbody>().isKinematic = false;
                 var _v = new Vector3(_random.Next(_min, _max), _random.Next(_min, _max), _random.Next(_min, _max));
-                _piece.GetComponent<Rigidbody>().AddForce(_v, ForceMode.Impulse);
-                _piece.GetComponent<Rigidbody>().AddTorque(_v, ForceMode.Impulse);
-                _piece.GetComponentsInChildren<Transform>().ToList().ForEach(_child => {
+                _piece.GetRigidbody().AddForce(_v, ForceMode.Impulse);
+                _piece.GetRigidbody().AddTorque(_v, ForceMode.Impulse);
+                _piece.GetTransformsInChildren().ToList().ForEach(_child => {
                     if (_piece.name != _child.name) { // なぜか破片も破片の子リストにいるので除外
                         _child.parent = null;
                         Destroy(_child.gameObject); // 破片の子オブジェクトは最初に削除
                     }
                 });
-                _piece.GetComponent<Block>().autoDestroy = true; // 2秒後に破片を消去する
+                _piece.GetBlock().autoDestroy = true; // 2秒後に破片を消去する
             }
         }
 
