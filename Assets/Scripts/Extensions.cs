@@ -339,6 +339,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// get the RectTransform object.
+        /// </summary>
+        public static RectTransform GetRectTransform(this GameObject self) {
+            return self.GetComponent<RectTransform>();
+        }
+
+        /// <summary>
         /// get the Common object.
         /// </summary>
         public static Common GetCommon(this GameObject self) {

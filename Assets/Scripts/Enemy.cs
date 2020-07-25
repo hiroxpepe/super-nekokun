@@ -65,7 +65,7 @@ namespace StudioMeowToon {
             soundSystem = gameObject.GetSoundSystem(); // SoundSystem 取得
 
             // セリフ吹き出し大きさ取得
-            var _rect = speechObject.GetComponent<RectTransform>();
+            var _rect = speechObject.GetRectTransform();
             speech.X = _rect.sizeDelta.x;
             speech.Y = _rect.sizeDelta.y;
 
@@ -76,8 +76,8 @@ namespace StudioMeowToon {
         // Start is called before the first frame update.
         void Start() {
             // プレーヤー参照取得
-            var _player = GameObject.FindGameObjectWithTag("Player");
-            var _rb = transform.GetComponent<Rigidbody>(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
+            var _playerObject = GameObject.FindGameObjectWithTag("Player");
+            var _rb = gameObject.GetRigidbody(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
 
             var _fps = Application.targetFrameRate;
             var _ADJUST1 = 0f;
@@ -106,7 +106,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable()
                 .Subscribe(_ => {
                     distance = (float) System.Math.Round(
-                        Vector3.Distance(transform.position, _player.transform.position), 1, System.MidpointRounding.AwayFromZero
+                        Vector3.Distance(transform.position, _playerObject.transform.position), 1, System.MidpointRounding.AwayFromZero
                     );
                 });
 
@@ -222,9 +222,9 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     simpleAnime.Play("Run"); // 走るアニメ
                     transform.LookAt(new Vector3(
-                        _player.transform.position.x,
+                        _playerObject.transform.position.x,
                         transform.position.y,
-                        _player.transform.position.z
+                        _playerObject.transform.position.z
                     ));
                     say("I'm chasing\nhim!");
                 });
@@ -255,9 +255,9 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     simpleAnime.Play("Punch"); // パンチアニメ
                     transform.LookAt(new Vector3(
-                        _player.transform.position.x,
+                        _playerObject.transform.position.x,
                         transform.position.y,
-                        _player.transform.position.z
+                        _playerObject.transform.position.z
                     ));
                 });
 
@@ -268,8 +268,8 @@ namespace StudioMeowToon {
                     doUpdate.ApplyAttacking();
                     soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
                     say("Punch!", 65);
-                    _player.transform.GetComponent<Player>().DecrementLife();
-                    _player.transform.GetComponent<Player>().DamagedByEnemy(transform.forward);
+                    _playerObject.GetPlayer().DecrementLife();
+                    _playerObject.GetPlayer().DamagedByEnemy(transform.forward);
                     Observable.TimerFrame(12) // FIXME: 60fpsの時は？
                         .Subscribe(__ => {
                             doUpdate.ApplyChasing();
@@ -288,8 +288,8 @@ namespace StudioMeowToon {
                         doUpdate.ApplyAttacking();
                         soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
                         say("Take this!", 60);
-                        _player.transform.GetComponent<Player>().DecrementLife();
-                        _player.transform.GetComponent<Player>().DamagedByEnemy(transform.forward);
+                        _playerObject.GetPlayer().DecrementLife();
+                        _playerObject.GetPlayer().DamagedByEnemy(transform.forward);
                         Observable.TimerFrame(12) // FIXME: 60fpsの時は？
                             .Subscribe(___ => {
                                 doUpdate.ApplyChasing();
@@ -333,9 +333,8 @@ namespace StudioMeowToon {
             // プレイヤーとの距離で大きさ調整
             var _distance = distance > 1 ? (int) (distance / 2) : 1;
             if (_distance == 0) { _distance = 1; }
-            speechObject.GetComponent<RectTransform>().sizeDelta = new Vector2(speech.X / _distance, speech.Y / _distance);
+            speechObject.GetRectTransform().sizeDelta = new Vector2(speech.X / _distance, speech.Y / _distance);
             speech.Text.fontSize = size / (int) (_distance * 1.25f); // 調整値
-            //Debug.Log("_distance: " + _distance + " x: " + speechImage.GetComponent<RectTransform>().sizeDelta.x + " y: " + speechImage.GetComponent<RectTransform>().sizeDelta.y);
             speech.Text.text = text;
             speechObject.SetActive(true);
             Observable.Timer(System.TimeSpan.FromSeconds(time))
