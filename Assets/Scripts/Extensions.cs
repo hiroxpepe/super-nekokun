@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace StudioMeowToon {
     /// <summary>
@@ -276,6 +277,13 @@ namespace StudioMeowToon {
         #region get the object.
 
         /// <summary>
+        /// get the Collider object.
+        /// </summary>
+        public static Collider GetCollider(this GameObject self) {
+            return self.GetComponent<Collider>();
+        }
+
+        /// <summary>
         /// get the BoxCollider object.
         /// </summary>
         public static BoxCollider GetBoxCollider(this GameObject self) {
@@ -283,10 +291,10 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// get the Collider object.
+        /// get the CapsuleCollider object.
         /// </summary>
-        public static Collider GetCollider(this GameObject self) {
-            return self.GetComponent<Collider>();
+        public static CapsuleCollider GetCapsuleCollider(this GameObject self) {
+            return self.GetComponent<CapsuleCollider>();
         }
 
         /// <summary>
@@ -339,6 +347,20 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// get the Image object.
+        /// </summary>
+        public static Image GetImage(this GameObject self) {
+            return self.GetComponent<Image>();
+        }
+
+        /// <summary>
+        /// get the Animator object.
+        /// </summary>
+        public static Animator GetAnimator(this GameObject self) {
+            return self.GetComponent<Animator>();
+        }
+
+        /// <summary>
         /// get Transform objects.
         /// </summary>
         public static IEnumerable<Transform> GetTransformsInChildren(this GameObject self) {
@@ -378,6 +400,13 @@ namespace StudioMeowToon {
         /// </summary>
         public static Player GetPlayer(this GameObject self) {
             return self.GetComponent<Player>();
+        }
+
+        /// <summary>
+        /// get the Holdable object.
+        /// </summary>
+        public static Holdable GetHoldable(this GameObject self) {
+            return self.GetComponent<Holdable>();
         }
 
         /// <summary>

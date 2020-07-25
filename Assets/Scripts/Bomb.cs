@@ -108,7 +108,7 @@ namespace StudioMeowToon {
                 if (_piece.GetRigidbody() == null) {
                     _piece.AddRigidbody();
                 }
-                _piece.GetComponent<Rigidbody>().isKinematic = false;
+                _piece.GetRigidbody().isKinematic = false;
                 var _v = new Vector3(_random.Next(_min, _max), _random.Next(_min, _max), _random.Next(_min, _max));
                 _piece.GetRigidbody().AddForce(_v, ForceMode.Impulse);
                 _piece.GetRigidbody().AddTorque(_v, ForceMode.Impulse);
