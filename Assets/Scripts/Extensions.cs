@@ -27,13 +27,6 @@ namespace StudioMeowToon {
         #region type of object.
 
         /// <summary>
-        /// whether the GameObject's name contains "Player".
-        /// </summary>
-        public static bool LikePlayer(this GameObject self) {
-            return self.name.Contains("Player");
-        }
-
-        /// <summary>
         /// whether the GameObject's tag is "Player".
         /// </summary>
         public static bool IsPlayer(this GameObject self) {
@@ -62,6 +55,27 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the GameObject's tag is "Holdable".
+        /// </summary>
+        public static bool Holdable(this GameObject self) {
+            return self.tag.Equals("Holdable");
+        }
+
+        /// <summary>
+        /// whether the GameObject's tag is "Getable".
+        /// </summary>
+        public static bool Getable(this GameObject self) {
+            return self.tag.Equals("Getable");
+        }
+
+        /// <summary>
+        /// whether the GameObject's name contains "Player".
+        /// </summary>
+        public static bool LikePlayer(this GameObject self) {
+            return self.name.Contains("Player");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Item".
         /// </summary>
         public static bool LikeItem(this GameObject self) {
@@ -80,13 +94,6 @@ namespace StudioMeowToon {
         /// </summary>
         public static bool LikeItem(this Transform self) {
             return self.name.Contains("Item");
-        }
-
-        /// <summary>
-        /// whether the GameObject's tag is "Getable".
-        /// </summary>
-        public static bool Getable(this GameObject self) {
-            return self.tag.Equals("Getable");
         }
 
         /// <summary>
@@ -269,13 +276,6 @@ namespace StudioMeowToon {
         /// </summary>
         public static bool LikeDebris(this Collision self) {
             return self.gameObject.name.Contains("debris");
-        }
-
-        /// <summary>
-        /// whether the GameObject's tag is "Holdable".
-        /// </summary>
-        public static bool Holdable(this GameObject self) {
-            return self.tag.Equals("Holdable");
         }
 
         #endregion
