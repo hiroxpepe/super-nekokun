@@ -32,9 +32,9 @@ namespace StudioMeowToon {
         void Start() {
 
             // Player と接触したら
-            this.OnTriggerEnterAsObservable().Where(x => x.tag == "Player")
+            this.OnTriggerEnterAsObservable().Where(x => x.IsPlayer())
                 .Subscribe(_ => {
-                    var _render = GetComponent<MeshRenderer>();
+                    var _render = gameObject.GetMeshRenderer();
                     var _materialList = _render.materials;
                     foreach (var _material in _materialList) {
                         Utils.SetRenderingMode(_material, RenderingMode.Fade);
@@ -45,9 +45,9 @@ namespace StudioMeowToon {
                 });
 
             // Player から離脱したら
-            this.OnTriggerExitAsObservable().Where(x => x.tag == "Player")
+            this.OnTriggerExitAsObservable().Where(x => x.IsPlayer())
                 .Subscribe(_ => {
-                    var _render = GetComponent<MeshRenderer>();
+                    var _render = gameObject.GetMeshRenderer();
                     var _materialList = _render.materials;
                     foreach (var _material in _materialList) {
                         Utils.SetRenderingMode(_material, RenderingMode.Fade);

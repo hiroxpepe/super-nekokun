@@ -79,7 +79,7 @@ namespace StudioMeowToon {
                         var _force = transform.forward * bulletSpeed;
 
                         // 弾を発射
-                        _bullet.GetComponent<Rigidbody>().AddForce(_force, ForceMode.Acceleration);
+                        _bullet.GetRigidbody().AddForce(_force, ForceMode.Acceleration);
                         soundSystem.PlayShootClip();
                     }
                 });
