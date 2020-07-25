@@ -157,7 +157,7 @@ namespace StudioMeowToon {
         /// 爆弾の爆発時に持ち手を強制パージ
         /// </summary>
         public void PurgeFromBomb() {
-            if (holded.name.Contains("Bomb")) {
+            if (holded.LikeBomb()) {
                 holded.transform.parent = null; // 子オブジェクト解除
                 doUpdate.holding = false; // 持つフラグOFF
                 holded = null; // 持つオブジェクト参照解除
@@ -764,7 +764,7 @@ namespace StudioMeowToon {
                         startFaceing(); // オブジェクトに正対する開始
                         faceToObject(holded); // オブジェクトに正対する
                         if (r2Button.wasPressedThisFrame) { _r2HoldTmp = true; } // (R2ボタン) R2ホールドフラグON
-                        if (holded.gameObject.name.Contains("Balloon")) { // 風船を持った
+                        if (holded.LikeBalloon()) { // 風船を持った
                             doUpdate.grounded = false; // 浮遊
                             doFixedUpdate.holdBalloon = true;
                         }
@@ -799,7 +799,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate() && _r2Hold && r2Button.wasPressedThisFrame)
                 .Subscribe(_ => {
                     if (holded != null) {
-                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                        if (holded.LikeBalloon()) { doFixedUpdate.holdBalloon = false; } // 風船を離した
                         if (holded.LikeKey()) { gameSystem.hasKey = false; } // キー保持フラグOFF
                         holded.transform.parent = null; // 子オブジェクト解除
                         doUpdate.holding = false; // 持つフラグOFF
@@ -812,7 +812,7 @@ namespace StudioMeowToon {
             this.UpdateAsObservable().Where(_ => continueUpdate() && (r1Button.wasReleasedThisFrame || (!r1Button.isPressed && doUpdate.holding)) && !_r2Hold)
                 .Subscribe(_ => {
                     if (holded != null) {
-                        if (holded.gameObject.name.Contains("Balloon")) { doFixedUpdate.holdBalloon = false; } // 風船を離した
+                        if (holded.LikeBalloon()) { doFixedUpdate.holdBalloon = false; } // 風船を離した
                         if (holded.LikeKey()) { gameSystem.hasKey = false; } // キー保持フラグOFF
                         holded.transform.parent = null; // 子オブジェクト解除
                         doUpdate.holding = false; // 持つフラグOFF
@@ -1004,8 +1004,7 @@ namespace StudioMeowToon {
                 });
 
             // スロープに接触し続けている
-            this.OnCollisionStayAsObservable()
-                .Where(x => x.gameObject.name.Contains("Slope"))
+            this.OnCollisionStayAsObservable().Where(x => x.gameObject.LikeSlope())
                 .Subscribe(x => {
                     normalVector = x.GetContact(0).normal; // 法線取得
                 });
@@ -1298,7 +1297,7 @@ namespace StudioMeowToon {
         /// オブジェクトに正対する。
         /// </summary>
         void faceToObject(GameObject target, float speed = 2.0f) {
-            if (!target.name.Contains("Block")) { // FIXME: ブロック以外は取り合えず無効
+            if (!target.LikeBlock()) { // FIXME: ブロック以外は取り合えず無効
                 doUpdate.faceing = false;
             }
             var _fx = (float) Math.Round(transform.forward.x);
@@ -1426,10 +1425,8 @@ namespace StudioMeowToon {
         void checkToClimb() {
             Ray _ray = new Ray(rayBox.transform.position, transform.forward); // RayBoxから前方サーチする
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.2f)) { // 前方にレイを投げて反応があった場合
-                if (_hit.transform.name.Contains("Block") ||
-                    _hit.transform.name.Contains("Ladder") ||
-                    _hit.transform.name.Contains("Wall") ||
-                    _hit.transform.name.Contains("Ground")) { // ブロック、ハシゴ、壁、地面で
+                if (_hit.transform.LikeBlock() || _hit.transform.LikeLadder() ||
+                    _hit.transform.LikeWall() || _hit.transform.LikeGround()) { // ブロック、ハシゴ、壁、地面で
                     if (_hit.transform.GetComponent<Common>().climbable) { // 登ることが可能なら
                         var _hitTop = getRaycastHitTop(_hit); // 前方オブジェクトのtop位置を取得
 #if DEBUG
@@ -1459,7 +1456,7 @@ namespace StudioMeowToon {
             if (_fps == 30) _ADJUST = 37.5f; // 調整値
             Ray _ray = new Ray(rayBox.transform.position, transform.forward); // RayBoxから前方サーチする
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.3f)) { // 前方にレイを投げて反応があった場合
-                if (_hit.transform.name.Contains("Ladder")) { // ハシゴなら
+                if (_hit.transform.LikeLadder()) { // ハシゴなら
                     var _hitTop = getRaycastHitTop(_hit); // 前方オブジェクトのtop位置を取得
 #if DEBUG
                     Debug.DrawRay(_ray.origin, _ray.direction * 0.3f, Color.white, 3, false); //レイを可視化
@@ -1564,7 +1561,7 @@ namespace StudioMeowToon {
 #endif
                 float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                 if (_distance < 0.35f) { // 距離が近くなら
-                    if (_hit.transform.name.Contains("Stair")) { // 上がれるのは階段のみ
+                    if (_hit.transform.LikeStair()) { // 上がれるのは階段のみ
                         doUpdate.stairUping = true; // 階段を上るフラグON
                         doUpdate.stairDowning = false; // 階段を下りるフラグOFF
                         stairUped = _hit.transform.gameObject; // 階段を上がられるオブジェクトの参照保存
@@ -1587,7 +1584,7 @@ namespace StudioMeowToon {
 #endif 
                 float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                 if (_distance < 0.2f) { // 距離が近くなら
-                    if (_hit.transform.name.Contains("Down_Point")) { // 下がれるのは階段に付けたBOXコライダーから判定する
+                    if (_hit.transform.LikeDownPoint()) { // 下がれるのは階段に付けたBOXコライダーから判定する
                         doUpdate.stairDowning = true; // 階段を下りるフラグON
                         doUpdate.stairUping = false; // 階段を上るフラグOFF
                         stairDowned = _hit.transform.gameObject; // 階段を下がられるオブジェクトの参照保存
@@ -1672,7 +1669,7 @@ namespace StudioMeowToon {
                 Debug.DrawRay(_ray.origin, _ray.direction * 0.35f, Color.magenta, 3, false); //レイを可視化
 #endif 
                 // TODO: 押し可能なブロックの判定
-                if (_hit.transform.name.Contains("Block")) { // 押せるのはブロックのみ
+                if (_hit.transform.LikeBlock()) { // 押せるのはブロックのみ
                     if (_hit.transform.GetComponent<Block>().pushable) { // 押せるブロックの場合
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                         if (_distance < 0.3) { // 距離が近くなら
@@ -1710,18 +1707,18 @@ namespace StudioMeowToon {
 #if DEBUG
                     Debug.DrawRay(_ray.origin, _ray.direction * 0.35f, Color.magenta, 4, false); //レイを可視化
 #endif
-                    if (checkDownAsHoldableBlock() || _hit.transform.name.Contains("Item")) { // 持てるのはアイテムのみ TODO: 子のオブジェクト判定は？
+                    if (checkDownAsHoldableBlock() || _hit.transform.LikeItem()) { // 持てるのはアイテムのみ TODO: 子のオブジェクト判定は？ FIXME: Holdable で統一
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                         if (_distance < 0.3f || checkDownAsHoldableBlock()) { // 距離が近くなら
                             Observable.EveryUpdate() // MEMO: Observable.EveryUpdate() だと "checkToHoldItem()" から呼ばれる以外でも発火する！
                                 .Where(_ => !doUpdate.holding)
                                 .Select(_ => !doUpdate.faceing && holded != null && !doUpdate.holding) // なぜ Where だとダメ？
                                 .Subscribe(_ => {
-                                    if (holded.tag.Equals("Block")) {
+                                    if (holded.tag.Equals("Block")) { // FIXME: "Block" タグの削除
                                         var _blockController = holded.GetComponent<Block>();
                                         leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
                                         rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
-                                    } else if (holded.tag.Equals("Holdable")) {
+                                    } else if (holded.Holdable()) {
                                         var _holdable = holded.GetComponent<Holdable>();
                                         leftHandTransform = _holdable.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
                                         rightHandTransform = _holdable.GetRightHandTransform(); // ブロックから右手のIK位置を取得

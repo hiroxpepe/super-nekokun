@@ -69,16 +69,30 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Transform's name contains "Item".
+        /// </summary>
+        public static bool LikeItem(this Transform self) {
+            return self.name.Contains("Item");
+        }
+
+        /// <summary>
         /// whether the GameObject's tag is "Getable".
         /// </summary>
         public static bool Getable(this GameObject self) {
-            return self.tag.Equals("Getable"); // TODO: "Getable"
+            return self.tag.Equals("Getable");
         }
 
         /// <summary>
         /// whether the GameObject's name contains "Block".
         /// </summary>
         public static bool LikeBlock(this GameObject self) {
+            return self.name.Contains("Block");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "Block".
+        /// </summary>
+        public static bool LikeBlock(this Transform self) {
             return self.name.Contains("Block");
         }
 
@@ -104,9 +118,23 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Transform's name contains "Ground".
+        /// </summary>
+        public static bool LikeGround(this Transform self) {
+            return self.name.Contains("Ground");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Wall".
         /// </summary>
         public static bool LikeWall(this GameObject self) {
+            return self.name.Contains("Wall");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "Wall".
+        /// </summary>
+        public static bool LikeWall(this Transform self) {
             return self.name.Contains("Wall");
         }
 
@@ -160,6 +188,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Transform's name contains "Ladder".
+        /// </summary>
+        public static bool LikeLadder(this Transform self) {
+            return self.name.Contains("Ladder");
+        }
+
+        /// <summary>
         /// whether the Transform's name contains "Ladder_Body".
         /// </summary>
         public static bool LikeLadderBody(this Transform self) {
@@ -167,10 +202,17 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// whether the GameObject's tag is "Holdable".
+        /// whether the Transform's name contains "Stair".
         /// </summary>
-        public static bool Holdable(this GameObject self) {
-            return self.tag.Equals("Holdable");
+        public static bool LikeStair(this Transform self) {
+            return self.name.Contains("Stair");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "Down_Point".
+        /// </summary>
+        public static bool LikeDownPoint(this Transform self) {
+            return self.name.Contains("Down_Point");
         }
 
         /// <summary>
@@ -178,6 +220,27 @@ namespace StudioMeowToon {
         /// </summary>
         public static bool LikeClone(this GameObject self) {
             return self.name.Contains("Clone");
+        }
+
+        /// <summary>
+        /// whether the GameObject's name contains "Balloon".
+        /// </summary>
+        public static bool LikeBalloon(this GameObject self) {
+            return self.name.Contains("Balloon");
+        }
+
+        /// <summary>
+        /// whether the GameObject's name contains "Bomb".
+        /// </summary>
+        public static bool LikeBomb(this GameObject self) {
+            return self.name.Contains("Bomb");
+        }
+
+        /// <summary>
+        /// whether the GameObject's tag is "Holdable".
+        /// </summary>
+        public static bool Holdable(this GameObject self) {
+            return self.tag.Equals("Holdable");
         }
 
         #endregion
