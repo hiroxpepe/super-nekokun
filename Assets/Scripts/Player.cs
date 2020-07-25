@@ -185,8 +185,8 @@ namespace StudioMeowToon {
             life = 10; // HP初期化
             speed = 0; // 速度初期化
 
-            var _rb = transform.GetComponent<Rigidbody>();
-            var _fps = Application.targetFrameRate;
+            Rigidbody _rb = gameObject.GetRigidbody();
+            int _fps = Application.targetFrameRate;
 
             bool _r2Hold = false; // R2ボタンで持っているかどうか
             bool _r2HoldTmp = false; // R2ボタンで持っているかどうか ※一時フラグ
@@ -198,7 +198,7 @@ namespace StudioMeowToon {
                 bodyIntoWater = transform.Find("Body").gameObject; // 水中での体取得
                 playerNeck = transform.Find("Bell").gameObject; // 水面判定用
                 speechText = speechObject.GetComponentInChildren<Text>(); // セリフ吹き出しテキスト取得
-                speechImage = speechObject.GetComponent<Image>(); // セリフ吹き出し画像取得
+                speechImage = speechObject.GetImage(); // セリフ吹き出し画像取得
 
                 rayBox = GameObject.Find("RayBox");
                 stepRayBox = GameObject.Find("StepRayBox");
@@ -576,9 +576,9 @@ namespace StudioMeowToon {
                         simpleAnime.Play("Default"); // デフォルトアニメ TODO: 浮かぶアニメ
                     }
                     if (transform.localPosition.y + 0.9f < waterLevel) { // 0.9f は調整値
-                        intoWaterFilter.GetComponent<Image>().enabled = true;
+                        intoWaterFilter.GetImage().enabled = true;
                     } else if (transform.localPosition.y + 0.85f > waterLevel) { // 0.8f は調整値(※浮上時は速く切り替える)
-                        intoWaterFilter.GetComponent<Image>().enabled = false;
+                        intoWaterFilter.GetImage().enabled = false;
                     }
                     doUpdate.grounded = false;
                 });
@@ -586,7 +586,7 @@ namespace StudioMeowToon {
             // 水中ではない
             this.UpdateAsObservable().Where(_ => continueUpdate() && !checkIntoWater())
                 .Subscribe(_ => {
-                    intoWaterFilter.GetComponent<Image>().enabled = false; // TODO: GetComponent をオブジェクト参照に
+                    intoWaterFilter.GetImage().enabled = false;
                 });
 
             // (Yボタン) 水中で押した
@@ -901,7 +901,7 @@ namespace StudioMeowToon {
                             // 下に当たった場合
                             if (isHitBlockBottom(x.gameObject)) {
                                 soundSystem.PlayKnockedupClip();
-                                x.gameObject.GetComponent<Common>().shockedBy = transform; // 下から衝撃を与える
+                                x.gameObject.GetCommon().shockedBy = transform; // 下から衝撃を与える
                             }
                             // 横に当たった場合
                             else {
@@ -1042,7 +1042,7 @@ namespace StudioMeowToon {
         // OnAnimatorIK is called by the Animator Component immediately before it updates its internal IK system.
         void OnAnimatorIK() {
             if (doUpdate.holding) { // 持つフラグON
-                var _animator = GetComponent<Animator>();
+                Animator _animator = gameObject.GetAnimator();
                 _animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0.5f);
                 _animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0.5f);
                 _animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.5f);
@@ -1114,7 +1114,7 @@ namespace StudioMeowToon {
             // ブロックを押してる時キャラ操作無効
             if (doUpdate.pushing && transform.parent != null) {
                 simpleAnime.Play("Push"); // 押すアニメ
-                pushed.GetComponent<Block>().pushed = true; // ブロックを押すフラグON
+                pushed.GetBlock().pushed = true; // ブロックを押すフラグON
                 return false;
             // 押してるブロックの子オブジェクト化が解除されたら
             } else if (doUpdate.pushing && transform.parent == null) {
@@ -1179,7 +1179,7 @@ namespace StudioMeowToon {
             // TODO: トルク: カーブ、シュート、スライダー？
 
             // 弾を発射
-            _bullet.GetComponent<Rigidbody>().AddForce(_force, ForceMode.Force);
+            _bullet.GetRigidbody().AddForce(_force, ForceMode.Force);
             soundSystem.PlayShootClip();
             speechImage.sprite = speechRightSprite;
             say("Shot!", 65);
@@ -1189,7 +1189,7 @@ namespace StudioMeowToon {
         /// TBA
         /// </summary>
         float getRendererTop(GameObject target) { // TODO: Player が測っても良いのでは？
-            float _height = target.GetComponent<Renderer>().bounds.size.y; // オブジェクトの高さ取得 
+            float _height = target.GetRenderer().bounds.size.y; // オブジェクトの高さ取得 
             float _y = target.transform.position.y; // オブジェクトのy座標取得(※0基点)
             float _top = _height + _y; // オブジェクトのTOP取得
             return _top;
@@ -1427,7 +1427,7 @@ namespace StudioMeowToon {
             if (Physics.Raycast(_ray, out RaycastHit _hit, 0.2f)) { // 前方にレイを投げて反応があった場合
                 if (_hit.transform.LikeBlock() || _hit.transform.LikeLadder() ||
                     _hit.transform.LikeWall() || _hit.transform.LikeGround()) { // ブロック、ハシゴ、壁、地面で
-                    if (_hit.transform.GetComponent<Common>().climbable) { // 登ることが可能なら
+                    if (_hit.transform.gameObject.GetCommon().climbable) { // 登ることが可能なら
                         var _hitTop = getRaycastHitTop(_hit); // 前方オブジェクトのtop位置を取得
 #if DEBUG
                         Debug.DrawRay(_ray.origin, _ray.direction * 0.2f, Color.green, 3, false); //レイを可視化
@@ -1670,7 +1670,7 @@ namespace StudioMeowToon {
 #endif 
                 // TODO: 押し可能なブロックの判定
                 if (_hit.transform.LikeBlock()) { // 押せるのはブロックのみ
-                    if (_hit.transform.GetComponent<Block>().pushable) { // 押せるブロックの場合
+                    if (_hit.transform.gameObject.GetBlock().pushable) { // 押せるブロックの場合
                         float _distance = _hit.distance; // 前方オブジェクトまでの距離を取得
                         if (_distance < 0.3) { // 距離が近くなら
                             if (!doUpdate.pushing) { // 押してない
@@ -1715,11 +1715,11 @@ namespace StudioMeowToon {
                                 .Select(_ => !doUpdate.faceing && holded != null && !doUpdate.holding) // なぜ Where だとダメ？
                                 .Subscribe(_ => {
                                     if (holded.tag.Equals("Block")) { // FIXME: "Block" タグの削除
-                                        var _blockController = holded.GetComponent<Block>();
-                                        leftHandTransform = _blockController.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
-                                        rightHandTransform = _blockController.GetRightHandTransform(); // ブロックから右手のIK位置を取得
+                                        var _block = holded.GetBlock();
+                                        leftHandTransform = _block.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
+                                        rightHandTransform = _block.GetRightHandTransform(); // ブロックから右手のIK位置を取得
                                     } else if (holded.Holdable()) {
-                                        var _holdable = holded.GetComponent<Holdable>();
+                                        var _holdable = holded.GetHoldable();
                                         leftHandTransform = _holdable.GetLeftHandTransform(); // ブロックから左手のIK位置を取得
                                         rightHandTransform = _holdable.GetRightHandTransform(); // ブロックから右手のIK位置を取得
                                     }
@@ -1772,7 +1772,7 @@ namespace StudioMeowToon {
         /// レイを投げた対象のtop位置を取得。
         /// </summary>
         float getRaycastHitTop(RaycastHit hit) {
-            float _hitHeight = hit.collider.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
+            float _hitHeight = hit.collider.gameObject.GetRenderer().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _hitY = hit.transform.position.y; // 対象オブジェクトの(※中心)y座標取得
             return _hitHeight + _hitY; // 対象オブジェクトのtop位置取得
         }
@@ -1781,7 +1781,7 @@ namespace StudioMeowToon {
         /// 衝突したオブジェクトの側面に当たったか判定する。
         /// </summary>
         bool isHitSide(GameObject target) {
-            float _targetHeight = target.GetComponent<Renderer>().bounds.size.y; // 対象オブジェクトの高さ取得 
+            float _targetHeight = target.GetRenderer().bounds.size.y; // 対象オブジェクトの高さ取得 
             float _targetY = target.transform.position.y; // 対象オブジェクトの(※中心)y座標取得
             float _targetTop = _targetHeight + _targetY; // 衝突したオブジェクトのTOP取得
             var _y = transform.position.y; // 自分のy位置(0基点)を取得
@@ -1797,7 +1797,7 @@ namespace StudioMeowToon {
         /// </summary>
         bool isHitBlockBottom(GameObject target) {
             var _targetBottom = target.transform.position.y; // 当たったブロックの底面の高さ
-            float _height = GetComponent<CapsuleCollider>().bounds.size.y; // 自分のコライダーの高さ
+            float _height = gameObject.GetCapsuleCollider().bounds.size.y; // 自分のコライダーの高さ
             float _y = transform.position.y; // 自分のy座標(※0基点)
             float _top = _height + _y; // 自分のTOP位置
             if (_top - 0.1f < _targetBottom) { // ブロックの底面が自分のTOP位置より低かったら※0.1fは誤差

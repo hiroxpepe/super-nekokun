@@ -76,10 +76,10 @@ namespace StudioMeowToon {
         // Start is called before the first frame update.
         void Start() {
             // プレーヤー参照取得
-            var _playerObject = gameObject.GetPlayerGameObject();
-            var _rb = gameObject.GetRigidbody(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
+            GameObject _playerObject = gameObject.GetPlayerGameObject();
+            Rigidbody _rb = gameObject.GetRigidbody(); // Rigidbody は FixedUpdate の中で "だけ" 使用する
 
-            var _fps = Application.targetFrameRate;
+            int _fps = Application.targetFrameRate;
             var _ADJUST1 = 0f;
             if (_fps == 60) _ADJUST1 = 8f;
             if (_fps == 30) _ADJUST1 = 16f;

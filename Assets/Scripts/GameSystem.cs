@@ -215,7 +215,7 @@ namespace StudioMeowToon {
             float _near = 0;
             var _previousTarget = lockonTarget;
             foreach (GameObject _obj in GameObject.FindGameObjectsWithTag(tag)) { // タグで管理する方がシンプル
-                if (_obj.GetComponent<Block>().IsRenderedInMainCamera()) { // カメラに写っている場合
+                if (_obj.GetBlock().IsRenderedInMainCamera()) { // カメラに写っている場合
                     _tmp = Vector3.Distance(_obj.transform.position, player.transform.position); // 自分とオブジェクトの距離を計測
                     if (_near == 0 || _near > _tmp) { // 距離の近いオブジェクトを保存
                         _near = _tmp;
@@ -225,10 +225,10 @@ namespace StudioMeowToon {
             }
             if (lockonTarget) {
                 if (lockonOriginalMaterial != null) {
-                    _previousTarget.GetComponent<Renderer>().material = lockonOriginalMaterial; // 前回のターゲットを元のマテリアルに戻す
+                    _previousTarget.GetRenderer().material = lockonOriginalMaterial; // 前回のターゲットを元のマテリアルに戻す
                 }
-                lockonOriginalMaterial = lockonTarget.GetComponent<Renderer>().material; // 新しいターゲットのマテリアル保存
-                lockonTarget.GetComponent<Renderer>().material = lockonFocusMaterial; // 新しいターゲットにフォーカスマテリアルを適用
+                lockonOriginalMaterial = lockonTarget.GetRenderer().material; // 新しいターゲットのマテリアル保存
+                lockonTarget.GetRenderer().material = lockonFocusMaterial; // 新しいターゲットにフォーカスマテリアルを適用
             }
             return lockonTarget;
         }
