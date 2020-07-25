@@ -346,6 +346,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// get Transform objects.
+        /// </summary>
+        public static IEnumerable<Transform> GetTransformsInChildren(this GameObject self) {
+            return self.GetComponentsInChildren<Transform>();
+        }
+
+        /// <summary>
         /// get the Common object.
         /// </summary>
         public static Common GetCommon(this GameObject self) {
@@ -385,13 +392,6 @@ namespace StudioMeowToon {
         /// </summary>
         public static Player GetPlayer(this Transform self) {
             return self.GetComponent<Player>();
-        }
-
-        /// <summary>
-        /// get Transform objects.
-        /// </summary>
-        public static IEnumerable<Transform> GetTransformsInChildren(this GameObject self) {
-            return self.GetComponentsInChildren<Transform>();
         }
 
         /// <summary>
