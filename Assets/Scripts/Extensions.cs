@@ -63,9 +63,23 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collision's tag is "Holdable".
+        /// </summary>
+        public static bool Holdable(this Collision self) {
+            return self.gameObject.tag.Equals("Holdable");
+        }
+
+        /// <summary>
         /// whether the GameObject's tag is "Getable".
         /// </summary>
         public static bool Getable(this GameObject self) {
+            return self.tag.Equals("Getable");
+        }
+
+        /// <summary>
+        /// whether the Collider's tag is "Getable".
+        /// </summary>
+        public static bool Getable(this Collider self) {
             return self.tag.Equals("Getable");
         }
 
@@ -77,17 +91,17 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// whether the Collision's name contains "Item".
-        /// </summary>
-        public static bool LikeItem(this Collision self) {
-            return self.gameObject.name.Contains("Item");
-        }
-
-        /// <summary>
         /// whether the Transform's name contains "Item".
         /// </summary>
         public static bool LikeItem(this Transform self) {
             return self.name.Contains("Item");
+        }
+
+        /// <summary>
+        /// whether the Collision's name contains "Item".
+        /// </summary>
+        public static bool LikeItem(this Collision self) {
+            return self.gameObject.name.Contains("Item");
         }
 
         /// <summary>
@@ -133,6 +147,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collision's name contains "Ground".
+        /// </summary>
+        public static bool LikeGround(this Collision self) {
+            return self.gameObject.name.Contains("Ground");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Wall".
         /// </summary>
         public static bool LikeWall(this GameObject self) {
@@ -175,6 +196,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collision's name contains "Slope".
+        /// </summary>
+        public static bool LikeSlope(this Collision self) {
+            return self.gameObject.name.Contains("Slope");
+        }
+
+        /// <summary>
         /// whether the Collision's name contains "Plate".
         /// </summary>
         public static bool LikePlate(this Collision self) {
@@ -185,6 +213,13 @@ namespace StudioMeowToon {
         /// whether the GameObject's name contains "Water".
         /// </summary>
         public static bool LikeWater(this GameObject self) {
+            return self.name.Contains("Water");
+        }
+
+        /// <summary>
+        /// whether the Collider's name contains "Water".
+        /// </summary>
+        public static bool LikeWater(this Collider self) {
             return self.name.Contains("Water");
         }
 
@@ -200,6 +235,13 @@ namespace StudioMeowToon {
         /// </summary>
         public static bool LikeBullet(this Transform self) {
             return self.name.Contains("Bullet");
+        }
+
+        /// <summary>
+        /// whether the Collision's name contains "Bullet".
+        /// </summary>
+        public static bool LikeBullet(this Collision self) {
+            return self.gameObject.name.Contains("Bullet");
         }
 
         /// <summary>
