@@ -560,7 +560,7 @@ namespace StudioMeowToon {
             #region into Water
 
             // 水面に接触したら
-            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.LikeWater())
+            this.OnTriggerEnterAsObservable().Where(x => x.LikeWater())
                 .Subscribe(_ => {
                     if (transform.localPosition.y + 0.75f > waterLevel) { // 0.75f は調整値 ⇒ TODO:再検討
                         soundSystem.PlayWaterInClip();
@@ -883,7 +883,7 @@ namespace StudioMeowToon {
             });
 
             // ブロックに接触したら
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBlock())
+            this.OnCollisionEnterAsObservable().Where(x => x.LikeBlock())
                 .Subscribe(x => {
                     if (isUpOrDown()) { // 上下変動がある場合
                         // 上に乗った状況
@@ -911,7 +911,7 @@ namespace StudioMeowToon {
                 });
 
             // 地上・壁・坂に接地したら
-            this.OnCollisionEnterAsObservable().Where(x => !x.gameObject.LikeBlock() && (x.gameObject.LikeGround() || x.gameObject.LikeWall()) && !checkIntoWater())
+            this.OnCollisionEnterAsObservable().Where(x => !x.LikeBlock() && (x.LikeGround() || x.LikeWall()) && !checkIntoWater())
                 .Subscribe(_ => {
                     simpleAnime.Play("Default"); // デフォルトアニメ
                     soundSystem.PlayGroundedClip();
@@ -931,7 +931,7 @@ namespace StudioMeowToon {
                 });
 
             // 持てるアイテム、ブロック、"Holdable" と接触したら
-            this.OnCollisionEnterAsObservable().Where(x => (x.gameObject.LikeItem() || x.gameObject.Holdable()) && !doUpdate.holding)
+            this.OnCollisionEnterAsObservable().Where(x => (x.LikeItem() || x.Holdable()) && !doUpdate.holding)
                 .Subscribe(x => {
                     doUpdate.grounded = true; // 接地フラグON
                     doFixedUpdate.grounded = true;
@@ -939,7 +939,7 @@ namespace StudioMeowToon {
                 });
 
             // ブロックに接触し続けている
-            this.OnCollisionStayAsObservable().Where(x => x.gameObject.LikeBlock())
+            this.OnCollisionStayAsObservable().Where(x => x.LikeBlock())
                 .Subscribe(x => {
                     // 横に当たった場合
                     if (isHitSide(x.gameObject)) {
@@ -948,7 +948,7 @@ namespace StudioMeowToon {
                 });
 
             // アイテムブロックから離れたら
-            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeBlock() && x.gameObject.LikeItem())
+            this.OnCollisionExitAsObservable().Where(x => x.LikeBlock() && x.LikeItem())
                 .Subscribe(_ => {
                     if (!doUpdate.holding) { // 持つ(Rボタン)を離した
                         holded = null; // 持てるブロックの参照を解除する
@@ -956,7 +956,7 @@ namespace StudioMeowToon {
                 });
 
             // 持てるアイテム、ブロック、"Holdable"  から離れたら
-            this.OnCollisionExitAsObservable().Where(x => (x.gameObject.LikeItem() || x.gameObject.Holdable()) && !doUpdate.holding)
+            this.OnCollisionExitAsObservable().Where(x => (x.LikeItem() || x.Holdable()) && !doUpdate.holding)
                 .Subscribe(_ => {
                     holded = null; // 持てるブロックの参照を解除する
                 });
@@ -964,7 +964,7 @@ namespace StudioMeowToon {
             #region get damaged
 
             // 被弾したら FIXME: 音はここでOK？ バウンドした弾でも音が鳴る
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeBullet())
+            this.OnCollisionEnterAsObservable().Where(x => x.LikeBullet())
                 .Subscribe(_ => {
                     soundSystem.PlayHitClip();
                 });
@@ -974,7 +974,7 @@ namespace StudioMeowToon {
             #region get Item
 
             // アイテムと接触したら
-            this.OnTriggerEnterAsObservable().Where(x => x.gameObject.Getable())
+            this.OnTriggerEnterAsObservable().Where(x => x.Getable())
                 .Subscribe(x => {
                     soundSystem.PlayItemClip(); // 効果音を鳴らす
                     gameSystem.DecrementItem(); // アイテム数デクリメント
@@ -997,20 +997,20 @@ namespace StudioMeowToon {
             #region Slope
 
             // スロープに接触したら
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeSlope())
+            this.OnCollisionEnterAsObservable().Where(x => x.LikeSlope())
                 .Subscribe(x => {
                     normalVector = x.GetContact(0).normal; // 法線取得
                     doUpdate.grounded = true; // 接地フラグON
                 });
 
             // スロープに接触し続けている
-            this.OnCollisionStayAsObservable().Where(x => x.gameObject.LikeSlope())
+            this.OnCollisionStayAsObservable().Where(x => x.LikeSlope())
                 .Subscribe(x => {
                     normalVector = x.GetContact(0).normal; // 法線取得
                 });
 
             // スロープから離脱したら
-            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeSlope())
+            this.OnCollisionExitAsObservable().Where(x => x.LikeSlope())
                 .Subscribe(_ => {
                     normalVector = Vector3.up; // 法線を戻す
                 });
