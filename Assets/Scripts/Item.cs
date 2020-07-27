@@ -127,13 +127,13 @@ namespace StudioMeowToon {
                 });
 
             // 接地した
-            this.OnCollisionEnterAsObservable().Where(x => x.gameObject.LikeGround() || x.gameObject.LikeBlock())
+            this.OnCollisionEnterAsObservable().Where(x => x.LikeGround() || x.LikeBlock())
                 .Subscribe(x => {
                     isGrounded = true; // FIXME: 開始早々には効かない？
                 });
 
             // 下のブロックが破壊された
-            this.OnCollisionExitAsObservable().Where(x => x.gameObject.LikeBlock())
+            this.OnCollisionExitAsObservable().Where(x => x.LikeBlock())
                 .Subscribe(_ => {
                     isFloat = false;
                     isGrounded = false; // 下のブロックが破壊された

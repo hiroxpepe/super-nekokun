@@ -83,7 +83,7 @@ namespace StudioMeowToon {
                         }
                         // TODO: ボスの破壊
                     }
-                    if (!x.gameObject.LikeClone()) {
+                    if (!x.LikeClone()) {
                         hits = true; // ヒットフラグON
                     }
                 });
