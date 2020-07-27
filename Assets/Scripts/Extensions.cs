@@ -329,10 +329,10 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// whether the Collision's name contains "debris".
+        /// whether the Collision's name contains "Debris".
         /// </summary>
         public static bool LikeDebris(this Collision self) {
-            return self.gameObject.name.Contains("debris");
+            return self.gameObject.name.Contains("Debris");
         }
 
         #endregion
