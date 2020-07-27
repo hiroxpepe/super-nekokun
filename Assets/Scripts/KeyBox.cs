@@ -31,7 +31,7 @@ namespace StudioMeowToon {
                 .Where(x => x.IsPlayer())
                 .Subscribe(x => {
                     foreach (Transform _child in x.gameObject.transform) {
-                        if (_child.gameObject.LikeKey()) {
+                        if (_child.LikeKey()) {
                             gameObject.GetGameSystem().ClearLevel(); // レベルクリア
                         }
                     }
