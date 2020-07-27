@@ -252,9 +252,23 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Transform's name contains "Key".
+        /// </summary>
+        public static bool LikeKey(this Transform self) {
+            return self.name.Contains("Key");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "_Piece".
         /// </summary>
         public static bool LikePiece(this GameObject self) {
+            return self.name.Contains("_Piece");
+        }
+
+        /// <summary>
+        /// whether the Transform's name contains "_Piece".
+        /// </summary>
+        public static bool LikePiece(this Transform self) {
             return self.name.Contains("_Piece");
         }
 
@@ -294,6 +308,13 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
+        /// whether the Collision's name contains "Clone".
+        /// </summary>
+        public static bool LikeClone(this Collision self) {
+            return self.gameObject.name.Contains("Clone");
+        }
+
+        /// <summary>
         /// whether the GameObject's name contains "Balloon".
         /// </summary>
         public static bool LikeBalloon(this GameObject self) {
@@ -308,10 +329,10 @@ namespace StudioMeowToon {
         }
 
         /// <summary>
-        /// whether the Collision's name contains "debris".
+        /// whether the Collision's name contains "Debris".
         /// </summary>
         public static bool LikeDebris(this Collision self) {
-            return self.gameObject.name.Contains("debris");
+            return self.gameObject.name.Contains("Debris");
         }
 
         #endregion
