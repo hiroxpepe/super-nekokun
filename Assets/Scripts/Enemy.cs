@@ -287,7 +287,7 @@ namespace StudioMeowToon {
                         _wait = true;
                         doUpdate.ApplyAttacking();
                         soundSystem.PlayDamageClip(); // FIXME: パンチ効果音は、頭に数ミリセック無音を仕込む
-                        say("Take this!", 60);
+                        say("Take this!", 60); // FIXME: 表示されない？
                         _playerObject.GetPlayer().DecrementLife();
                         _playerObject.GetPlayer().DamagedByEnemy(transform.forward);
                         Observable.TimerFrame(12) // FIXME: 60fpsの時は？
@@ -308,7 +308,6 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     simpleAnime.Play("ClimbUp"); // ダメージ代用
                     _damaged = true;
-                    say("Damn it!", 65); // FIXME: 表示されない？
                     // 10秒後に復活
                     Observable.Timer(System.TimeSpan.FromSeconds(10))
                         .Subscribe(__ => {
@@ -319,6 +318,18 @@ namespace StudioMeowToon {
                         });
                 });
 
+            // ダメージ中 セリフ
+            this.UpdateAsObservable().Where(x => _damaged)
+                .Subscribe(_ => {
+                    say("Damn it!", 65, 5d); // TODO: なぜ 5d
+                });
+
+            // リカバリー セリフ
+            //this.UpdateAsObservable().Where(x => !_damaged)
+            //    .Subscribe(_ => {
+            //        say("I recovered.", 5d); // FIXME: 表示されない？
+            //    });
+
             #endregion
         }
 
@@ -328,7 +339,7 @@ namespace StudioMeowToon {
         /// <summary>
         /// セリフ用吹き出しにセリフを表示する。 // FIXME: 吹き出しの形
         /// </summary>
-        void say(string text, int size = 60, double time = 0.5d) { // TODO: 表示されないものがある？
+        void say(string text, int size = 60, double time = 1.0d) { // TODO: 表示されないものがある？
             if (!isRendered) { return; }
             // プレイヤーとの距離で大きさ調整
             var _distance = distance > 1 ? (int) (distance / 2) : 1;
@@ -349,7 +360,7 @@ namespace StudioMeowToon {
         }
 
         void say(string text) {
-            say(text, 60, 0.5d);
+            say(text, 60, 1.0d);
         }
 
         /// <summary>
