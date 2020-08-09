@@ -337,11 +337,11 @@ namespace StudioMeowToon {
                     // FIXME: 二段階加速
                     _rb.useGravity = true; // 重力再有効化 
                     if (speed < 3.25f) { // ⇒ フレームレートに依存する 60fps,8f, 30fps:16f, 20fps:24f, 15fps:32f
-                        var onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
+                        var _onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
                         if (normalVector != Vector3.up) {
-                            _rb.AddFor​​ce(onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
+                            _rb.AddFor​​ce(_onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
                         } else {
-                            _rb.AddFor​​ce(onPlane * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                            _rb.AddFor​​ce(_onPlane * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
                         }
                     }
                     doFixedUpdate.run = false;
@@ -352,11 +352,11 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     _rb.useGravity = true; // 重力再有効化 
                     if (speed < 1.1f) {
-                        var onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
+                        var _onPlane = Vector3.ProjectOnPlane(Utils.TransformForward(transform.forward, speed), normalVector);
                         if (normalVector != Vector3.up) {
-                            _rb.AddFor​​ce(onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
+                            _rb.AddFor​​ce(_onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
                         } else {
-                            _rb.AddFor​​ce(onPlane * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
+                            _rb.AddFor​​ce(_onPlane * _ADJUST1, ForceMode.Acceleration); // 前に移動させる
                         }
                     }
                     doFixedUpdate.walk = false;
@@ -385,11 +385,11 @@ namespace StudioMeowToon {
                 .Subscribe(_ => {
                     _rb.useGravity = true; // 重力再有効化 
                     if (speed < 0.75f) {
-                        var onPlane = Vector3.ProjectOnPlane(-Utils.TransformForward(transform.forward, speed), normalVector);
+                        var _onPlane = Vector3.ProjectOnPlane(-Utils.TransformForward(transform.forward, speed), normalVector);
                         if (normalVector != Vector3.up) {
-                            _rb.AddFor​​ce(onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
+                            _rb.AddFor​​ce(_onPlane * _ADJUST1 / 12f, ForceMode.Impulse); // 12fは調整値
                         } else {
-                            _rb.AddFor​​ce(onPlane * _ADJUST1, ForceMode.Acceleration); // 後ろに移動させる
+                            _rb.AddFor​​ce(_onPlane * _ADJUST1, ForceMode.Acceleration); // 後ろに移動させる
                         }
                     }
                     doFixedUpdate.backward = false;
