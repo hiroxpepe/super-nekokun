@@ -33,4 +33,4 @@
 - It is an alpha version still but it works completely on my environment.
 
 ## License
-It's released under version 2.0 of the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
+It's released under [GNU General Public License v2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
