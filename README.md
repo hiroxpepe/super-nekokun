@@ -33,4 +33,5 @@
 - It is an alpha version still but it works completely on my environment.
 
 ## License
-It's released under [GNU General Public License v2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+It's released under [GNU General Public License v2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) excluding 3D models.  
+3D models are released under [Uni-Virtual License](https://uv-license.com/en/license?utf8=%E2%9C%93).
